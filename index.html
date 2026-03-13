@@ -1,359 +1,108 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>تعلم الإنجليزية ببساطة - 15 درساً</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-
-body{
-font-family:'Tajawal',sans-serif;
-background:#f0f4f8;
-}
-
-.lesson-card{
-transition:transform .2s;
-}
-
-.lesson-card:hover{
-transform:translateY(-5px);
-}
-
-.loading-pulse{
-animation:pulse 2s cubic-bezier(0.4,0,0.6,1) infinite;
-}
-
-@keyframes pulse{
-0%,100%{opacity:1;}
-50%{opacity:.5;}
-}
-
-</style>
-
-</head>
-
-<body class="bg-gray-50 text-gray-800">
-
-<header class="bg-indigo-600 text-white p-6 shadow-lg sticky top-0 z-50">
-
-<div class="container mx-auto flex justify-between items-center">
-
-<h1 class="text-2xl font-bold">
-🇬🇧 أكاديمية القواعد
-</h1>
-
-<nav class="flex gap-4">
-
-<button onclick="showSection('home')" class="hover:underline">
-الرئيسية
-</button>
-
-<button onclick="showSection('lessons')" class="hover:underline">
-الدروس
-</button>
-
-</nav>
-
-</div>
-
-</header>
-
-
-
-<main class="container mx-auto p-4 mt-6">
-
-<section id="home-section" class="text-center py-10">
-
-<h2 class="text-4xl font-bold text-indigo-800 mb-4">
-منهج متكامل من 15 درساً
-</h2>
-
-<p class="text-lg text-gray-600 mb-8">
-تعلم القواعد الإنجليزية خطوة بخطوة
-</p>
-
-<button onclick="showSection('lessons')" 
-class="bg-indigo-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:bg-indigo-700">
-تصفح الدروس
-</button>
-
-</section>
-
-
-
-<section id="lessons-section" class="hidden">
-
-<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
-خارطة الطريق التعليمية
-</h2>
-
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="lessons-grid"></div>
-
-</section>
-
-
-
-<section id="content-section" class="hidden max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
-
-<div id="lesson-header" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-6">
-
-<div id="lesson-title-container"></div>
-
-<div class="flex flex-wrap gap-2">
-
-<button id="audio-btn" onclick="playLessonAudio()" 
-class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full hover:bg-indigo-200 transition font-bold">
-
-🔊 <span id="audio-text">طلب الشرح الصوتي</span>
-
-</button>
-
-</div>
-
-</div>
-
-<div id="lesson-body" class="prose prose-indigo max-w-none text-lg"></div>
-
-<div class="mt-10 pt-6 border-t flex justify-between items-center">
-
-<button onclick="showSection('lessons')" class="text-indigo-600 font-bold">
-← العودة للقائمة
-</button>
-
-<button id="quiz-btn" 
-class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg font-bold">
-ابدأ الاختبار
-</button>
-
-</div>
-
-</section>
-
-
-
-<section id="quiz-section" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-
-<h2 class="text-2xl font-bold mb-6 text-indigo-700">
-اختبر استيعابك
-</h2>
-
-<div id="quiz-body" class="space-y-8"></div>
-
-<div class="mt-8 pt-6 border-t text-center">
-
-<button onclick="showSection('lessons')" 
-class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg">
-إنهاء الاختبار
-</button>
-
-</div>
-
-</section>
-
-</main>
-
-
-
-<script>
-
-let currentLessonId=null
-
-
-
-const lessonsData={
+const lessonsData = {
 
 1:{
 title:"هيكل الجملة البسيطة",
-desc:"أساس بناء أي جملة في الإنجليزية.",
-audio:"",
-content:"<h3>القاعدة الأساسية</h3><p>تتكون الجملة من <b>Subject + Verb + Object</b>.</p><ul><li>I (فاعل) + eat (فعل) + an apple (مفعول به).</li></ul>",
+desc:"أساس بناء أي جملة في الإنجليزية",
+content:"<p>Subject + Verb + Object</p>",
 quiz:[{q:"رتب: (reads - He - a book)",options:["He reads a book","A book reads he"],correct:0}]
 },
 
 2:{
 title:"الضمائر الشخصية",
-desc:"الكلمات التي تعبر عن الأشخاص.",
-audio:"",
-content:"<p>الضمائر هي: I, He, She, It, We, You, They.</p>",
-quiz:[{q:"ماذا يعني الضمير We؟",options:["هم","نحن"],correct:1}]
+desc:"الكلمات التي تعبر عن الأشخاص",
+content:"<p>I He She It We You They</p>",
+quiz:[{q:"ماذا يعني We",options:["هم","نحن"],correct:1}]
 },
 
 3:{
-title:"فعل الكينونة (To Be)",
-desc:"كيف تقول 'أنا أكون' أو 'هو يكون'.",
-audio:"",
-content:"<ul><li>I am</li><li>He/She/It is</li><li>We/You/They are</li></ul>",
-quiz:[{q:"She ___ a nurse.",options:["am","is","are"],correct:1}]
+title:"فعل الكينونة",
+desc:"To Be",
+content:"<ul><li>I am</li><li>He is</li><li>They are</li></ul>",
+quiz:[{q:"She ___ a nurse",options:["am","is","are"],correct:1}]
 },
 
 4:{
 title:"المضارع البسيط",
 desc:"العادات اليومية",
-audio:"",
-content:"<p>I play. / He plays.</p>",
-quiz:[{q:"Ali ___ milk every day.",options:["drink","drinks"],correct:1}]
+content:"<p>I play / He plays</p>",
+quiz:[{q:"Ali ___ milk every day",options:["drink","drinks"],correct:1}]
 },
 
 5:{
 title:"المضارع المستمر",
 desc:"ما يحدث الآن",
-audio:"",
 content:"<p>am/is/are + verb + ing</p>",
-quiz:[{q:"They ___ watching TV.",options:["is","are"],correct:1}]
+quiz:[{q:"They ___ watching TV",options:["is","are"],correct:1}]
+},
+
+6:{
+title:"الماضي البسيط",
+desc:"الأحداث الماضية",
+content:"<p>I played yesterday</p>",
+quiz:[{q:"ماضي Go",options:["goed","went"],correct:1}]
+},
+
+7:{
+title:"المستقبل البسيط",
+desc:"Will",
+content:"<p>I will travel tomorrow</p>",
+quiz:[{q:"I ___ help you",options:["will","am"],correct:0}]
+},
+
+8:{
+title:"أسماء الإشارة",
+desc:"This That",
+content:"<p>This / That</p>",
+quiz:[{q:"___ is my pen",options:["This","That"],correct:0}]
+},
+
+9:{
+title:"صفات الملكية",
+desc:"My Your His",
+content:"<p>My car / His book</p>",
+quiz:[{q:"This is ___ book",options:["me","my"],correct:1}]
+},
+
+10:{
+title:"A An The",
+desc:"أدوات التعريف",
+content:"<p>A book / An apple</p>",
+quiz:[{q:"___ orange",options:["A","An"],correct:1}]
+},
+
+11:{
+title:"حروف الجر",
+desc:"In On At",
+content:"<p>On the table</p>",
+quiz:[{q:"The keys are ___ table",options:["in","on"],correct:1}]
+},
+
+12:{
+title:"السؤال",
+desc:"Do Does",
+content:"<p>Do you play?</p>",
+quiz:[{q:"___ he like coffee",options:["Do","Does"],correct:1}]
+},
+
+13:{
+title:"النفي",
+desc:"Negative",
+content:"<p>I don't know</p>",
+quiz:[{q:"I ___ like fish",options:["not","don't"],correct:1}]
+},
+
+14:{
+title:"الصفات",
+desc:"Adjectives",
+content:"<p>A red car</p>",
+quiz:[{q:"رتب: (boy - smart - A)",options:["A smart boy","A boy smart"],correct:0}]
+},
+
+15:{
+title:"الماضي المستمر",
+desc:"Past Continuous",
+content:"<p>Was/Were + verb + ing</p>",
+quiz:[{q:"They ___ playing football",options:["was","were"],correct:1}]
 }
 
 }
-
-
-
-function playLessonAudio(){
-
-if(currentLessonId===1){
-
-const audio=new Audio("./lesson1.wav")
-
-audio.play().catch(()=>{
-alert("لم يتم العثور على ملف الصوت lesson1.wav")
-})
-
-return
-}
-
-alert("لا يوجد شرح صوتي لهذا الدرس بعد")
-
-}
-
-
-
-function initApp(){
-
-const grid=document.getElementById("lessons-grid")
-
-Object.keys(lessonsData).forEach(id=>{
-
-const lesson=lessonsData[id]
-
-const card=document.createElement("div")
-
-card.className="lesson-card bg-white p-6 rounded-2xl shadow-md cursor-pointer border-2 border-transparent hover:border-indigo-500"
-
-card.onclick=()=>openLesson(id)
-
-card.innerHTML=`
-<div class="flex items-center gap-4 mb-3">
-<span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${id}</span>
-<h3 class="font-bold text-lg text-indigo-900">${lesson.title}</h3>
-</div>
-<p class="text-gray-500 text-sm">${lesson.desc}</p>
-`
-
-grid.appendChild(card)
-
-})
-
-}
-
-
-
-function openLesson(id){
-
-currentLessonId=id
-
-const lesson=lessonsData[id]
-
-document.getElementById("lesson-title-container").innerHTML=
-`<h2 class="text-3xl font-bold text-indigo-900">${lesson.title}</h2>`
-
-document.getElementById("lesson-body").innerHTML=lesson.content
-
-document.getElementById("quiz-btn").onclick=()=>startQuiz(id)
-
-showSection("content")
-
-}
-
-
-
-function startQuiz(id){
-
-const quiz=lessonsData[id].quiz
-
-const body=document.getElementById("quiz-body")
-
-body.innerHTML=quiz.map((q,i)=>`
-
-<div class="bg-indigo-50 p-6 rounded-2xl">
-
-<p class="font-bold text-xl mb-4">${q.q}</p>
-
-<div class="grid gap-3">
-
-${q.options.map((opt,oi)=>`
-
-<button onclick="checkAnswer(${i},${oi},${q.correct},this)" class="bg-white p-4 rounded-xl border-2 border-gray-200 text-right hover:border-indigo-400">
-${opt}
-</button>
-
-`).join("")}
-
-</div>
-
-</div>
-
-`).join("")
-
-showSection("quiz")
-
-}
-
-
-
-function checkAnswer(qi,oi,correct,btn){
-
-const buttons=btn.parentElement.querySelectorAll("button")
-
-buttons.forEach(b=>b.disabled=true)
-
-if(oi===correct){
-
-btn.classList.add("bg-green-100","border-green-500")
-
-btn.innerHTML+=" ✔"
-
-}else{
-
-btn.classList.add("bg-red-100","border-red-500")
-
-buttons[correct].classList.add("bg-green-50","border-green-300")
-
-}
-
-}
-
-
-
-function showSection(id){
-
-["home","lessons","content","quiz"].forEach(s=>
-document.getElementById(s+"-section").classList.add("hidden"))
-
-document.getElementById(id+"-section").classList.remove("hidden")
-
-window.scrollTo(0,0)
-
-}
-
-
-
-initApp()
-
-</script>
-
-</body>
-</html>
