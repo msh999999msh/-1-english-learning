@@ -1,13 +1,17 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تعلم الإنجليزية ببساطة - 15 درساً</title>
+
+<title>تعلم الإنجليزية ببساطة</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
+
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
 
 body{
@@ -22,49 +26,69 @@ transition:transform .2s;
 .lesson-card:hover{
 transform:translateY(-5px);
 }
+
 </style>
 
 </head>
 
+
 <body class="bg-gray-50 text-gray-800">
 
-<header class="bg-indigo-600 text-white p-6 shadow-lg sticky top-0 z-50">
+
+<header class="bg-indigo-600 text-white p-6 shadow-lg">
+
 <div class="container mx-auto flex justify-between items-center">
 
-<h1 class="text-2xl font-bold">🇬🇧 أكاديمية القواعد</h1>
+<h1 class="text-2xl font-bold">
+🇬🇧 أكاديمية القواعد
+</h1>
 
 <nav class="flex gap-4">
-<button onclick="showSection('home')" class="hover:underline">الرئيسية</button>
-<button onclick="showSection('lessons')" class="hover:underline">الدروس</button>
+
+<button onclick="showSection('home')" class="hover:underline">
+الرئيسية
+</button>
+
+<button onclick="showSection('lessons')" class="hover:underline">
+الدروس
+</button>
+
 </nav>
 
 </div>
+
 </header>
 
+
+
 <main class="container mx-auto p-4 mt-6">
+
 
 <section id="home-section" class="text-center py-10">
 
 <h2 class="text-4xl font-bold text-indigo-800 mb-4">
-منهج متكامل من 15 درساً
+تعلم الإنجليزية خطوة بخطوة
 </h2>
 
 <p class="text-lg text-gray-600 mb-8">
-تعلم القواعد الإنجليزية خطوة بخطوة
+منهج بسيط لتعلم القواعد الأساسية
 </p>
 
 <button onclick="showSection('lessons')" 
 class="bg-indigo-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:bg-indigo-700">
+
 تصفح الدروس
+
 </button>
 
 </section>
 
 
+
 <section id="lessons-section" class="hidden">
 
 <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
-خارطة الطريق التعليمية
+الدروس
 </h2>
 
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="lessons-grid"></div>
@@ -72,28 +96,26 @@ class="bg-indigo-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow
 </section>
 
 
+
 <section id="content-section" class="hidden max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
 
-<div id="lesson-header" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-6">
+<div id="lesson-header" class="flex justify-between items-center mb-8 border-b pb-6">
 
 <div id="lesson-title-container"></div>
 
-<div class="flex flex-wrap gap-2">
-
 <button id="audio-btn" onclick="playLessonAudio()" 
-class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full font-bold">
+class="bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full font-bold">
 
-🔊 <span id="audio-text">استمع للشرح</span>
+🔊 استمع للشرح
 
 </button>
 
 </div>
 
-</div>
+<div id="lesson-body" class="text-lg"></div>
 
-<div id="lesson-body" class="prose prose-indigo max-w-none text-lg"></div>
 
-<div class="mt-10 pt-6 border-t flex justify-between items-center">
+<div class="mt-10 pt-6 border-t flex justify-between">
 
 <button onclick="showSection('lessons')" class="text-indigo-600 font-bold">
 ← العودة للقائمة
@@ -101,7 +123,9 @@ class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-f
 
 <button id="quiz-btn" 
 class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg font-bold">
+
 ابدأ الاختبار
+
 </button>
 
 </div>
@@ -109,10 +133,13 @@ class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg
 </section>
 
 
+
 <section id="quiz-section" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
 
 <h2 class="text-2xl font-bold mb-6 text-indigo-700">
+
 اختبر استيعابك
+
 </h2>
 
 <div id="quiz-body" class="space-y-8"></div>
@@ -121,12 +148,15 @@ class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg
 
 <button onclick="showSection('lessons')" 
 class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg">
+
 إنهاء الاختبار
+
 </button>
 
 </div>
 
 </section>
+
 
 </main>
 
@@ -134,54 +164,93 @@ class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg">
 
 <script>
 
+
 let currentLessonId = null
+
 
 
 const lessonsData = {
 
+
 1:{
+
 title:"هيكل الجملة البسيطة",
-desc:"أساس بناء أي جملة في الإنجليزية",
+
+desc:"أساس بناء الجملة",
 
 content:`
 
 <h3>القاعدة الأساسية</h3>
 
-<p>تتكون الجملة من</p>
+<p>تتكون الجملة الإنجليزية من:</p>
 
 <p style="font-size:22px;font-weight:bold">
 Subject + Verb + Object
 </p>
 
 <ul>
+
 <li>I (فاعل) + eat (فعل) + an apple (مفعول به)</li>
+
 </ul>
 
 `,
 
 quiz:[
-{q:"رتب: (reads - He - a book)",
-options:["He reads a book","A book reads he"],
-correct:0}
+
+{
+
+q:"رتب: (reads - He - a book)",
+
+options:[
+"He reads a book",
+"A book reads he"
+],
+
+correct:0
+
+}
+
 ]
 
 },
 
+
+
 2:{
+
 title:"الضمائر الشخصية",
+
 desc:"الكلمات التي تعبر عن الأشخاص",
+
 content:"<p>I He She It We You They</p>",
-quiz:[{q:"ماذا يعني We",options:["هم","نحن"],correct:1}]
+
+quiz:[
+{q:"ماذا يعني We",options:["هم","نحن"],correct:1}
+]
+
 },
 
+
+
 3:{
+
 title:"فعل الكينونة",
+
 desc:"To Be",
+
 content:"<ul><li>I am</li><li>He is</li><li>They are</li></ul>",
-quiz:[{q:"She ___ a nurse",options:["am","is","are"],correct:1}]
-}
+
+quiz:[
+{q:"She ___ a nurse",options:["am","is","are"],correct:1}
+]
 
 }
+
+
+
+}
+
 
 
 
@@ -189,12 +258,24 @@ function playLessonAudio(){
 
 if(currentLessonId==1){
 
-const audio=new Audio("lesson1.mp3.wav")
-audio.play()
+const audio = new Audio("./lesson1.wav")
+
+audio.play().catch(function(){
+
+alert("تأكد أن ملف الصوت lesson1.wav موجود بجانب index.html")
+
+})
+
+}
+
+else{
+
+alert("لا يوجد شرح صوتي لهذا الدرس")
 
 }
 
 }
+
 
 
 
@@ -235,6 +316,7 @@ currentLessonId=id
 const lesson=lessonsData[id]
 
 document.getElementById("lesson-title-container").innerHTML=
+
 `<h2 class="text-3xl font-bold text-indigo-900">${lesson.title}</h2>`
 
 document.getElementById("lesson-body").innerHTML=lesson.content
@@ -313,6 +395,7 @@ buttons[correct].style.background="#bbf7d0"
 function showSection(id){
 
 ["home","lessons","content","quiz"].forEach(s=>
+
 document.getElementById(s+"-section").classList.add("hidden"))
 
 document.getElementById(id+"-section").classList.remove("hidden")
@@ -325,7 +408,9 @@ window.scrollTo(0,0)
 
 initApp()
 
+
 </script>
+
 
 </body>
 </html>
