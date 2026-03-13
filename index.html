@@ -1,344 +1,331 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تعلم الإنجليزية ببساطة - 15 درساً</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-        body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f0f4f8;
-        }
-        .lesson-card {
-            transition: transform 0.2s;
-        }
-        .lesson-card:hover {
-            transform: translateY(-5px);
-        }
-        .loading-pulse {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تعلم الإنجليزية ببساطة - 15 درساً</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+body{
+font-family:'Tajawal',sans-serif;
+background:#f0f4f8;
+}
+
+.lesson-card{
+transition:transform .2s;
+}
+
+.lesson-card:hover{
+transform:translateY(-5px);
+}
+</style>
+
 </head>
+
 <body class="bg-gray-50 text-gray-800">
 
-    <header class="bg-indigo-600 text-white p-6 shadow-lg sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold">🇬🇧 أكاديمية القواعد</h1>
-            <nav class="flex gap-4">
-                <button onclick="showSection('home')" class="hover:underline">الرئيسية</button>
-                <button onclick="showSection('lessons')" class="hover:underline">الدروس</button>
-            </nav>
-        </div>
-    </header>
+<header class="bg-indigo-600 text-white p-6 shadow-lg sticky top-0 z-50">
+<div class="container mx-auto flex justify-between items-center">
 
-    <main class="container mx-auto p-4 mt-6">
-        
-        <!-- Home Section -->
-        <section id="home-section" class="text-center py-10">
-            <h2 class="text-4xl font-bold text-indigo-800 mb-4">منهج متكامل من 15 درساً</h2>
-            <p class="text-lg text-gray-600 mb-8">تعلم القواعد الإنجليزية خطوة بخطوة مع الشرح الصوتي والتحميل.</p>
-            <button onclick="showSection('lessons')" class="bg-indigo-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:bg-indigo-700 transition-all">تصفح الدروس</button>
-        </section>
+<h1 class="text-2xl font-bold">🇬🇧 أكاديمية القواعد</h1>
 
-        <!-- Lessons Selection -->
-        <section id="lessons-section" class="hidden">
-            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">خارطة الطريق التعليمية</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="lessons-grid">
-                <!-- Lessons populated by JS -->
-            </div>
-        </section>
+<nav class="flex gap-4">
+<button onclick="showSection('home')" class="hover:underline">الرئيسية</button>
+<button onclick="showSection('lessons')" class="hover:underline">الدروس</button>
+</nav>
 
-        <!-- Content Area -->
-        <section id="content-section" class="hidden max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
-            <div id="lesson-header" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-6">
-                <div id="lesson-title-container"></div>
-                <div class="flex flex-wrap gap-2">
-                    <button id="audio-btn" onclick="playLessonAudio()" class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full hover:bg-indigo-200 transition font-bold">
-                        <span id="audio-icon">🔊</span> <span id="audio-text">طلب الشرح الصوتي</span>
-                    </button>
-                    <button id="download-btn" onclick="downloadAudio()" class="hidden flex items-center gap-2 bg-green-100 text-green-700 px-5 py-2 rounded-full hover:bg-green-200 transition font-bold border border-green-200">
-                        <span>📥</span> <span>تحميل</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div id="lesson-body" class="prose prose-indigo max-w-none text-lg"></div>
+</div>
+</header>
 
-            <div class="mt-10 pt-6 border-t flex justify-between items-center">
-                <button onclick="showSection('lessons')" class="text-indigo-600 font-bold">← العودة للقائمة</button>
-                <button id="quiz-btn" class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg font-bold">ابدأ الاختبار</button>
-            </div>
-        </section>
+<main class="container mx-auto p-4 mt-6">
 
-        <!-- Quiz Area -->
-        <section id="quiz-section" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-            <h2 class="text-2xl font-bold mb-6 text-indigo-700">اختبر استيعابك 🧠</h2>
-            <div id="quiz-body" class="space-y-8"></div>
-            <div class="mt-8 pt-6 border-t text-center">
-                <button onclick="showSection('lessons')" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg">إنهاء الاختبار</button>
-            </div>
-        </section>
+<section id="home-section" class="text-center py-10">
 
-    </main>
+<h2 class="text-4xl font-bold text-indigo-800 mb-4">
+منهج متكامل من 15 درساً
+</h2>
 
-    <script>
-        const apiKey = ""; 
-        let currentLessonId = null;
-        let isSpeaking = false;
-        let currentAudioBlob = null;
+<p class="text-lg text-gray-600 mb-8">
+تعلم القواعد الإنجليزية خطوة بخطوة
+</p>
 
-        const lessonsData = {
-            1: {
-                title: "هيكل الجملة البسيطة",
-                desc: "أساس بناء أي جملة في الإنجليزية.",
-                audio: "في هذا الدرس الأول، نتعلم أن الجملة الإنجليزية يجب أن تبدأ بالفاعل، يليه الفعل، ثم المفعول به. لا توجد جملة اسمية بدون فعل مثل العربية. تذكر دائماً: فاعل، فعل، مفعول.",
-                content: "<h3>القاعدة الأساسية</h3><p>تتكون الجملة من <b>Subject + Verb + Object</b>.</p><ul><li>I (فاعل) + eat (فعل) + an apple (مفعول به).</li></ul>",
-                quiz: [{ q: "رتب: (reads - He - a book)", options: ["He reads a book", "A book reads he"], correct: 0 }]
-            },
-            2: {
-                title: "الضمائر الشخصية",
-                desc: "الكلمات التي تعبر عن الأشخاص.",
-                audio: "الضمائر هي أساس التحدث. آي تعني أنا، هِي للمذكر، شِي للمؤنث، وإِت لغير العاقل. وي تعني نحن، وذَي تعني هم.",
-                content: "<p>الضمائر هي: I, He, She, It, We, You, They.</p>",
-                quiz: [{ q: "ماذا يعني الضمير We؟", options: ["هم", "نحن"], correct: 1 }]
-            },
-            3: {
-                title: "فعل الكينونة (To Be)",
-                desc: "كيف تقول 'أنا أكون' أو 'هو يكون'.",
-                audio: "فعل تو بي يتغير حسب الفاعل. آي تأخذ آم، هِي وشِي وإت تأخذ إِز، ووي ويو وذَي تأخذ آر.",
-                content: "<ul><li>I am</li><li>He/She/It is</li><li>We/You/They are</li></ul>",
-                quiz: [{ q: "She ___ a nurse.", options: ["am", "is", "are"], correct: 1 }]
-            },
-            4: {
-                title: "المضارع البسيط",
-                desc: "العادات والحقائق اليومية.",
-                audio: "المضارع البسيط نستخدمه للعادات. القاعدة الأهم هي إضافة حرف إس للفعل إذا كان الفاعل هو أو هي أو غير عاقل.",
-                content: "<p>أضف s مع (He, She, It).</p><ul><li>I play.</li><li>He plays.</li></ul>",
-                quiz: [{ q: "Ali ___ milk every day.", options: ["drink", "drinks"], correct: 1 }]
-            },
-            5: {
-                title: "المضارع المستمر",
-                desc: "ما يحدث الآن في هذه اللحظة.",
-                audio: "للتعبير عن شيء يحدث الآن، نستخدم فعل تو بي مع إضافة آي إن جي للفعل الأساسي.",
-                content: "<p>am/is/are + verb + ing</p><ul><li>I am reading now.</li></ul>",
-                quiz: [{ q: "They ___ watching TV.", options: ["is", "are"], correct: 1 }]
-            },
-            6: {
-                title: "الماضي البسيط",
-                desc: "التحدث عن أحداث انتهت.",
-                audio: "في الماضي البسيط، نضيف عادة إي دي لنهاية الفعل المنتظم. وهناك أفعال غير منتظمة يجب حفظها.",
-                content: "<p>إضافة (ed) للأفعال المنتظمة.</p><ul><li>I played yesterday.</li></ul>",
-                quiz: [{ q: "ما هو ماضي Go؟", options: ["goed", "went"], correct: 1 }]
-            },
-            7: {
-                title: "المستقبل البسيط",
-                desc: "استخدام Will للتعبير عن القادم.",
-                audio: "للمستقبل نستخدم كلمة وِيل قبل الفعل. وِيل تعني سـ أو سوف.",
-                content: "<p>Will + base verb</p><ul><li>I will travel tomorrow.</li></ul>",
-                quiz: [{ q: "I ___ help you.", options: ["will", "am"], correct: 0 }]
-            },
-            8: {
-                title: "أسماء الإشارة",
-                desc: "هذا، هذه، هؤلاء (This, That).",
-                audio: "ذِس للقريب المفرد، وذَات للبعيد المفرد. ذِيز للقريب الجمع، وذُوز للبعيد الجمع.",
-                content: "<ul><li>This (قريب مفرد)</li><li>That (بعيد مفرد)</li></ul>",
-                quiz: [{ q: "___ is my pen (in my hand).", options: ["This", "That"], correct: 0 }]
-            },
-            9: {
-                title: "صفات الملكية",
-                desc: "لي، لك، له (My, Your, His).",
-                audio: "صفات الملكية تأتي قبل الاسم لتوضح من يملكه. ماي تعني لي، وهِز تعني له.",
-                content: "<ul><li>My car (سيارتي)</li><li>His book (كتابه)</li></ul>",
-                quiz: [{ q: "هذا كتابي: This is ___ book.", options: ["me", "my"], correct: 1 }]
-            },
-            10: {
-                title: "أدوات التعريف والتنكير",
-                desc: "A, An, The.",
-                audio: "نستخدم (أ) قبل الكلمة التي تبدأ بحرف ساكن، و(أن) قبل الكلمة التي تبدأ بحرف علة.",
-                content: "<ul><li>A book</li><li>An apple</li></ul>",
-                quiz: [{ q: "___ orange.", options: ["A", "An"], correct: 1 }]
-            },
-            11: {
-                title: "حروف الجر المكانية",
-                desc: "In, On, At والمزيد.",
-                audio: "إن تعني في، أون تعني على، وآت تستخدم غالباً مع الأماكن المحددة أو الوقت.",
-                content: "<ul><li>In the room</li><li>On the table</li></ul>",
-                quiz: [{ q: "The keys are ___ the table.", options: ["in", "on"], correct: 1 }]
-            },
-            12: {
-                title: "السؤال بـ Do و Does",
-                desc: "كيف تطرح سؤالاً في المضارع.",
-                audio: "في السؤال، نضع دو في البداية مع آي ووي ويو وذَي، ونضع دَز مع هِي وشِي وإِت.",
-                content: "<ul><li>Do you play?</li><li>Does she eat?</li></ul>",
-                quiz: [{ q: "___ he like coffee?", options: ["Do", "Does"], correct: 1 }]
-            },
-            13: {
-                title: "النفي (Negative)",
-                desc: "كيف تقول 'لا' (Not).",
-                audio: "للنفي نستخدم دونت أو دازنت قبل الفعل، أو نضع نوت بعد فعل الكينونة.",
-                content: "<ul><li>I do not (don't) know.</li><li>She is not sad.</li></ul>",
-                quiz: [{ q: "I ___ like fish.", options: ["not", "don't"], correct: 1 }]
-            },
-            14: {
-                title: "الصفات (Adjectives)",
-                desc: "وصف الأشياء والأشخاص.",
-                audio: "في الإنجليزية، الصفة تأتي قبل الاسم، بعكس العربية التي تأتي فيها الصفة بعد الاسم.",
-                content: "<ul><li>A red car (سيارة حمراء)</li><li>A tall man (رجل طويل)</li></ul>",
-                quiz: [{ q: "رتب: (boy - smart - A)", options: ["A smart boy", "A boy smart"], correct: 0 }]
-            },
-            15: {
-                title: "الماضي المستمر",
-                desc: "حدث كان مستمراً في الماضي.",
-                audio: "نستخدم واز أو وير مع الفعل المضاف له آي إن جي للتعبير عن شيء كان يحدث لفترة في الماضي.",
-                content: "<p>Was/Were + Verb + ing</p><ul><li>I was sleeping.</li></ul>",
-                quiz: [{ q: "They ___ playing football.", options: ["was", "were"], correct: 1 }]
-            }
-        };
+<button onclick="showSection('lessons')" 
+class="bg-indigo-600 text-white px-10 py-4 rounded-full text-xl font-bold shadow-xl hover:bg-indigo-700">
+تصفح الدروس
+</button>
 
-        function initApp() {
-            const grid = document.getElementById('lessons-grid');
-            Object.keys(lessonsData).forEach(id => {
-                const lesson = lessonsData[id];
-                const card = document.createElement('div');
-                card.className = "lesson-card bg-white p-6 rounded-2xl shadow-md cursor-pointer border-2 border-transparent hover:border-indigo-500 transition-all";
-                card.onclick = () => openLesson(id);
-                card.innerHTML = `
-                    <div class="flex items-center gap-4 mb-3">
-                        <span class="bg-indigo-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">${id}</span>
-                        <h3 class="font-bold text-lg text-indigo-900">${lesson.title}</h3>
-                    </div>
-                    <p class="text-gray-500 text-sm">${lesson.desc}</p>
-                `;
-                grid.appendChild(card);
-            });
-        }
+</section>
 
-        async function playLessonAudio() {
-            if (isSpeaking) return;
-            const lesson = lessonsData[currentLessonId];
-            const btn = document.getElementById('audio-btn');
-            const txt = document.getElementById('audio-text');
-            
-            try {
-                isSpeaking = true;
-                btn.classList.add('loading-pulse');
-                txt.innerText = "جاري تحضير الشرح...";
 
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `اشرح بأسلوب تعليمي مبسط باللغة العربية كأنك مدرس لغة إنجليزية: ${lesson.audio}` }] }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
-                        },
-                        model: "gemini-2.5-flash-preview-tts"
-                    })
-                });
+<section id="lessons-section" class="hidden">
 
-                const result = await response.json();
-                const audioData = result.candidates[0].content.parts[0].inlineData.data;
-                currentAudioBlob = pcmToWav(audioData, 24000);
-                
-                const audio = new Audio(URL.createObjectURL(currentAudioBlob));
-                txt.innerText = "جاري الشرح الآن...";
-                audio.play();
-                document.getElementById('download-btn').classList.remove('hidden');
-                
-                audio.onended = () => {
-                    isSpeaking = false;
-                    btn.classList.remove('loading-pulse');
-                    txt.innerText = "استمع للشرح مرة أخرى";
-                };
-            } catch (e) {
-                alert("حدث خطأ في تشغيل الصوت.");
-                isSpeaking = false;
-                btn.classList.remove('loading-pulse');
-                txt.innerText = "طلب الشرح الصوتي";
-            }
-        }
+<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+خارطة الطريق التعليمية
+</h2>
 
-        function downloadAudio() {
-            if (!currentAudioBlob) return;
-            const url = URL.createObjectURL(currentAudioBlob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `Lesson_${currentLessonId}_Explanation.wav`;
-            a.click();
-        }
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto" id="lessons-grid"></div>
 
-        function pcmToWav(base64, rate) {
-            const buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
-            const wav = new ArrayBuffer(44 + buffer.byteLength);
-            const view = new DataView(wav);
-            view.setUint32(0, 0x52494646, false); view.setUint32(4, 36 + buffer.byteLength, true);
-            view.setUint32(8, 0x57415645, false); view.setUint32(12, 0x666d7420, false);
-            view.setUint32(16, 16, true); view.setUint16(20, 1, true);
-            view.setUint16(22, 1, true); view.setUint32(24, rate, true);
-            view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true);
-            view.setUint16(34, 16, true); view.setUint32(36, 0x64617461, false);
-            view.setUint32(40, buffer.byteLength, true);
-            new Uint8Array(wav, 44).set(new Uint8Array(buffer));
-            return new Blob([wav], { type: 'audio/wav' });
-        }
+</section>
 
-        function openLesson(id) {
-            currentLessonId = id;
-            const lesson = lessonsData[id];
-            document.getElementById('lesson-title-container').innerHTML = `<h2 class="text-3xl font-bold text-indigo-900">${lesson.title}</h2>`;
-            document.getElementById('lesson-body').innerHTML = lesson.content;
-            document.getElementById('download-btn').classList.add('hidden');
-            document.getElementById('quiz-btn').onclick = () => startQuiz(id);
-            document.getElementById('audio-text').innerText = "طلب الشرح الصوتي";
-            showSection('content');
-        }
 
-        function startQuiz(id) {
-            const quiz = lessonsData[id].quiz;
-            const body = document.getElementById('quiz-body');
-            body.innerHTML = quiz.map((q, i) => `
-                <div class="bg-indigo-50 p-6 rounded-2xl">
-                    <p class="font-bold text-xl mb-4">${q.q}</p>
-                    <div class="grid gap-3">
-                        ${q.options.map((opt, oi) => `
-                            <button onclick="checkAnswer(${i}, ${oi}, ${q.correct}, this)" class="bg-white p-4 rounded-xl border-2 border-gray-200 text-right hover:border-indigo-400 transition-all">
-                                ${opt}
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
-            `).join('');
-            showSection('quiz');
-        }
+<section id="content-section" class="hidden max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10">
 
-        function checkAnswer(qi, oi, correct, btn) {
-            const buttons = btn.parentElement.querySelectorAll('button');
-            buttons.forEach(b => b.disabled = true);
-            if (oi === correct) {
-                btn.classList.add('bg-green-100', 'border-green-500', 'text-green-800');
-                btn.innerHTML += " ✨ إجابة صحيحة!";
-            } else {
-                btn.classList.add('bg-red-100', 'border-red-500', 'text-red-800');
-                btn.innerHTML += " ❌ حاول مرة أخرى";
-                buttons[correct].classList.add('bg-green-50', 'border-green-300');
-            }
-        }
+<div id="lesson-header" class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-6">
 
-        function showSection(id) {
-            ['home', 'lessons', 'content', 'quiz'].forEach(s => document.getElementById(s + '-section').classList.add('hidden'));
-            document.getElementById(id + '-section').classList.remove('hidden');
-            window.scrollTo(0,0);
-        }
+<div id="lesson-title-container"></div>
 
-        initApp();
-    </script>
+<div class="flex flex-wrap gap-2">
+
+<button id="audio-btn" onclick="playLessonAudio()" 
+class="flex items-center gap-2 bg-indigo-100 text-indigo-700 px-5 py-2 rounded-full font-bold">
+
+🔊 <span id="audio-text">استمع للشرح</span>
+
+</button>
+
+</div>
+
+</div>
+
+<div id="lesson-body" class="prose prose-indigo max-w-none text-lg"></div>
+
+<div class="mt-10 pt-6 border-t flex justify-between items-center">
+
+<button onclick="showSection('lessons')" class="text-indigo-600 font-bold">
+← العودة للقائمة
+</button>
+
+<button id="quiz-btn" 
+class="bg-green-500 text-white px-8 py-3 rounded-xl hover:bg-green-600 shadow-lg font-bold">
+ابدأ الاختبار
+</button>
+
+</div>
+
+</section>
+
+
+<section id="quiz-section" class="hidden max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+
+<h2 class="text-2xl font-bold mb-6 text-indigo-700">
+اختبر استيعابك
+</h2>
+
+<div id="quiz-body" class="space-y-8"></div>
+
+<div class="mt-8 pt-6 border-t text-center">
+
+<button onclick="showSection('lessons')" 
+class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg">
+إنهاء الاختبار
+</button>
+
+</div>
+
+</section>
+
+</main>
+
+
+
+<script>
+
+let currentLessonId = null
+
+
+const lessonsData = {
+
+1:{
+title:"هيكل الجملة البسيطة",
+desc:"أساس بناء أي جملة في الإنجليزية",
+
+content:`
+
+<h3>القاعدة الأساسية</h3>
+
+<p>تتكون الجملة من</p>
+
+<p style="font-size:22px;font-weight:bold">
+Subject + Verb + Object
+</p>
+
+<ul>
+<li>I (فاعل) + eat (فعل) + an apple (مفعول به)</li>
+</ul>
+
+`,
+
+quiz:[
+{q:"رتب: (reads - He - a book)",
+options:["He reads a book","A book reads he"],
+correct:0}
+]
+
+},
+
+2:{
+title:"الضمائر الشخصية",
+desc:"الكلمات التي تعبر عن الأشخاص",
+content:"<p>I He She It We You They</p>",
+quiz:[{q:"ماذا يعني We",options:["هم","نحن"],correct:1}]
+},
+
+3:{
+title:"فعل الكينونة",
+desc:"To Be",
+content:"<ul><li>I am</li><li>He is</li><li>They are</li></ul>",
+quiz:[{q:"She ___ a nurse",options:["am","is","are"],correct:1}]
+}
+
+}
+
+
+
+function playLessonAudio(){
+
+if(currentLessonId==1){
+
+const audio=new Audio("lesson1.mp3.wav")
+audio.play()
+
+}
+
+}
+
+
+
+function initApp(){
+
+const grid=document.getElementById("lessons-grid")
+
+Object.keys(lessonsData).forEach(id=>{
+
+const lesson=lessonsData[id]
+
+const card=document.createElement("div")
+
+card.className="lesson-card bg-white p-6 rounded-2xl shadow-md cursor-pointer"
+
+card.onclick=()=>openLesson(id)
+
+card.innerHTML=`
+
+<h3 class="font-bold text-lg text-indigo-900">${lesson.title}</h3>
+
+<p class="text-gray-500 text-sm">${lesson.desc}</p>
+
+`
+
+grid.appendChild(card)
+
+})
+
+}
+
+
+
+function openLesson(id){
+
+currentLessonId=id
+
+const lesson=lessonsData[id]
+
+document.getElementById("lesson-title-container").innerHTML=
+`<h2 class="text-3xl font-bold text-indigo-900">${lesson.title}</h2>`
+
+document.getElementById("lesson-body").innerHTML=lesson.content
+
+document.getElementById("quiz-btn").onclick=()=>startQuiz(id)
+
+showSection("content")
+
+}
+
+
+
+function startQuiz(id){
+
+const quiz=lessonsData[id].quiz
+
+const body=document.getElementById("quiz-body")
+
+body.innerHTML=quiz.map((q,i)=>`
+
+<div class="bg-indigo-50 p-6 rounded-2xl">
+
+<p class="font-bold text-xl mb-4">${q.q}</p>
+
+<div class="grid gap-3">
+
+${q.options.map((opt,oi)=>`
+
+<button onclick="checkAnswer(${i},${oi},${q.correct},this)"
+class="bg-white p-4 rounded-xl border-2 border-gray-200 text-right">
+
+${opt}
+
+</button>
+
+`).join("")}
+
+</div>
+
+</div>
+
+`).join("")
+
+showSection("quiz")
+
+}
+
+
+
+function checkAnswer(qi,oi,correct,btn){
+
+const buttons=btn.parentElement.querySelectorAll("button")
+
+buttons.forEach(b=>b.disabled=true)
+
+if(oi===correct){
+
+btn.style.background="#bbf7d0"
+
+btn.innerHTML+=" ✔"
+
+}else{
+
+btn.style.background="#fecaca"
+
+btn.innerHTML+=" ✖"
+
+buttons[correct].style.background="#bbf7d0"
+
+}
+
+}
+
+
+
+function showSection(id){
+
+["home","lessons","content","quiz"].forEach(s=>
+document.getElementById(s+"-section").classList.add("hidden"))
+
+document.getElementById(id+"-section").classList.remove("hidden")
+
+window.scrollTo(0,0)
+
+}
+
+
+
+initApp()
+
+</script>
+
 </body>
 </html>
