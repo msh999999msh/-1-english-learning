@@ -130,7 +130,6 @@
     </main>
 
     <script>
-        // API Key (Note: In a real production environment, use environment variables)
         const apiKey = "AIzaSyAF0s4wN37-ieIM_fCx5fJF7byHkYyPgs0";
 
         const lessons = [
@@ -139,7 +138,7 @@
                 title: "سر تكوين الجملة الإنجليزية",
                 desc: "الفاعل أولاً، ثم الفعل، ثم المفعول به",
                 content: `
-                    <div class="space-y-6 text-right">
+                    <div class="space-y-6">
                         <p>أهلاً بك! أهم قاعدة في الإنجليزية هي أن الجملة <b>اسمية دائماً</b>، أي أنها تبدأ بالفاعل.</p>
                         <div class="bg-indigo-50 p-6 rounded-2xl border-r-4 border-indigo-500">
                             <h4 class="font-bold text-indigo-900 mb-2">القاعدة الذهبية:</h4>
@@ -165,8 +164,8 @@
                 title: "استخدام فعل الكينونة (To Be)",
                 desc: "كيف تصف نفسك والآخرين باستخدام am, is, are",
                 content: `
-                    <div class="space-y-6 text-right">
-                        <p>فعل الكينونة (To Be) هو الأساس في اللغة الإنجليزية، ونستخدمه للوصف أو التعريف بالحالة.</p>
+                    <div class="space-y-6">
+                        <p>فعل الكينونة (To Be) هو "الملك" في اللغة الإنجليزية، ونستخدمه للوصف.</p>
                         <ul class="space-y-4">
                             <li class="flex items-center gap-3">
                                 <span class="bg-blue-100 text-blue-700 w-8 h-8 rounded-full flex items-center justify-center font-bold">1</span>
@@ -203,14 +202,14 @@
             const grid = document.getElementById('lessons-grid');
             grid.innerHTML = lessons.map(l => `
                 <div class="bg-white p-8 rounded-[2rem] shadow-sm lesson-card cursor-pointer" onclick="openLesson(${l.id})">
-                    <div class="flex justify-between items-start mb-6 text-right">
-                        <span class="bg-indigo-50 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold font-mono">الوحدة ${l.id}</span>
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="bg-indigo-50 text-indigo-600 px-4 py-1 rounded-full text-xs font-bold font-mono">UNIT ${l.id}</span>
                         <span class="text-2xl">📖</span>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 text-slate-800 text-right">${l.title}</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed text-right">${l.desc}</p>
-                    <div class="mt-8 flex items-center justify-end text-indigo-600 font-bold text-sm gap-2">
-                         <span class="text-lg">←</span> ابدأ الدرس
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">${l.title}</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed">${l.desc}</p>
+                    <div class="mt-8 flex items-center text-indigo-600 font-bold text-sm gap-2">
+                        ابدأ الدرس الآن <span class="text-lg">←</span>
                     </div>
                 </div>
             `).join('');
@@ -234,7 +233,7 @@
             btn.classList.add('audio-playing', 'opacity-70');
             btn.disabled = true;
             icon.innerText = "⌛";
-            textSpan.innerText = "جاري التحضير...";
+            textSpan.innerText = "جاري تحضير الشرح...";
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
@@ -246,7 +245,7 @@
                             responseModalities: ["AUDIO"],
                             speechConfig: {
                                 voiceConfig: {
-                                    prebuiltVoiceConfig: { voiceName: "Aoede" } 
+                                    prebuiltVoiceConfig: { voiceName: "Aoede" } // Beautiful female Arabic voice
                                 }
                             }
                         }
@@ -272,7 +271,7 @@
                 btn.classList.remove('audio-playing', 'opacity-70');
                 btn.disabled = false;
                 icon.innerText = "❌";
-                textSpan.innerText = "خطأ في الصوت";
+                textSpan.innerText = "تعذر تشغيل الصوت";
                 setTimeout(() => {
                     icon.innerText = "🔊";
                     textSpan.innerText = "استمع للشرح بالعربي";
