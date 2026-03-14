@@ -3,123 +3,172 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Elite English Academy</title>
+  <title>الأكاديمية المتميزة - تجربة ممتعة</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: { indigo: '#4f46e5', cyan: '#06b6d4' }
+          colors: { 
+            brand: { 
+              primary: '#6366f1', 
+              secondary: '#f43f5e',
+              accent: '#f59e0b',
+              soft: '#eef2ff'
+            } 
           },
-          fontFamily: {
-            ar: ['IBM Plex Sans Arabic','sans-serif'],
-            en: ['Outfit','sans-serif']
-          }
+          borderRadius: { '4xl': '2rem' },
+          fontFamily: { ar: ['IBM Plex Sans Arabic','sans-serif'], en: ['Outfit','sans-serif'] }
         }
       }
     }
   </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&family=Outfit:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family:'IBM Plex Sans Arabic',sans-serif; background:#f8fafc; }
+    body { 
+      font-family:'IBM Plex Sans Arabic',sans-serif; 
+      background: radial-gradient(circle at top right, #fdfcfb, #e2d1c333), #f8fafc;
+      min-height: 100vh;
+    }
     .english-snippet { direction:ltr; text-align:left; font-family:'Outfit',sans-serif; }
+    
+    /* حركات حيوية */
+    .floating { animation: float 6s ease-in-out infinite; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .card-gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    }
+
+    .playing-btn { 
+      background: #6366f1 !important; 
+      color: white !important; 
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+      transform: scale(0.95);
+    }
+
+    .audio-active::after { 
+      content: ""; position: absolute; inset: -8px; 
+      border: 3px solid #6366f1; border-radius: inherit; 
+      animation: ripple 1.5s cubic-bezier(0, 0, 0.2, 1) infinite; 
+    }
+    @keyframes ripple {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(1.3); opacity: 0; }
+    }
+
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(10px);
+    }
+
+    .lvl-card:hover { transform: translateY(-8px) rotate(1deg); }
   </style>
 </head>
 <body class="text-slate-800">
 
-<header class="bg-white border-b sticky top-0 z-40">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
-    <button onclick="navigate('home')" class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-brand-indigo text-white flex items-center justify-center rounded-xl">🎓</div>
-      <div>
-        <div class="font-bold">The Elite English Academy</div>
-        <div class="text-xs english-snippet text-slate-500">Professional Arabic-English Learning</div>
+<!-- الهيدر بشكل عصري -->
+<header class="glass-nav border-b border-white/50 sticky top-0 z-40">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+    <button onclick="navigate('home')" class="flex items-center gap-3 group">
+      <div class="w-12 h-12 bg-gradient-to-tr from-brand-primary to-purple-500 text-white flex items-center justify-center rounded-2xl text-2xl shadow-lg transition-transform group-hover:rotate-12">✨</div>
+      <div class="text-right">
+        <div class="font-bold text-lg text-slate-900 tracking-tight">The Elite Academy</div>
+        <div class="text-[9px] english-snippet text-brand-primary font-bold uppercase tracking-widest">Premium Audio Learning</div>
       </div>
     </button>
-    <nav class="flex gap-2">
-      <button onclick="navigate('home')" class="px-4 py-2 bg-slate-100 rounded-xl">الرئيسية</button>
-      <button onclick="navigate('lessons')" class="px-4 py-2 bg-brand-indigo text-white rounded-xl">ابدأ الآن</button>
+    <nav class="flex gap-3">
+      <button onclick="navigate('home')" class="px-5 py-2.5 rounded-2xl hover:bg-white transition-all font-semibold text-slate-600">الرئيسية</button>
+      <button onclick="navigate('lessons')" class="px-5 py-2.5 bg-brand-primary text-white rounded-2xl font-bold shadow-md hover:shadow-indigo-200 transition-all">استكشف 🚀</button>
     </nav>
   </div>
 </header>
 
-<main id="app" class="max-w-7xl mx-auto px-4 py-10"></main>
+<main id="app" class="max-w-6xl mx-auto px-6 py-12"></main>
 
 <script>
-const STORAGE_KEY = 'academy_progress_v2';
+const apiKey = ""; 
 
 const state = {
   route: 'home',
   selectedLessonId: null,
   currentLevel: null,
-  progress: loadProgress()
+  isSpeaking: false,
+  currentAudio: null,
+  activeBtnId: null
 };
 
-function loadProgress() {
-  const s = localStorage.getItem(STORAGE_KEY);
-  if (s) return JSON.parse(s);
-  return { completed: [], unlockedLevels: [1] };
+async function speak(text, elementId, lang = "en-US") {
+  if (state.isSpeaking) return; 
+
+  const btn = document.getElementById(elementId);
+  if (!btn) return;
+
+  btn.classList.add('playing-btn', 'audio-active');
+  state.isSpeaking = true;
+
+  try {
+    const promptPrefix = lang === "ar" ? "Explain this lesson clearly in a professional female Arabic voice: " : "Say in a professional female English teaching voice: ";
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: promptPrefix + text }] }],
+        generationConfig: {
+          responseModalities: ["AUDIO"],
+          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: lang === "ar" ? "Zubenelgenubi" : "Kore" } } }
+        },
+        model: "gemini-2.5-flash-preview-tts"
+      })
+    });
+
+    const result = await response.json();
+    const audioData = result.candidates[0].content.parts[0].inlineData.data;
+    const audioBlob = pcmToWav(audioData, 24000);
+    const audio = new Audio(URL.createObjectURL(audioBlob));
+    state.currentAudio = audio;
+
+    audio.onended = () => {
+      state.isSpeaking = false;
+      btn.classList.remove('playing-btn', 'audio-active');
+    };
+    await audio.play();
+  } catch (err) {
+    state.isSpeaking = false;
+    btn.classList.remove('playing-btn', 'audio-active');
+  }
 }
 
-function saveProgress() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
-}
-
-function longExplanation(title, focus) {
-  return `في هذا الدرس نتناول ${title} بطريقة مبسطة وعملية حتى تتحول القاعدة من معلومة نظرية إلى مهارة تستخدمها فعلًا في القراءة والكتابة والمحادثة. الفكرة الأساسية في ${title} هي ${focus}. من المهم أن يفهم المتعلم العربي متى تُستخدم القاعدة، ولماذا تظهر بهذا الشكل، وما الفرق بينها وبين القواعد القريبة منها، لأن أكبر سبب للأخطاء هو الترجمة الحرفية من العربية أو محاولة تطبيق قاعدة واحدة على جميع الجمل. لذلك لا يكفي أن تحفظ الصيغة فقط، بل يجب أن تراقب ترتيب الكلمات، ونوع الفعل، وعلاقة الجملة بالزمن أو بالمعنى المقصود. عندما تتدرب على أمثلة قصيرة وواضحة ثم تحاول تكوين جملك الخاصة، ستبدأ القاعدة بالثبات في ذهنك بشكل أفضل. كذلك من المفيد أن تقرأ المثال بصوت مرتفع، ثم تبدّل بعض عناصره، مثل الفاعل أو الزمن أو الكلمة الأساسية، حتى تلاحظ كيف تتغير الجملة من دون أن تنهار القاعدة. هذا الأسلوب يجعلك تنتقل من الحفظ إلى الفهم، ومن الفهم إلى الاستخدام الحقيقي. ومع التكرار ستجد أن ${title} لم تعد نقطة صعبة، بل أصبحت جزءًا طبيعيًا من طريقتك في التعبير.`;
-}
-
-function makeLesson(id, level, titleAr, titleEn, description, focus, examples) {
-  return { id, level, titleAr, titleEn, description, explanation: longExplanation(titleAr, focus), examples };
+function pcmToWav(base64, sampleRate) {
+  const binary = atob(base64);
+  const buffer = new ArrayBuffer(binary.length);
+  const view = new Uint8Array(buffer);
+  for (let i = 0; i < binary.length; i++) view[i] = binary.charCodeAt(i);
+  const wavHeader = new ArrayBuffer(44);
+  const dView = new DataView(wavHeader);
+  dView.setUint32(0, 0x52494646, false);
+  dView.setUint32(4, 36 + buffer.byteLength, true);
+  dView.setUint32(8, 0x57415645, false);
+  dView.setUint32(12, 0x666d7420, false);
+  dView.setUint16(16, 16, true);
+  dView.setUint16(20, 1, true);
+  dView.setUint16(22, 1, true);
+  dView.setUint32(24, sampleRate, true);
+  dView.setUint32(28, sampleRate * 2, true);
+  dView.setUint16(32, 2, true);
+  dView.setUint16(34, 16, true);
+  dView.setUint32(36, 0x64617461, false);
+  dView.setUint32(40, buffer.byteLength, true);
+  return new Blob([wavHeader, buffer], { type: 'audio/wav' });
 }
 
 const lessonsDB = [
-  makeLesson(1,1,'فعل الكينونة مع الضمائر','Be Verb with Pronouns','المدخل الأساسي لفهم الجملة الإنجليزية الاسمية. هذا الدرس يعلّمك كيف تربط الفاعل بالمعلومة بشكل صحيح وواضح.','استخدام am وis وare مع الضمائر المختلفة لربط الفاعل بالصفة أو المهنة أو المكان.',['I am tired. — أنا متعب.','She is a doctor. — هي طبيبة.','They are at home. — هم في المنزل.']),
-  makeLesson(2,1,'الضمائر الشخصية','Personal Pronouns','الضمائر تسهّل الحديث وتمنع تكرار الأسماء. بإتقانها يصبح كلامك أسرع وأكثر طبيعية.','اختيار الضمير المناسب بحسب المتكلم أو المخاطب أو الغائب وربطه بالفعل الصحيح.',['He works here. — هو يعمل هنا.','We are ready. — نحن جاهزون.','It is old. — إنه قديم.']),
-  makeLesson(3,1,'أدوات التنكير والتعريف','Articles','هذا الدرس يوضح الفرق بين a وan وthe بطريقة سهلة وعملية. وهو من أكثر المواضيع التي يخطئ فيها المتعلم العربي.','التفريق بين الاسم غير المحدد والاسم المحدد واختيار الأداة المناسبة بحسب الصوت والسياق.',['She bought a bag. — اشترت حقيبة.','He ate an orange. — أكل برتقالة.','The teacher is here. — المعلم هنا.']),
-  makeLesson(4,1,'الجمع','Plurals','الانتقال من المفرد إلى الجمع قاعدة أساسية في اللغة. هذا الدرس يشرح القاعدة العامة مع أهم الاستثناءات.','إضافة s أو es في أكثر الحالات مع التعرف على الأشكال غير المنتظمة.',['One car / two cars. — سيارة واحدة / سيارتان.','One box / three boxes. — صندوق واحد / ثلاثة صناديق.','One child / two children. — طفل واحد / طفلان.']),
-  makeLesson(5,1,'المضارع البسيط','Present Simple','زمن العادات والحقائق والجداول اليومية. وهو من أكثر الأزمنة استخدامًا في الإنجليزية.','التعبير عن الروتين والحقائق العامة والانتباه إلى إضافة s مع he وshe وit.',['I study every day. — أدرس كل يوم.','She works in a hospital. — هي تعمل في مستشفى.','Water boils at 100°C. — الماء يغلي عند 100 درجة.']),
-  makeLesson(6,1,'الأسئلة في المضارع البسيط','Present Simple Questions','تعلم كيف تصوغ سؤالًا صحيحًا في الإنجليزية باستخدام Do وDoes. هذا أساس الحوار اليومي.','استخدام Do وDoes قبل الفاعل ثم الفعل الأساسي لتكوين السؤال.',['Do you speak English? — هل تتحدث الإنجليزية؟','Does he live here? — هل يسكن هنا؟','Where do they work? — أين يعملون؟']),
-  makeLesson(7,1,'النفي في المضارع البسيط','Present Simple Negatives','هذا الدرس يعلمك كيف تقول لا بشكل صحيح في الإنجليزية. وهو ضروري جدًا في المحادثات اليومية.','استخدام do not وdoes not قبل الفعل الأساسي مع ملاحظة رجوع الفعل إلى المصدر.',['I do not smoke. — أنا لا أدخن.','He doesn’t drive. — هو لا يقود.','They do not agree. — هم لا يوافقون.']),
-  makeLesson(8,1,'أسماء الإشارة','Demonstratives','هذا، هذه، ذلك، وتلك في الإنجليزية. درس بسيط لكنه مهم جدًا للدقة في الإشارة.','التمييز بين المفرد والجمع والقريب والبعيد باستخدام this وthat وthese وthose.',['This is my phone. — هذا هاتفي.','That is your car. — تلك سيارتك.','These are new shoes. — هذه أحذية جديدة.']),
-  makeLesson(9,1,'صفات الملكية','Possessive Adjectives','تعلم كيف تعبّر عن الملكية بطريقة صحيحة قبل الاسم. هذا يجعل كلامك أكثر دقة وطبيعية.','استخدام my وyour وhis وher وour وtheir قبل الاسم لتوضيح الملكية.',['My car is new. — سيارتي جديدة.','Her name is Sara. — اسمها سارة.','Their house is large. — بيتهم كبير.']),
-  makeLesson(10,1,'أسئلة Wh','Wh Questions','هذا الدرس يعلمك كيف تسأل عن المكان والزمان والسبب والشخص والمعلومة. وهو أساس المحادثة الحقيقية.','فهم معنى what وwhere وwhen وwhy وwho وhow وبناء السؤال بها داخل جملة سليمة.',['Where do you live? — أين تسكن؟','Why is she late? — لماذا هي متأخرة؟','Who is your teacher? — من معلمك؟']),
-
-  makeLesson(11,2,'الماضي البسيط للأفعال المنتظمة','Past Simple Regular Verbs','بداية الحديث عن الأحداث الماضية. هذا الدرس يشرح القاعدة العامة للأفعال المنتظمة.','إضافة ed إلى الأفعال المنتظمة للتعبير عن أحداث انتهت في الماضي.',['I watched a movie yesterday. — شاهدت فيلمًا أمس.','She cleaned the room. — نظفت الغرفة.','We visited our uncle last week. — زرنا عمنا الأسبوع الماضي.']),
-  makeLesson(12,2,'الماضي البسيط للأفعال غير المنتظمة','Past Simple Irregular Verbs','ليست كل الأفعال تأخذ ed في الماضي. هذا الدرس يشرح الأفعال الأكثر شيوعًا التي يتغير شكلها.','فهم الأفعال التي تتغير كليًا أو جزئيًا في الماضي مثل go/went وsee/saw.',['I went home early. — ذهبت إلى المنزل مبكرًا.','He saw his friend. — رأى صديقه.','They had lunch together. — تناولوا الغداء معًا.']),
-  makeLesson(13,2,'الأسئلة والنفي في الماضي','Past Questions and Negatives','تعلم كيف تسأل وتنفي في الماضي باستخدام did. هذا يكمل فهمك لزمن الماضي البسيط.','استخدام did وdid not مع الفعل الأساسي في السؤال والنفي.',['Did you call him? — هل اتصلت به؟','She did not come yesterday. — لم تأتِ أمس.','Why did they leave early? — لماذا غادروا مبكرًا؟']),
-  makeLesson(14,2,'المستقبل باستخدام Will','Future with Will','تعلم كيف تتحدث عن المستقبل والتوقعات والقرارات السريعة. هذا من أكثر التراكيب استخدامًا.','استخدام will مع الفعل الأساسي للتوقع أو الوعد أو القرار الفوري.',['I will call you later. — سأتصل بك لاحقًا.','She will help us. — ستساعدنا.','It will be fine. — سيكون الأمر بخير.']),
-  makeLesson(15,2,'المستقبل باستخدام Going to','Future with Going to','هذا الدرس يشرح طريقة أخرى للتعبير عن المستقبل، خاصة في الخطط والنيات الواضحة.','استخدام going to مع فعل الكينونة للتعبير عن خطة مسبقة أو توقع مبني على دليل.',['We are going to travel next month. — سنسافر الشهر القادم.','I am going to start a new course. — سأبدأ دورة جديدة.','Look at the sky! It is going to rain. — انظر إلى السماء، ستمطر.']),
-  makeLesson(16,2,'المضارع المستمر','Present Continuous','الزمن الذي يصف ما يحدث الآن أو حول الآن. وهو مهم جدًا للتمييز بين الحدث الحالي والعادة.','استخدام am/is/are مع verb+ing لوصف الحدث الجاري الآن أو في فترة مؤقتة.',['He is studying now. — هو يدرس الآن.','They are waiting outside. — هم ينتظرون في الخارج.','I am learning English these days. — أتعلم الإنجليزية هذه الأيام.']),
-  makeLesson(17,2,'الماضي المستمر','Past Continuous','درس مهم للسرد ووصف الخلفية الزمنية في الماضي. يساعدك على بناء مشهد أو قصة بشكل أفضل.','استخدام was/were مع verb+ing لحدث كان جاريًا في الماضي أو حين وقع حدث آخر.',['She was cooking when I arrived. — كانت تطبخ عندما وصلت.','We were talking at midnight. — كنا نتحدث عند منتصف الليل.','It was raining all evening. — كانت السماء تمطر طوال المساء.']),
-  makeLesson(18,2,'المستقبل المستمر','Future Continuous','تعلم كيف تتحدث عن شيء سيكون مستمرًا في وقت معين في المستقبل. هذا يعطي كلامك دقة أعلى.','استخدام will be مع verb+ing لوصف حدث سيكون جاريًا في لحظة مستقبلية معينة.',['I will be studying tonight. — سأكون أدرس الليلة.','They will be waiting for us. — سيكونون بانتظارنا.','She will be traveling next week. — ستكون مسافرة الأسبوع القادم.']),
-  makeLesson(19,2,'المقارنة','Comparatives','هذا الدرس يشرح كيف تقارن بين شخصين أو شيئين بطريقة صحيحة. وهو مهم جدًا في الوصف.','استخدام er أو more مع الصفة ثم than للمقارنة بين شيئين أو شخصين.',['My car is faster than yours. — سيارتي أسرع من سيارتك.','This book is easier than that one. — هذا الكتاب أسهل من ذاك.','English is more flexible than I thought. — الإنجليزية أكثر مرونة مما ظننت.']),
-  makeLesson(20,2,'التفضيل','Superlatives','تعلم كيف تعبر عن الأعلى أو الأفضل داخل مجموعة. هذا مهم في الوصف والكتابة.','استخدام est أو most مع the للتعبير عن أعلى درجة داخل مجموعة.',['She is the smartest student here. — هي أذكى طالبة هنا.','This is the best option. — هذا هو الخيار الأفضل.','Mount Everest is the highest mountain. — إيفرست هو أعلى جبل.']),
-
-  makeLesson(21,3,'المضارع التام','Present Perfect','هذا الزمن يربط الماضي بالحاضر. وهو من أهم الأزمنة لفهم التجربة والنتيجة والاستمرارية.','استخدام have/has مع التصريف الثالث للتجربة أو النتيجة الحالية أو الاستمرار من الماضي حتى الآن.',['I have finished my homework. — أنهيت واجبي.','She has visited Dubai before. — لقد زارت دبي من قبل.','They have lived here for years. — لقد عاشوا هنا لسنوات.']),
-  makeLesson(22,3,'الفرق بين الماضي البسيط والمضارع التام','Past Simple vs Present Perfect','درس مهم جدًا لفهم متى تستخدم كل زمن. يساعدك على تجنب أحد أشهر الأخطاء عند المتعلمين.','التمييز بين الحدث المرتبط بزمن منتهٍ محدد والحدث ذي الأثر الحالي أو الزمن غير المحدد.',['I visited London in 2022. — زرت لندن في 2022.','I have visited London before. — لقد زرت لندن من قبل.','She finished the task yesterday. — أنهت المهمة أمس.']),
-  makeLesson(23,3,'الأفعال الناقصة للقدرة والاحتمال','Modals of Ability and Possibility','هذا الدرس يشرح can وcould وmight. وهي كلمات مهمة جدًا للقدرة واللباقة والاحتمال.','استخدام can للقدرة وcould للطلب المهذب أو القدرة الماضية وmight للاحتمال.',['I can speak English. — أستطيع التحدث بالإنجليزية.','Could you open the window? — هل يمكنك فتح النافذة؟','It might be true. — قد يكون ذلك صحيحًا.']),
-  makeLesson(24,3,'الأفعال الناقصة للوجوب والنصيحة','Modals of Obligation and Advice','درس عملي يوضح الفرق بين must وshould وhave to. وهو مهم جدًا للنصيحة والقواعد والالتزام.','التفريق بين الإلزام القوي والنصيحة والضرورة الخارجية باستخدام must وshould وhave to.',['You must be careful. — يجب أن تكون حذرًا.','You should drink more water. — ينبغي أن تشرب ماء أكثر.','I have to leave now. — يجب أن أغادر الآن.']),
-  makeLesson(25,3,'المبني للمجهول في الحاضر','Present Passive','تعلم كيف تركز على الفعل أو النتيجة بدل الفاعل. هذا مهم في الأسلوب الرسمي والتقارير.','استخدام am/is/are مع التصريف الثالث لإبراز الفعل أو النتيجة في الحاضر.',['The room is cleaned every day. — تُنظف الغرفة كل يوم.','English is taught in many schools. — تُدرَّس الإنجليزية في كثير من المدارس.','The emails are checked daily. — يتم فحص الرسائل يوميًا.']),
-  makeLesson(26,3,'المبني للمجهول في الماضي','Past Passive','هذا الدرس يكمل فهم المبني للمجهول في الزمن الماضي. وهو شائع في الأخبار والسرد الرسمي.','استخدام was/were مع التصريف الثالث للتعبير عن فعل تم في الماضي مع التركيز على النتيجة.',['The project was finished on time. — تم إنهاء المشروع في الوقت.','The letter was sent yesterday. — أُرسلت الرسالة أمس.','The rules were explained clearly. — شُرحت القواعد بوضوح.']),
-  makeLesson(27,3,'الشرط الأول','First Conditional','هذا الدرس يشرح كيف تتحدث عن احتمال حقيقي في المستقبل ونتيجته. وهو مفيد في النصائح والتخطيط.','استخدام if مع المضارع البسيط ثم will مع الفعل الأساسي للتعبير عن احتمال واقعي.',['If it rains, we will stay home. — إذا أمطرت فسنمكث في المنزل.','If you work hard, you will succeed. — إذا عملت بجد فستنجح.','If she calls, I will answer. — إذا اتصلت فسأرد.']),
-  makeLesson(28,3,'الشرط الثاني','Second Conditional','هذا الدرس يشرح لغة الخيال والافتراض غير الواقعي. وهو مهم للنصيحة والتصور والاحتمالات البعيدة.','استخدام if مع الماضي البسيط ثم would مع الفعل الأساسي للتعبير عن موقف افتراضي غير واقعي.',['If I were you, I would study more. — لو كنت مكانك لدرست أكثر.','If she had time, she would join us. — لو كان لديها وقت لانضمت إلينا.','If they practiced daily, they would improve. — لو تدربوا يوميًا لتحسنوا.']),
-  makeLesson(29,3,'الروابط المنطقية','Logical Connectors','تعلم كيف تربط الأفكار داخل الجملة أو بين الجمل. هذا يجعل الكتابة والكلام أكثر سلاسة وتنظيمًا.','استخدام because وso وhowever وalthough وtherefore لبيان السبب والنتيجة والتناقض والإضافة.',['I stayed home because I was tired. — بقيت في المنزل لأنني كنت متعبًا.','He studied hard, so he passed. — درس بجد، لذلك نجح.','Although it was late, we continued. — رغم أنه كان متأخرًا، واصلنا.']),
-  makeLesson(30,3,'الأسماء المعدودة وغير المعدودة','Countable and Uncountable Nouns','هذا الدرس يوضح الفرق بين ما يمكن عده وما لا يعد مباشرة. وهو مهم في أدوات الكمية.','التمييز بين الأسماء المعدودة وغير المعدودة وتأثير ذلك على much وmany وsome وa little.',['Many students came. — جاء كثير من الطلاب.','There is little water left. — بقي قليل من الماء.','I need some information. — أحتاج بعض المعلومات.']),
-
-  makeLesson(31,4,'الماضي التام','Past Perfect','هذا الزمن يوضح أي حدث وقع أولًا عندما نتحدث عن حدثين في الماضي. وهو مهم جدًا في السرد المنظم.','استخدام had مع التصريف الثالث لبيان أن حدثًا وقع قبل حدث ماضٍ آخر.',['I had finished the work before they came. — كنت قد أنهيت العمل قبل أن يأتوا.','She had left when I called. — كانت قد غادرت عندما اتصلت.','They had eaten before the meeting. — كانوا قد تناولوا الطعام قبل الاجتماع.']),
-  makeLesson(32,4,'الكلام المنقول','Reported Speech','هذا الدرس يشرح كيف تنقل كلام شخص آخر بطريقة غير مباشرة. وهو مهم في السرد والتقارير والكتابة.','تحويل الكلام المباشر إلى غير مباشر مع ملاحظة تغيّر الضمائر والأزمنة والإشارات الزمنية.',['He said that he was busy. — قال إنه كان مشغولًا.','She said that she would come. — قالت إنها ستأتي.','They told me that they were ready. — أخبروني أنهم كانوا جاهزين.']),
-  makeLesson(33,4,'الأسئلة في الكلام المنقول','Reported Questions','تعلم كيف تنقل السؤال بطريقة غير مباشرة. هذا يطور قدرتك على السرد والتعبير الرسمي.','استخدام asked وif أو أدوات السؤال مع ترتيب خبري بدل ترتيب السؤال المباشر.',['She asked if I was ready. — سألت إن كنت جاهزًا.','He asked where I lived. — سأل أين كنت أسكن.','They asked when he would arrive. — سألوا متى سيصل.']),
-  makeLesson(34,4,'هيكل الفقرة الأكاديمية','Academic Paragraph Structure','هذا الدرس يعلّمك كيف تبني فقرة قوية ومنظمة. وهو أساس الكتابة الأكاديمية الجيدة.','ترتيب الفقرة حول جملة رئيسية ثم دعم ثم خاتمة قصيرة أو جملة ختامية.',['Learning English opens many opportunities. — تعلم الإنجليزية يفتح فرصًا كثيرة.','It helps people communicate and access knowledge. — يساعد الناس على التواصل والوصول إلى المعرفة.','For this reason, it is an important skill today. — ولهذا فهو مهارة مهمة اليوم.']),
-  makeLesson(35,4,'هيكل المقالة الأكاديمية','Academic Essay Structure','هذا الدرس يشرح الشكل العام للمقالة الأكاديمية. وهو مهم جدًا لمن يريد كتابة نصوص أطول ومنظمة.','تقسيم المقالة إلى مقدمة ومتن وخاتمة مع وجود فكرة رئيسية واضحة تربط الأقسام.',['Introduction presents the topic. — المقدمة تعرض الموضوع.','Body paragraphs explain the main points. — فقرات المتن تشرح النقاط الأساسية.','Conclusion summarizes the essay. — الخاتمة تلخص المقالة.']),
-  makeLesson(36,4,'الترابط الأكاديمي','Academic Cohesion','هذا الدرس يرفع جودة الكتابة من جمل صحيحة إلى نص مترابط. وهو عنصر أساسي في الكتابة المتقدمة.','استخدام أدوات الربط والإحالة وتسلسل الأفكار لجعل النص منسجمًا وسهل المتابعة.',['However, the results were limited. — ومع ذلك، كانت النتائج محدودة.','Furthermore, students need practice. — إضافة إلى ذلك، يحتاج الطلاب إلى تدريب.','Therefore, a new strategy is necessary. — لذلك، من الضروري اتباع استراتيجية جديدة.']),
-  makeLesson(37,4,'لغة الرأي الرسمي','Formal Opinion Language','تعلم كيف تعبّر عن رأيك بطريقة مهذبة وأكاديمية. هذا مهم جدًا في النقاش والكتابة الرسمية.','اختيار صيغ رسمية ومتوازنة لعرض الرأي مثل In my view وIt seems that وربط الرأي بالحجة.',['In my view, this policy needs revision. — في رأيي، هذه السياسة تحتاج إلى مراجعة.','It seems that the data is incomplete. — يبدو أن البيانات غير مكتملة.','From a practical perspective, this method is useful. — من منظور عملي، هذه الطريقة مفيدة.']),
-  makeLesson(38,4,'بناء الحجة','Argument Building','هذا الدرس يشرح كيف تبني حجة قوية ومقنعة. وهو مهم جدًا في الكتابة والمناظرة.','تنظيم الحجة على شكل ادعاء وسبب ودليل وشرح يربط الدليل بالنتيجة.',['Online learning should be improved. — يجب تحسين التعليم الإلكتروني.','Student feedback shows engagement issues. — ملاحظات الطلاب تظهر مشكلات في التفاعل.','Better interaction can improve outcomes. — التفاعل الأفضل يمكن أن يحسن النتائج.']),
-  makeLesson(39,4,'الاعتراض المهذب','Polite Rebuttal','تعلم كيف تختلف مع الآخرين باحترام ومنطق. هذه مهارة متقدمة جدًا في النقاش.','البدء بالاعتراف بالرأي الآخر ثم تقديم الرد المخالف بلغة محترمة ومدعومة.',['I understand your point; however, the data suggests otherwise. — أتفهم وجهة نظرك، لكن البيانات تشير إلى غير ذلك.','While that may be true, the long-term effects are different. — مع أن ذلك قد يكون صحيحًا، فإن الآثار بعيدة المدى مختلفة.','Respectfully, I see the issue differently. — باحترام، أرى الأمر بشكل مختلف.']),
-  makeLesson(40,4,'الافتتاح والخاتمة في المناظرة','Debate Openings and Closings','هذا الدرس يساعدك على بدء الحديث وإنهائه بشكل قوي ومؤثر. وهو مهم جدًا في العرض والمناظرة.','صياغة مقدمة واضحة ومؤثرة ثم إنهاء منظم يلخص الفكرة الرئيسية ويثبت الموقف.',['Today, I would like to argue that education should be more flexible. — اليوم أود أن أجادل بأن التعليم يجب أن يكون أكثر مرونة.','My main point is that evidence matters. — نقطتي الأساسية هي أن الدليل مهم.','In conclusion, this solution is the most practical. — ختامًا، هذا الحل هو الأكثر عملية.'])
+  { id: 1, level: 1, titleAr: 'فعل الكينونة', titleEn: 'Be Verb', ruleEn: 'Structure: [Subject] + [am / is / are] + [Adjective/Noun]', audioExp: 'أهلاً بك يا بطل! اليوم سنتعلم فعل الكينونة. هو أساس الجملة، تخيل أنه الجسر الذي يربط الشخص بصفته. آم مع آي، إيز مع الشخص الواحد، وآر مع المجموعات.', examples: ['I am a doctor. — أنا طبيب', 'He is brave. — هو شجاع'] },
+  { id: 2, level: 1, titleAr: 'الضمائر الشخصية', titleEn: 'Personal Pronouns', ruleEn: 'Subject Pronouns: I, You, He, She, It, We, They', audioExp: 'الضمائر هي المنقذ! بدلاً من تكرار الأسماء، نستخدم هو وهي ونحن. تذكر أن إيت تستخدم لكل ما هو ليس إنساناً.', examples: ['She studies daily. — هي تدرس يومياً', 'They play football. — هم يلعبون'] },
+  { id: 11, level: 2, titleAr: 'الماضي البسيط', titleEn: 'Past Simple', ruleEn: 'Rule: Verb + (ed) | Irregular: Go → Went', audioExp: 'هل تتحدث عن الأمس؟ إذاً أنت في عالم الماضي البسيط. فقط أضف إي دي لمعظم الأفعال، لكن انتبه للأفعال المشاكسة التي تتغير تماماً.', examples: ['I visited London. — زرت لندن', 'We went home. — ذهبنا للمنزل'] }
 ];
 
 function navigate(route, params = {}) {
@@ -129,102 +178,164 @@ function navigate(route, params = {}) {
   render();
 }
 
-function router() {
-  if (state.route === 'home') return homeView();
-  if (state.route === 'lessons') return levelsView();
-  if (state.route === 'level-lessons') return levelLessonsView();
-  if (state.route === 'lesson-detail') return lessonView();
-  return homeView();
-}
-
 function homeView() {
   return `
-    <section class="text-center space-y-6">
-      <span class="inline-block bg-white px-4 py-2 rounded-full border">✨ منصة احترافية لتعلّم الإنجليزية</span>
-      <h1 class="text-4xl font-bold">تعلم اللغة الانجليزية باحتراف</h1>
-      <p class="text-slate-600">منهج احترافي من 40 درسًا موزعة على 4 مستويات مع شرح كامل لكل درس.</p>
-      <button onclick="navigate('lessons')" class="px-8 py-4 bg-brand-indigo text-white rounded-xl">ابدأ التعلم</button>
-    </section>
+    <div class="text-center space-y-12 py-12 animate-in">
+      <div class="relative inline-block">
+        <div class="absolute -top-10 -right-10 w-24 h-24 bg-brand-accent/20 rounded-full blur-3xl"></div>
+        <h1 class="text-7xl font-black text-slate-900 leading-tight">
+          تعلم <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary to-purple-600">بمتعة</span><br>
+          واسمع بتركيز!
+        </h1>
+      </div>
+      <p class="text-2xl text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
+        وداعاً للملل! الأكاديمية توفر لك شرحاً صوتياً تفاعلياً وقواعد مكتوبة بأسلوب بصري مذهل.
+      </p>
+      <div class="flex justify-center gap-6 pt-6">
+        <button onclick="navigate('lessons')" class="group px-10 py-5 bg-brand-primary text-white rounded-3xl font-bold text-xl shadow-[0_20px_50px_rgba(99,102,241,0.3)] hover:scale-105 transition-all flex items-center gap-3">
+          ابدأ رحلتك الآن
+          <span class="group-hover:translate-x-1 transition-transform">→</span>
+        </button>
+      </div>
+      <div class="grid grid-cols-3 gap-6 pt-12 max-w-3xl mx-auto">
+        <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="text-3xl mb-2">🎧</div>
+          <div class="font-bold">استماع ذكي</div>
+        </div>
+        <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="text-3xl mb-2">📚</div>
+          <div class="font-bold">قواعد واضحة</div>
+        </div>
+        <div class="p-6 bg-white rounded-3xl shadow-sm border border-slate-100">
+          <div class="text-3xl mb-2">⭐</div>
+          <div class="font-bold">تفاعل حي</div>
+        </div>
+      </div>
+    </div>
   `;
 }
 
 function levelsView() {
   return `
-    <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-      ${[1,2,3,4].map(level => {
-        const unlocked = state.progress.unlockedLevels.includes(level);
-        return `
-          <div class="bg-white p-6 rounded-2xl border space-y-4 ${!unlocked ? 'opacity-50' : ''}">
-            <h3 class="font-bold text-xl">المستوى ${level}</h3>
-            <p class="text-sm text-slate-500">${lessonsDB.filter(l => l.level === level).length} دروس</p>
-            <button ${unlocked ? `onclick="openLevel(${level})"` : ''} class="w-full py-3 rounded-xl ${unlocked ? 'bg-brand-indigo text-white' : 'bg-slate-200'}">استعراض الدروس</button>
+    <div class="animate-in space-y-10">
+      <div class="text-center">
+        <h2 class="text-4xl font-black text-slate-900">خريطة التعلم</h2>
+        <p class="text-slate-500 mt-2 font-medium">كل مستوى هو مغامرة جديدة بانتظارك</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        ${[1,2,3,4].map(level => `
+          <div class="lvl-card bg-white p-10 rounded-[2.5rem] border-2 border-slate-50 shadow-sm hover:shadow-2xl hover:border-brand-primary transition-all text-center group cursor-pointer" onclick="navigate('level-lessons', {level: ${level}})">
+            <div class="w-20 h-20 bg-gradient-to-br from-indigo-50 to-white text-brand-primary rounded-3xl flex items-center justify-center mx-auto mb-6 text-3xl font-black shadow-inner group-hover:scale-110 transition-transform">${level}</div>
+            <h3 class="font-bold text-2xl mb-2 text-slate-900">المستوى ${level}</h3>
+            <p class="text-slate-400 text-sm mb-6">دروس تفاعلية وصوتية</p>
+            <div class="py-2 px-4 bg-slate-50 rounded-xl text-slate-400 font-bold group-hover:bg-brand-primary group-hover:text-white transition-colors">دخول</div>
           </div>
-        `;
-      }).join('')}
-    </section>
+        `).join('')}
+      </div>
+    </div>
   `;
-}
-
-function openLevel(level) {
-  state.currentLevel = level;
-  navigate('level-lessons', { level });
 }
 
 function levelLessonsView() {
   const lessons = lessonsDB.filter(l => l.level === state.currentLevel);
   return `
-    <section>
-      <h2 class="text-3xl font-bold mb-6">دروس المستوى ${state.currentLevel}</h2>
-      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        ${lessons.map(l => `
-          <div onclick="openLesson(${l.id})" class="cursor-pointer bg-white p-5 rounded-xl border hover:shadow">
-            <h4 class="font-bold">${l.titleAr}</h4>
-            <p class="english-snippet text-sm text-slate-500">${l.titleEn}</p>
-            <p class="text-sm text-slate-600 mt-2">${l.description}</p>
-          </div>
-        `).join('')}
+    <div class="space-y-8 animate-in">
+      <div class="flex justify-between items-center bg-white/60 backdrop-blur-md p-8 rounded-[2.5rem] border border-white shadow-sm">
+        <div>
+          <h2 class="text-3xl font-black text-brand-primary">المستوى ${state.currentLevel}</h2>
+          <p class="text-slate-500 font-medium">اختر درساً لتبدأ الاستماع</p>
+        </div>
+        <button onclick="navigate('lessons')" class="font-bold text-slate-400 hover:text-brand-secondary px-6 py-3 rounded-2xl bg-white shadow-sm border transition-all">العودة</button>
       </div>
-    </section>
+      ${lessons.length > 0 ? `
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ${lessons.map(l => `
+            <div onclick="navigate('lesson-detail', {lessonId: ${l.id}})" class="cursor-pointer bg-white p-8 rounded-[2rem] border-2 border-transparent hover:border-brand-primary hover:shadow-xl transition-all group flex flex-col justify-between h-56">
+              <div>
+                <h4 class="font-bold text-2xl group-hover:text-brand-primary transition-colors">${l.titleAr}</h4>
+                <p class="english-snippet text-lg text-slate-400 mt-1">${l.titleEn}</p>
+              </div>
+              <div class="flex items-center gap-2 text-brand-primary font-bold text-sm">
+                <span class="w-8 h-8 bg-indigo-50 rounded-full flex items-center justify-center">▶</span>
+                ابدأ الدرس الآن
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<div class="p-32 text-center text-slate-300 font-bold bg-white/50 rounded-[3rem] border-4 border-dashed">سيتم توفير الدروس قريباً! 🎈</div>`}
+    </div>
   `;
 }
 
-function openLesson(id) {
-  state.selectedLessonId = id;
-  navigate('lesson-detail', { lessonId: id });
-}
-
 function lessonView() {
-  const lesson = lessonsDB.find(l => l.id === state.selectedLessonId);
+  const lesson = lessonsDB.find(l => l.id === state.selectedLessonId) || lessonsDB[0];
   return `
-    <section class="space-y-6">
-      <div class="bg-white p-6 rounded-2xl border space-y-3">
-        <h1 class="text-3xl font-bold">${lesson.titleAr}</h1>
-        <p class="english-snippet text-slate-500">${lesson.titleEn}</p>
-        <p class="text-slate-700 leading-8">${lesson.description}</p>
-      </div>
+    <div class="max-w-4xl mx-auto space-y-8 animate-in pb-20">
+      <div class="bg-white p-10 rounded-[3.5rem] border border-white shadow-2xl space-y-10 relative overflow-hidden">
+        <!-- زينة خلفية -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+        
+        <div class="flex justify-between items-center relative z-10">
+           <button id="ar-audio" onclick="speak('${lesson.audioExp.replace(/'/g, "\\'")}', 'ar-audio', 'ar')" class="audio-btn w-24 h-24 bg-gradient-to-tr from-brand-primary to-indigo-400 text-white rounded-[2rem] flex flex-col items-center justify-center hover:rotate-3 transition-all shadow-xl group">
+              <span class="text-4xl group-hover:scale-110 transition-transform">🎙️</span>
+              <span class="text-[10px] font-bold mt-2 uppercase">استمع الآن</span>
+           </button>
+           <div class="text-right flex-1 pr-8">
+             <div class="inline-block px-4 py-1 bg-brand-soft text-brand-primary rounded-full text-xs font-bold mb-3">درس ${lesson.id} • مستوى ${lesson.level}</div>
+             <h1 class="text-5xl font-black text-slate-900">${lesson.titleAr}</h1>
+             <p class="english-snippet text-2xl text-slate-400 font-semibold mt-1">${lesson.titleEn}</p>
+           </div>
+        </div>
 
-      <div class="bg-white p-6 rounded-2xl border space-y-4">
-        <h2 class="text-2xl font-bold">الشرح الكامل</h2>
-        <p class="leading-9 text-slate-700">${lesson.explanation}</p>
-      </div>
+        <!-- القاعدة بشكل بطاقة ذكية -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 p-10 rounded-[2.5rem] text-white shadow-2xl relative group">
+          <div class="absolute top-4 left-6 text-brand-primary/40 font-black english-snippet text-xs tracking-[0.3em]">GRAMMAR_PROTOCOL_v1.0</div>
+          <div class="relative z-10 mt-4">
+            <p class="text-3xl font-bold english-snippet leading-relaxed border-l-4 border-brand-primary pl-6 py-2">${lesson.ruleEn}</p>
+          </div>
+          <div class="absolute right-6 bottom-4 text-white/10 text-6xl font-black italic">RULE</div>
+        </div>
 
-      <div class="bg-white p-6 rounded-2xl border space-y-4">
-        <h2 class="text-2xl font-bold">أمثلة</h2>
-        <div class="grid gap-3">
-          ${lesson.examples.map(ex => `<div class="bg-slate-50 border rounded-xl p-4 text-slate-700">${ex}</div>`).join('')}
+        <!-- قسم الأمثلة -->
+        <div class="space-y-6">
+          <h3 class="font-bold text-2xl text-right flex items-center justify-end gap-3">
+             <span class="px-3 py-1 bg-brand-accent/10 text-brand-accent rounded-lg text-sm">Listen carefully</span>
+             تدرب على النطق
+          </h3>
+          <div class="grid gap-4">
+            ${lesson.examples.map((ex, idx) => {
+              const [en, ar] = ex.split(' — ');
+              return `
+              <div class="flex justify-between items-center p-6 bg-slate-50 rounded-[2rem] hover:bg-white hover:shadow-lg transition-all cursor-pointer border-2 border-transparent hover:border-brand-primary group" onclick="speak('${en.replace(/'/g, "\\'")}', 'ex-${idx}', 'en')">
+                <button id="ex-${idx}" class="audio-btn w-12 h-12 bg-white rounded-2xl text-brand-primary shadow-sm flex items-center justify-center text-xl">▶</button>
+                <div class="text-right flex-1 pr-6">
+                  <div class="english-snippet font-bold text-2xl text-slate-900 group-hover:text-brand-primary transition-colors">${en}</div>
+                  <div class="text-lg font-medium text-slate-400 mt-1">${ar}</div>
+                </div>
+              </div>
+              `;
+            }).join('')}
+          </div>
         </div>
       </div>
 
-      <button onclick="navigate('level-lessons',{level:${lesson.level}})" class="px-6 py-3 bg-slate-200 rounded-xl">العودة لدروس المستوى</button>
-    </section>
+      <div class="flex gap-4">
+        <button onclick="navigate('level-lessons',{level:${lesson.level}})" class="flex-1 py-6 bg-brand-soft text-brand-primary rounded-[2rem] font-black hover:bg-brand-primary hover:text-white transition-all shadow-sm">العودة للدروس</button>
+        <button onclick="navigate('home')" class="px-10 py-6 bg-white text-slate-300 rounded-[2rem] font-bold hover:text-slate-900 transition-all border shadow-sm text-2xl">🏠</button>
+      </div>
+    </div>
   `;
 }
 
 function render() {
-  document.getElementById('app').innerHTML = router();
+  const content = (state.route === 'home') ? homeView() :
+                  (state.route === 'lessons') ? levelsView() :
+                  (state.route === 'level-lessons') ? levelLessonsView() :
+                  (state.route === 'lesson-detail') ? lessonView() : homeView();
+  document.getElementById('app').innerHTML = content;
 }
 
-render();
+window.onload = render;
 </script>
 
 </body>
