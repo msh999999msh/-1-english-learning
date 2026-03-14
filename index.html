@@ -10,1060 +10,244 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              indigo: '#4f46e5',
-              cyan: '#06b6d4'
-            }
+            brand: { indigo: '#4f46e5', cyan: '#06b6d4' }
           },
           fontFamily: {
-            ar: ['IBM Plex Sans Arabic', 'sans-serif'],
-            en: ['Outfit', 'sans-serif']
-          },
-          boxShadow: {
-            soft: '0 20px 60px rgba(79,70,229,0.12)'
+            ar: ['IBM Plex Sans Arabic','sans-serif'],
+            en: ['Outfit','sans-serif']
           }
         }
       }
-    };
+    }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'IBM Plex Sans Arabic', sans-serif;
-      background:
-        radial-gradient(circle at top right, rgba(6,182,212,0.10), transparent 22%),
-        radial-gradient(circle at top left, rgba(79,70,229,0.10), transparent 18%),
-        #f8fafc;
-    }
-    .glass {
-      background: rgba(255,255,255,0.72);
-      -webkit-backdrop-filter: blur(16px);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.65);
-    }
-    .visualizer { display:flex; align-items:flex-end; gap:4px; height:32px; }
-    .visualizer span {
-      width:6px; border-radius:999px; background: linear-gradient(to top, #4f46e5, #06b6d4);
-      height:10px; opacity:.45;
-    }
-    .visualizer.active span { animation: bounce 1s infinite ease-in-out; opacity:1; }
-    .visualizer.active span:nth-child(2){ animation-delay:.1s; }
-    .visualizer.active span:nth-child(3){ animation-delay:.2s; }
-    .visualizer.active span:nth-child(4){ animation-delay:.3s; }
-    .visualizer.active span:nth-child(5){ animation-delay:.4s; }
-    @keyframes bounce {
-      0%,100%{ transform:scaleY(.45); }
-      50%{ transform:scaleY(1.5); }
-    }
-    .lesson-card:hover { transform: translateY(-4px); }
-    .fade-in { animation: fade .35s ease; }
-    @keyframes fade { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)} }
-    .english-snippet { direction:ltr; text-align:left; font-family:'Outfit', sans-serif; }
-    .prose-elite p { margin-bottom: 1rem; line-height: 2; }
-    .prose-elite ul { list-style: disc; padding-inline-start: 1.25rem; }
+  body{font-family:'IBM Plex Sans Arabic',sans-serif;background:#f8fafc}
+  .english-snippet{direction:ltr;text-align:left;font-family:'Outfit',sans-serif}
+  .visualizer{display:flex;gap:4px;height:30px;align-items:flex-end}
+  .visualizer span{width:6px;background:#4f46e5;border-radius:10px;height:8px}
   </style>
 </head>
+
 <body class="text-slate-800">
-  <header class="glass sticky top-0 z-50 border-b border-white/70">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between py-4 gap-4">
-        <button onclick="navigate('home')" class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-indigo to-brand-cyan text-white flex items-center justify-center shadow-soft text-xl">🎓</div>
-          <div class="text-right">
-            <div class="font-bold text-lg text-slate-900">The Elite English Academy</div>
-            <div class="text-xs text-slate-500 english-snippet">Professional Arabic-English Learning SPA</div>
-          </div>
-        </button>
-        <nav class="flex items-center gap-2 flex-wrap">
-          <button onclick="navigate('home')" class="px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:bg-white">الرئيسية</button>
-          <button onclick="navigate('lessons')" class="px-4 py-2 rounded-full text-sm font-semibold text-slate-700 hover:bg-white">المنهج</button>
-          <button onclick="navigate('lessons')" class="px-4 py-2 rounded-full text-sm font-semibold bg-brand-indigo text-white shadow-lg shadow-indigo-200">ابدأ الآن</button>
-        </nav>
-      </div>
-    </div>
-  </header>
 
-  <main id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"></main>
+<header class="bg-white border-b">
+<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between">
 
-  <script>
-    const GEMINI_API_KEY = "AIzaSyAF0s4wN37-ieIM_fCx5fJF7byHkYyPgs0";
-    const STORAGE_KEY = 'eliteEnglishAcademyStateV1';
+<button onclick="navigate('home')" class="flex items-center gap-3">
+<div class="w-10 h-10 bg-brand-indigo text-white flex items-center justify-center rounded-xl">🎓</div>
+<div>
+<div class="font-bold">The Elite English Academy</div>
+<div class="text-xs english-snippet text-slate-500">Professional Arabic-English Learning</div>
+</div>
+</button>
 
-    const state = {
-      route: 'home',
-      selectedLessonId: 1,
-      currentAudioBlob: null,
-      isPlaying: false,
-      audio: null,
-      progress: loadProgress()
-    };
+<nav class="flex gap-2">
+<button onclick="navigate('home')" class="px-4 py-2 bg-slate-100 rounded-xl">الرئيسية</button>
+<button onclick="navigate('lessons')" class="px-4 py-2 bg-brand-indigo text-white rounded-xl">ابدأ الآن</button>
+</nav>
 
-    function loadProgress() {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) return JSON.parse(saved);
-      return {
-        completedLessonIds: [],
-        unlockedLevels: [1],
-        quizScores: {},
-        lastLessonId: null
-      };
-    }
+</div>
+</header>
 
-    function saveProgress() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
-    }
+<main id="app" class="max-w-7xl mx-auto px-4 py-10"></main>
 
-    function slugify(text) {
-      return text.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    }
+<script>
 
-    function paragraph(topic, focus) {
-      return `في هذا الدرس نتعامل مع ${topic} بوصفه جزءًا عمليًا من التواصل اليومي وليس مجرد قاعدة تحفظ ثم تُنسى. الفكرة الأساسية أن المتعلم العربي يحتاج إلى فهم متى تُستخدم القاعدة، ولماذا تظهر بهذا الشكل، وما الخطأ الشائع الذي يفسد المعنى عند الترجمة الحرفية. لذلك سنربط ${topic} بالمواقف الحقيقية مثل الحديث عن النفس، المدرسة، العمل، المواعيد، والمحادثات السريعة. ${focus} عندما تفهم هذه النقطة يصبح تكوين الجملة أسرع، ويقل التردد أثناء الكلام والكتابة. كذلك من المهم مراقبة ترتيب الكلمات لأن الإنجليزية تعتمد على بنية مستقرة أكثر من العربية، ولهذا فإن تبديل عنصر واحد قد يغيّر النبرة أو يجعل الجملة غير طبيعية. حاول دائمًا أن تسأل نفسك: ما الزمن؟ من الفاعل؟ هل أحتاج أداة مساعدة؟ هل أتكلم عن حقيقة، عادة، تجربة، احتمال، أو نتيجة؟ هذا النوع من الأسئلة يحول القاعدة إلى قرار ذكي تتخذه أثناء الاستخدام. ومع التكرار، ستلاحظ أن ${topic} يصبح تلقائيًا، خصوصًا إذا قرأت الأمثلة بصوت عالٍ، وكتبت جملك الخاصة، ثم قارنتها بالنمط الصحيح حتى تثبّت الصيغة في ذهنك.`;
-    }
+const STORAGE_KEY="academy_progress_v1";
 
-    const lessonsDB = [
-      {
-        id: 1, level: 1, titleAr: 'فعل الكينونة مع الضمائر', titleEn: 'Be with Pronouns',
-        description: 'ابدأ من أقوى أساس في اللغة الإنجليزية. هذا الدرس يرسّخ بناء الجملة الاسمية ويمنحك ثقة فورية في التقديم والتعريف.',
-        content: {
-          arabicFull: paragraph('فعل الكينونة مع الضمائر', 'نستخدم am وis وare للربط بين الفاعل والمعلومة، مثل الاسم أو الصفة أو المهنة أو الحالة.'),
-          englishSummary: 'Use am, is, and are to connect the subject to identity, description, or status.',
-          examples: ['I am a student. — أنا طالب.', 'She is ready. — هي جاهزة.', 'They are in class. — هم في الصف.'],
-          expertTip: 'اربط كل ضمير بفعل الكينونة الخاص به كحزمة واحدة: I am / he is / they are.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: في هذا الدرس نشرح فعل الكينونة مع الضمائر. وضحي أن I تأخذ am، وhe وshe وit تأخذ is، وwe وyou وthey تأخذ are. اذكري أن هذا الفعل يربط الفاعل بالمهنة أو الصفة أو المكان، وقدمي أمثلة واضحة وسهلة ثم اختمي بتذكير عملي.',
-        quiz: { question: 'أي جملة صحيحة نحويًا؟', options: ['She are happy.', 'She is happy.', 'She am happy.'], correctIndex: 1 }
-      },
-      {
-        id: 2, level: 1, titleAr: 'الضمائر الشخصية', titleEn: 'Personal Pronouns',
-        description: 'الضمائر هي مفاتيح الكلام السريع والواضح. إذا أتقنتها ستفهم من يقوم بالفعل بدون تكرار الأسماء.',
-        content: {
-          arabicFull: paragraph('الضمائر الشخصية', 'الهدف هو اختيار الضمير المناسب بحسب المتكلم أو المخاطب أو الغائب، ثم ربطه بالفعل الصحيح دون ارتباك.'),
-          englishSummary: 'Personal pronouns replace nouns and help you speak and write naturally.',
-          examples: ['He works here. — هو يعمل هنا.', 'We study together. — نحن ندرس معًا.', 'It is new. — إنه جديد.'],
-          expertTip: 'درّب نفسك على تحويل الأسماء إلى ضمائر: Ahmed = he، Sara = she، the car = it.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: عرّفي الضمائر الشخصية بالإنجليزية، واشرحي الفرق بين I وyou وhe وshe وit وwe وthey، ثم بيّني كيف تمنع التكرار وتجعل الحديث أكثر سلاسة. استخدمي أمثلة يومية سهلة.',
-        quiz: { question: 'ما الضمير المناسب لكلمة The teacher إذا كان المعلم رجلًا؟', options: ['He', 'She', 'They'], correctIndex: 0 }
-      },
-      {
-        id: 3, level: 1, titleAr: 'أداتا التنكير والتعريف', titleEn: 'Articles',
-        description: 'هذا الدرس يزيل أحد أكثر الأخطاء شيوعًا عند المتعلمين العرب. ستفهم متى تستخدم a وan وthe بطريقة منطقية لا حفظية.',
-        content: {
-          arabicFull: paragraph('أدوات التعريف والتنكير', 'الفارق الجوهري هو أن a وan تقدمان اسمًا غير محدد، بينما the تشير إلى شيء معروف أو محدد في السياق.'),
-          englishSummary: 'Use a/an for non-specific singular nouns and the for specific nouns.',
-          examples: ['I saw a bird. — رأيت طائرًا.', 'She ate an apple. — أكلت تفاحة.', 'The book on the table is mine. — الكتاب الذي على الطاولة لي.'],
-          expertTip: 'اختر an مع الصوت الأول العِلّي، لا مع شكل الحرف فقط.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي استخدام a وan وthe بلغة عربية واضحة، وركزي على فكرة المحدد وغير المحدد، مع التوضيح أن an تعتمد على الصوت الأول. اختمي بأمثلة من المنزل والفصل.',
-        quiz: { question: 'أي خيار صحيح؟ ___ orange', options: ['A', 'An', 'The'], correctIndex: 1 }
-      },
-      {
-        id: 4, level: 1, titleAr: 'الجمع المنتظم وغير المنتظم', titleEn: 'Plurals',
-        description: 'الجمع يبدو بسيطًا لكنه يخفي تفاصيل مهمة. هنا ستتعلم كيف تنتقل من المفرد إلى الجمع مع الانتباه للاستثناءات.',
-        content: {
-          arabicFull: paragraph('صياغة الجمع', 'القاعدة العامة هي إضافة s أو es، لكن بعض الكلمات تتغير بالكامل مثل man إلى men أو child إلى children.'),
-          englishSummary: 'Most nouns take s/es in the plural, but some have irregular forms.',
-          examples: ['One book / two books. — كتاب واحد / كتابان.', 'One box / three boxes. — صندوق واحد / ثلاثة صناديق.', 'One child / two children. — طفل واحد / طفلان.'],
-          expertTip: 'اصنع قائمة صغيرة للاستثناءات الأكثر تكرارًا وراجعها يوميًا.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قدّمي شرحًا منظمًا عن الجمع بإضافة s وes، ثم اذكري أمثلة على الجمع غير المنتظم، ووضحي متى يتغير شكل الكلمة بالكامل. اجعلي الشرح تدريجيًا وسهلًا.',
-        quiz: { question: 'ما جمع كلمة child؟', options: ['childs', 'children', 'childes'], correctIndex: 1 }
-      },
-      {
-        id: 5, level: 1, titleAr: 'المضارع البسيط', titleEn: 'Present Simple',
-        description: 'هذا الزمن هو لغة العادات والحقائق والروتين اليومي. إتقانه يمنحك قدرة فورية على وصف يومك وحياتك.',
-        content: {
-          arabicFull: paragraph('زمن المضارع البسيط', 'نستخدم هذا الزمن للحقائق العامة والعادات والجداول الثابتة، مع الانتباه إلى إضافة s أو es مع he وshe وit.'),
-          englishSummary: 'Present simple describes habits, routines, facts, and repeated actions.',
-          examples: ['I drink coffee every morning. — أشرب القهوة كل صباح.', 'He works in Riyadh. — هو يعمل في الرياض.', 'The sun rises in the east. — تشرق الشمس من الشرق.'],
-          expertTip: 'إذا كان الفاعل مفردًا غائبًا، فتذكر علامة s قبل أن تكتب الجملة.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي المضارع البسيط بوصفه زمن العادة والحقيقة، ثم نبهي إلى قاعدة إضافة s مع he وshe وit، وقدّمي فرقًا سريعًا بين I play وhe plays.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['He play football.', 'He plays football.', 'He playing football.'], correctIndex: 1 }
-      },
-      {
-        id: 6, level: 1, titleAr: 'أسئلة المضارع بـ Do وDoes', titleEn: 'Present Simple Questions',
-        description: 'السؤال الصحيح هو مفتاح المحادثة. في هذا الدرس ستبني أسئلة واضحة ومهنية بدون ترجمة حرفية من العربية.',
-        content: {
-          arabicFull: paragraph('صياغة الأسئلة في المضارع البسيط', 'الهيكل الأساسي هو Do أو Does في البداية، ثم الفاعل، ثم الفعل بصيغته الأساسية دون إضافات.'),
-          englishSummary: 'Use do/does + subject + base verb to form present simple questions.',
-          examples: ['Do you speak English? — هل تتحدث الإنجليزية؟', 'Does she live here? — هل تسكن هنا؟', 'Do they need help? — هل يحتاجون إلى مساعدة؟'],
-          expertTip: 'عند استخدام does احذف s من الفعل لأن علامة الزمن انتقلت إلى الأداة.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي قاعدة الأسئلة في المضارع باستخدام do وdoes، وبيّني أن الفعل يعود إلى المصدر بعد does، مع أمثلة عملية قصيرة وواضحة.',
-        quiz: { question: 'اختر السؤال الصحيح:', options: ['Does he likes tea?', 'Do he like tea?', 'Does he like tea?'], correctIndex: 2 }
-      },
-      {
-        id: 7, level: 1, titleAr: 'النفي في المضارع', titleEn: 'Present Simple Negatives',
-        description: 'كل متعلم يحتاج أن يقول ما لا يفعله بوضوح. هذا الدرس يمنحك بناء النفي الصحيح بدون تردد.',
-        content: {
-          arabicFull: paragraph('النفي في المضارع البسيط', 'نستخدم do not أو does not قبل الفعل الأساسي، ويمكن استخدام الاختصارات don’t وdoesn’t في الكلام اليومي.'),
-          englishSummary: 'Use do not/does not + base verb for negative statements in the present simple.',
-          examples: ['I do not smoke. — أنا لا أدخن.', 'She doesn’t drive. — هي لا تقود.', 'They do not agree. — هم لا يوافقون.'],
-          expertTip: 'في النفي مثل السؤال، لا تضف s إلى الفعل بعد does not.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: وضحي طريقة النفي في المضارع باستخدام do not وdoes not، واذكري الاختصار المستخدم في الكلام، ثم اشرحي لماذا لا نضيف s إلى الفعل بعد doesn’t.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['He doesn’t works here.', 'He doesn’t work here.', 'He not work here.'], correctIndex: 1 }
-      },
-      {
-        id: 8, level: 1, titleAr: 'أسماء الإشارة', titleEn: 'Demonstratives',
-        description: 'هذا، هذه، ذلك، وتلك ليست كلمات بسيطة فقط. إنها أدوات دقة تشير إلى القرب والعدد داخل السياق.',
-        content: {
-          arabicFull: paragraph('أسماء الإشارة', 'الاختيار بين this وthat وthese وthose يعتمد على قرب الشيء من المتحدث وعلى كونه مفردًا أو جمعًا.'),
-          englishSummary: 'Use this/that for singular and these/those for plural depending on distance.',
-          examples: ['This is my bag. — هذه حقيبتي.', 'That is your car. — تلك سيارتك.', 'These are new books. — هذه كتب جديدة.'],
-          expertTip: 'اربط this/these بالقرب، وthat/those بالبعد.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: عرّفي أسماء الإشارة واربطيها بالقرب والبعد والمفرد والجمع. استخدمي أشياء من الفصل والبيت لتقريب الفكرة.',
-        quiz: { question: 'أي كلمة تستخدم مع أشياء قريبة وجمع؟', options: ['These', 'Those', 'That'], correctIndex: 0 }
-      },
-      {
-        id: 9, level: 1, titleAr: 'صفات الملكية', titleEn: 'Possessive Adjectives',
-        description: 'هذا الدرس يجعل كلامك أكثر دقة وأناقة. ستتعلم كيف تعبّر عن الملكية قبل الاسم بشكل طبيعي.',
-        content: {
-          arabicFull: paragraph('صفات الملكية', 'هذه الكلمات مثل my وyour وhis وher وour وtheir تأتي قبل الاسم مباشرة لتوضيح صاحب الشيء.'),
-          englishSummary: 'Possessive adjectives come before nouns to show ownership.',
-          examples: ['My phone is new. — هاتفي جديد.', 'Her idea is smart. — فكرتها ذكية.', 'Their house is large. — بيتهم كبير.'],
-          expertTip: 'لا تستخدم my وحدها دون اسم بعدها إلا إذا تغيّرت إلى ضمير ملكية مثل mine.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي صفات الملكية وميّزي بينها وبين الضمائر الشخصية، ثم قدمي أمثلة عن الهاتف والكتاب والسيارة حتى يتضح الاستخدام.',
-        quiz: { question: 'أي خيار صحيح؟ This is ___ book.', options: ['my', 'me', 'I'], correctIndex: 0 }
-      },
-      {
-        id: 10, level: 1, titleAr: 'أسئلة المعلومات', titleEn: 'Wh- Questions',
-        description: 'هنا تبدأ المحادثة الحقيقية. ستتعلم كيف تسأل عن الأشخاص والأماكن والأسباب والأوقات بثقة.',
-        content: {
-          arabicFull: paragraph('أسئلة المعلومات', 'نستخدم كلمات مثل what وwhere وwhen وwhy وwho وhow لطلب تفاصيل محددة بدل الاكتفاء بسؤال نعم أو لا.'),
-          englishSummary: 'Wh- questions ask for specific information such as place, time, reason, or person.',
-          examples: ['Where do you live? — أين تسكن؟', 'Why is she late? — لماذا هي متأخرة؟', 'How do they study? — كيف يدرسون؟'],
-          expertTip: 'اختر أداة السؤال أولًا حسب نوع المعلومة التي تريدها، ثم ابنِ الجملة.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: فسري أدوات السؤال الأساسية، ووضحي الفرق بين what وwhere وwhen وwhy وwho وhow، ثم قدمي أمثلة قصيرة من الحياة اليومية.',
-        quiz: { question: 'أي أداة تسأل عن المكان؟', options: ['When', 'Where', 'Why'], correctIndex: 1 }
-      },
+const state={
+route:'home',
+selectedLessonId:null,
+currentLevel:null,
+progress:loadProgress()
+};
 
-      {
-        id: 11, level: 2, titleAr: 'الماضي البسيط للأفعال المنتظمة', titleEn: 'Past Simple Regular Verbs',
-        description: 'زمن السرد الأساسي يبدأ من هنا. ستتعلم كيف تتحدث عن حدث انتهى بوضوح وتسلسل.',
-        content: {
-          arabicFull: paragraph('الماضي البسيط مع الأفعال المنتظمة', 'القاعدة المركزية هي إضافة ed غالبًا، مع الانتباه للنطق المختلف بين /t/ و/d/ و/id/ حسب نهاية الفعل.'),
-          englishSummary: 'Add -ed to regular verbs to describe completed actions in the past.',
-          examples: ['I visited my friend yesterday. — زرت صديقي أمس.', 'She cleaned the room. — نظفت الغرفة.', 'We watched a movie. — شاهدنا فيلمًا.'],
-          expertTip: 'لا تركز على الكتابة فقط؛ درّب أذنك على نطق نهاية ed.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي الماضي البسيط للأفعال المنتظمة مع التركيز على إضافة ed والنطق الصحيح، وقدمي أمثلة يومية مع كلمات زمن مثل yesterday وlast week.',
-        quiz: { question: 'ما الصيغة الصحيحة للماضي من clean؟', options: ['cleaned', 'cleant', 'cleaning'], correctIndex: 0 }
-      },
-      {
-        id: 12, level: 2, titleAr: 'الماضي البسيط للأفعال غير المنتظمة', titleEn: 'Past Simple Irregular Verbs',
-        description: 'ليست كل الأفعال مطيعة للقاعدة العامة. هذا الدرس ينقلك إلى أكثر الأفعال استخدامًا في القصص والمحادثات.',
-        content: {
-          arabicFull: paragraph('الأفعال غير المنتظمة في الماضي', 'هذه الأفعال لا تكتفي بإضافة ed، بل تتغير صيغتها مثل go إلى went وsee إلى saw وhave إلى had.'),
-          englishSummary: 'Irregular verbs change form in the past and must be learned through frequent use.',
-          examples: ['I went home early. — ذهبت إلى المنزل مبكرًا.', 'They saw the match. — شاهدوا المباراة.', 'She had a meeting. — كان لديها اجتماع.'],
-          expertTip: 'احفظ الأفعال غير المنتظمة في مجموعات مرتبطة بالاستخدام اليومي، لا كقائمة عشوائية.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي أن بعض الأفعال تتغير كليًا في الماضي، واذكري أمثلة شائعة جدًا، ثم انصحي بطريقة عملية لحفظها من خلال جمل لا قوائم فقط.',
-        quiz: { question: 'ما ماضي الفعل go؟', options: ['goed', 'went', 'gone'], correctIndex: 1 }
-      },
-      {
-        id: 13, level: 2, titleAr: 'الأسئلة والنفي في الماضي', titleEn: 'Past Questions and Negatives',
-        description: 'تحدي الماضي الحقيقي ليس في الإثبات فقط. هنا ستتقن السؤال والنفي باستخدام did بطريقة مهنية.',
-        content: {
-          arabicFull: paragraph('السؤال والنفي في الماضي البسيط', 'عندما نستخدم did أو didn’t يعود الفعل إلى صورته الأساسية لأن الأداة تحمل دلالة الزمن الماضي.'),
-          englishSummary: 'Use did/did not + base verb for past questions and negatives.',
-          examples: ['Did you call him? — هل اتصلت به؟', 'She didn’t come yesterday. — لم تأتِ أمس.', 'Did they finish the task? — هل أنهوا المهمة؟'],
-          expertTip: 'بعد did أو didn’t، انسَ الماضي المكتوب في الفعل واستخدم المصدر.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي كيف نصيغ السؤال والنفي في الماضي باستخدام did وdidn’t، مع توضيح أن الفعل يعود للمصدر. استخدمي أمثلة شائعة وتذكيرًا بالخطأ الشائع did went.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['Did he went home?', 'Did he go home?', 'Did he goes home?'], correctIndex: 1 }
-      },
-      {
-        id: 14, level: 2, titleAr: 'المستقبل بـ Will', titleEn: 'Future with Will',
-        description: 'هذا الدرس يفتح لك باب التوقع والقرار والوعد. ستستخدم will لتتحدث عن المستقبل بمرونة وسرعة.',
-        content: {
-          arabicFull: paragraph('المستقبل باستخدام will', 'نلجأ إلى will عند اتخاذ قرار لحظي، أو تقديم وعد، أو التعبير عن توقع عام بشأن المستقبل.'),
-          englishSummary: 'Use will for predictions, promises, and spontaneous decisions.',
-          examples: ['I will help you. — سأساعدك.', 'It will rain tomorrow. — ستمطر غدًا.', 'We will call later. — سنتصل لاحقًا.'],
-          expertTip: 'استخدم will عندما تشعر أن القرار وُلد في لحظة الكلام.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي استخدام will مع التركيز على الوعد والتوقع والقرار الفوري، ثم اذكري الفرق المبسط بينها وبين going to دون تعقيد.',
-        quiz: { question: 'أي جملة تعبّر عن وعد؟', options: ['I will help you.', 'I helped you.', 'I am helping you yesterday.'], correctIndex: 0 }
-      },
-      {
-        id: 15, level: 2, titleAr: 'المستقبل بـ Going to', titleEn: 'Future with Going to',
-        description: 'إذا كانت لديك خطة أو نية واضحة فهذا هو الزمن المناسب. هذا الدرس يجعلك تميز بين النية والقرار اللحظي.',
-        content: {
-          arabicFull: paragraph('المستقبل باستخدام going to', 'نستخدم going to للتعبير عن خطط سابقة أو مؤشرات واضحة تجعل الحدث المستقبلي متوقعًا بقوة.'),
-          englishSummary: 'Use going to for prior plans and evidence-based future predictions.',
-          examples: ['I am going to study tonight. — سأدرس الليلة.', 'They are going to travel next week. — سيسافرون الأسبوع القادم.', 'Look at the clouds! It is going to rain. — انظر إلى الغيوم، ستمطر.'],
-          expertTip: 'اسأل نفسك: هل خططت لهذا مسبقًا؟ إذا نعم، فغالبًا going to أنسب.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: بيّني أن going to تستخدم للخطة السابقة أو التوقع المبني على دليل واضح، وامنحي المتعلم طريقة سريعة للتفريق بينها وبين will.',
-        quiz: { question: 'أي مثال يدل على خطة مسبقة؟', options: ['I am going to visit my aunt.', 'I will answer the phone.', 'I answered the phone.'], correctIndex: 0 }
-      },
-      {
-        id: 16, level: 2, titleAr: 'المضارع المستمر', titleEn: 'Present Continuous',
-        description: 'هذا الزمن يصف ما يحدث الآن أو حول الآن. ستتجاوز الخلط بين العادة والحدث الجاري في اللحظة.',
-        content: {
-          arabicFull: paragraph('المضارع المستمر', 'نبنيه باستخدام فعل الكينونة ثم الفعل مع ing، ونستخدمه للأحداث الجارية حاليًا أو المواقف المؤقتة.'),
-          englishSummary: 'Use am/is/are + verb-ing for actions happening now or around now.',
-          examples: ['I am reading now. — أنا أقرأ الآن.', 'She is working today. — هي تعمل اليوم.', 'They are waiting outside. — هم ينتظرون في الخارج.'],
-          expertTip: 'وجود كلمات مثل now وat the moment غالبًا يشير إلى المضارع المستمر.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي المضارع المستمر كزمن للحدث الجاري الآن، وقدمي بنية am is are مع ing، مع مقارنة لطيفة بالمضارع البسيط.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['He is play now.', 'He is playing now.', 'He playing now.'], correctIndex: 1 }
-      },
-      {
-        id: 17, level: 2, titleAr: 'الماضي المستمر', titleEn: 'Past Continuous',
-        description: 'السرد الاحترافي يحتاج وصف خلفية الحدث لا الحدث فقط. هذا الدرس يجعلك تبني مشهدًا زمنيًا كاملًا.',
-        content: {
-          arabicFull: paragraph('الماضي المستمر', 'نستخدم was أو were مع ing لحدث كان مستمرًا في نقطة معينة من الماضي أو حين وقع حدث آخر قطعه.'),
-          englishSummary: 'Use was/were + verb-ing for an ongoing action in the past.',
-          examples: ['I was sleeping at 10. — كنت نائمًا عند العاشرة.', 'They were studying when I called. — كانوا يدرسون عندما اتصلت.', 'She was driving home. — كانت تقود إلى المنزل.'],
-          expertTip: 'اربط الماضي المستمر غالبًا بلحظة زمنية أو بحدث مفاجئ قاطعه.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي الماضي المستمر، ووضحي أنه يصف حدثًا جاريًا في الماضي، ثم قدمي مثالًا مع when لتوضيح المقاطعة الزمنية.',
-        quiz: { question: 'أي خيار صحيح؟', options: ['They was studying.', 'They were studying.', 'They are studying yesterday.'], correctIndex: 1 }
-      },
-      {
-        id: 18, level: 2, titleAr: 'المستقبل المستمر', titleEn: 'Future Continuous',
-        description: 'هذا الزمن يعطي كلامك بعدًا أكثر تطورًا. ستتحدث عن شيء سيكون جاريًا في وقت محدد مستقبلًا.',
-        content: {
-          arabicFull: paragraph('المستقبل المستمر', 'التركيب هو will be مع الفعل المضاف إليه ing، ويُستخدم لوصف نشاط سيكون مستمرًا في زمن قادم معين.'),
-          englishSummary: 'Use will be + verb-ing for an action that will be in progress in the future.',
-          examples: ['I will be working at 8 PM. — سأكون أعمل عند الثامنة مساءً.', 'She will be traveling next week. — ستكون مسافرة الأسبوع القادم.', 'They will be waiting for us. — سيكونون بانتظارنا.'],
-          expertTip: 'استخدمه عندما تريد أن تبدو دقيقًا في توصيف اللحظة المستقبلية.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: عرّفي المستقبل المستمر ببنية will be plus ing، واذكري أنه مناسب للتعبير عن شيء سيكون جاريًا في وقت محدد مستقبلًا.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['I will be study tonight.', 'I will be studying tonight.', 'I will studying tonight.'], correctIndex: 1 }
-      },
-      {
-        id: 19, level: 2, titleAr: 'المقارنة', titleEn: 'Comparatives',
-        description: 'حين تقارن بين شخصين أو شيئين فأنت تحتاج لغة دقيقة ومباشرة. هذا الدرس يشرح المقارنة بشكل واضح ومنظم.',
-        content: {
-          arabicFull: paragraph('صيغة المقارنة', 'نستخدم عادة er مع الصفات القصيرة أو more مع الصفات الطويلة، ثم نربط بين الطرفين باستخدام than.'),
-          englishSummary: 'Use -er or more + adjective + than to compare two people or things.',
-          examples: ['Ali is taller than Omar. — علي أطول من عمر.', 'This exam is easier than the last one. — هذا الاختبار أسهل من السابق.', 'English is more flexible than I expected. — الإنجليزية أكثر مرونة مما توقعت.'],
-          expertTip: 'قسّم الصفات إلى قصيرة وطويلة، فهذا يسرّع قرارك بين er وmore.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي المقارنة بين شيئين، وبيّني متى نستخدم er ومتى نستخدم more، مع مثال عربي واضح ثم مثال إنجليزي سهل.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['She is more tall than me.', 'She is taller than me.', 'She is tallest than me.'], correctIndex: 1 }
-      },
-      {
-        id: 20, level: 2, titleAr: 'التفضيل', titleEn: 'Superlatives',
-        description: 'هذا الدرس يرفع دقتك حين تريد اختيار الأفضل أو الأكبر أو الأسرع. إنه لغة الأحكام النهائية داخل المجموعة.',
-        content: {
-          arabicFull: paragraph('صيغة التفضيل', 'نستخدم est مع الصفات القصيرة أو most مع الصفات الطويلة للتعبير عن أعلى درجة داخل مجموعة محددة.'),
-          englishSummary: 'Use -est or most to show the highest degree within a group.',
-          examples: ['Maha is the smartest student in class. — مها أذكى طالبة في الصف.', 'This is the most useful lesson. — هذا هو الدرس الأكثر فائدة.', 'It was the fastest answer. — كانت أسرع إجابة.'],
-          expertTip: 'تذكّر غالبًا وجود the قبل صيغة التفضيل.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قدّمي صيغة التفضيل بوصفها أعلى درجة داخل مجموعة، واشرحي استخدام the مع est أو most، ثم اختمي بأمثلة من الصف والحياة اليومية.',
-        quiz: { question: 'أي مثال صحيح؟', options: ['He is the tallest boy.', 'He is tallest boy.', 'He is more tallest boy.'], correctIndex: 0 }
-      },
+function loadProgress(){
+const s=localStorage.getItem(STORAGE_KEY);
+if(s) return JSON.parse(s);
+return {completed:[], unlockedLevels:[1]};
+}
 
-      {
-        id: 21, level: 3, titleAr: 'المضارع التام', titleEn: 'Present Perfect',
-        description: 'هنا تدخل منطقة الزمن الدقيقة بين الماضي والحاضر. ستتعلم كيف تعبّر عن تجربة أو نتيجة ما زالت مؤثرة الآن.',
-        content: {
-          arabicFull: paragraph('المضارع التام', 'يبنى باستخدام have أو has مع التصريف الثالث، ويُستخدم للتجارب، والإنجازات، والحالات التي بدأت في الماضي وما زالت ذات أثر.'),
-          englishSummary: 'Use have/has + past participle for experiences, results, and unfinished time connections.',
-          examples: ['I have finished the report. — أنهيت التقرير.', 'She has visited جدة before. — لقد زارت جدة من قبل.', 'They have lived here for years. — لقد عاشوا هنا لسنوات.'],
-          expertTip: 'إذا كان الأثر حاضرًا الآن، ففكر أولًا في المضارع التام.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي المضارع التام بلغة سهلة، ووضحي فكرته الأساسية: حدث في الماضي لكن أثره حاضر الآن، مع أمثلة على التجربة والإنجاز والاستمرار.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['She has finish the work.', 'She has finished the work.', 'She have finished the work.'], correctIndex: 1 }
-      },
-      {
-        id: 22, level: 3, titleAr: 'الفرق بين الماضي البسيط والمضارع التام', titleEn: 'Past Simple vs Present Perfect',
-        description: 'هذا واحد من أهم الفروق في الإنجليزية المتقدمة. إذا فهمته ستختفي أخطاء كثيرة من كتابتك وكلامك.',
-        content: {
-          arabicFull: paragraph('الفرق بين الماضي البسيط والمضارع التام', 'الماضي البسيط يرتبط بوقت منتهٍ ومحدد، أما المضارع التام فيربط الحدث بالحاضر أو بزمن غير محدد.'),
-          englishSummary: 'Use past simple for finished past time and present perfect for present relevance or unspecified time.',
-          examples: ['I visited London in 2022. — زرت لندن في 2022.', 'I have visited London before. — لقد زرت لندن من قبل.', 'She finished the task yesterday. — أنهت المهمة أمس.'],
-          expertTip: 'إذا ذكرت زمنًا منتهيًا مثل yesterday أو last year، فالماضي البسيط هو الخيار المعتاد.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قارني بين الماضي البسيط والمضارع التام، مع التركيز على الزمن المنتهي المحدد مقابل الأثر الحالي أو الزمن غير المحدد، وقدّمي أمثلة متقابلة.',
-        quiz: { question: 'أي جملة تناسب كلمة yesterday؟', options: ['I have seen him yesterday.', 'I saw him yesterday.', 'I have saw him yesterday.'], correctIndex: 1 }
-      },
-      {
-        id: 23, level: 3, titleAr: 'الأفعال الناقصة: القدرة والاحتمال', titleEn: 'Modals of Ability and Possibility',
-        description: 'الأفعال الناقصة تعطي كلامك مرونة ولباقة. في هذا الدرس ستتعامل مع can وcould وmight بشكل دقيق.',
-        content: {
-          arabicFull: paragraph('الأفعال الناقصة للقدرة والاحتمال', 'نستخدم can للقدرة الحالية، وcould للقدرة الماضية أو اللباقة، وmight لاحتمال ضعيف أو غير مؤكد.'),
-          englishSummary: 'Use can, could, and might to express ability, politeness, and possibility.',
-          examples: ['I can solve this problem. — أستطيع حل هذه المشكلة.', 'Could you open the door? — هل يمكنك فتح الباب؟', 'It might be true. — قد يكون ذلك صحيحًا.'],
-          expertTip: 'الفعل بعد modal يبقى في صورته الأساسية دائمًا.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: عرّفي can وcould وmight، وبيّني وظائفها المختلفة مع أمثلة عن القدرة والطلب المهذب والاحتمال، ثم ذكّري أن الفعل بعدها لا يتصرف.',
-        quiz: { question: 'أي خيار يدل على احتمال؟', options: ['can', 'might', 'must'], correctIndex: 1 }
-      },
-      {
-        id: 24, level: 3, titleAr: 'الأفعال الناقصة: الوجوب والنصيحة', titleEn: 'Modals of Obligation and Advice',
-        description: 'هنا تبدأ اللغة الأكثر نضجًا في التوجيه والنصح. ستتعلم متى تستخدم must وshould وhave to دون خلط.',
-        content: {
-          arabicFull: paragraph('الأفعال الناقصة للوجوب والنصيحة', 'must تعبّر غالبًا عن إلزام قوي أو رأي شخصي قوي، وshould للنصيحة، وhave to لضرورة واقعية أو خارجية.'),
-          englishSummary: 'Use must, should, and have to for obligation, advice, and external necessity.',
-          examples: ['You must wear your seatbelt. — يجب أن تضع حزام الأمان.', 'You should rest. — ينبغي أن ترتاح.', 'I have to leave early. — يجب أن أغادر مبكرًا.'],
-          expertTip: 'اسأل نفسك: هل هو إلزام داخلي قوي، نصيحة، أم ظرف مفروض من الخارج؟'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي الفرق بين must وshould وhave to، وقدّمي أمثلة واقعية عن التعليمات والنصيحة والالتزام بسبب الظروف.',
-        quiz: { question: 'أي كلمة أنسب للنصيحة؟', options: ['should', 'must', 'have to'], correctIndex: 0 }
-      },
-      {
-        id: 25, level: 3, titleAr: 'صيغة المبني للمجهول في الحاضر', titleEn: 'Present Passive',
-        description: 'المبني للمجهول لغة مهنية تستخدم في الأخبار والتعليمات والتقارير. هذا الدرس يشرح كيف يتحول التركيز من الفاعل إلى الفعل أو النتيجة.',
-        content: {
-          arabicFull: paragraph('المبني للمجهول في الحاضر', 'نبنيه باستخدام am أو is أو are مع التصريف الثالث عندما نهتم بالفعل نفسه أو بالمفعول به أكثر من الفاعل.'),
-          englishSummary: 'Use am/is/are + past participle to focus on the action or result rather than the doer.',
-          examples: ['English is spoken here. — تُتحدث الإنجليزية هنا.', 'The emails are checked daily. — يتم فحص الرسائل يوميًا.', 'The room is cleaned every morning. — تُنظف الغرفة كل صباح.'],
-          expertTip: 'حوّل المفعول به في الجملة الأصلية إلى بداية الجملة الجديدة عند بناء المبني للمجهول.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: فسري فكرة المبني للمجهول في الحاضر، واذكري أنه مفيد عندما لا يكون الفاعل مهمًا أو معروفًا، ثم قدّمي خطوات تحويل بسيطة.',
-        quiz: { question: 'أي جملة مبنية للمجهول؟', options: ['They clean the room.', 'The room is cleaned.', 'The room cleans them.'], correctIndex: 1 }
-      },
-      {
-        id: 26, level: 3, titleAr: 'صيغة المبني للمجهول في الماضي', titleEn: 'Past Passive',
-        description: 'هذا الدرس يكمل صورتك المهنية في اللغة. ستفهم كيف تصف ما تم إنجازه أو تنفيذه في الماضي دون التركيز على المنفذ.',
-        content: {
-          arabicFull: paragraph('المبني للمجهول في الماضي', 'التركيب هو was أو were مع التصريف الثالث، ويظهر كثيرًا في التقارير والأخبار والسياقات الرسمية.'),
-          englishSummary: 'Use was/were + past participle for passive descriptions in the past.',
-          examples: ['The project was completed on time. — تم إكمال المشروع في الوقت.', 'The message was sent yesterday. — أُرسلت الرسالة أمس.', 'The rules were explained clearly. — شُرحت القواعد بوضوح.'],
-          expertTip: 'وجود نتيجة أهم من الفاعل مؤشر قوي على استخدام المبني للمجهول.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي المبني للمجهول في الماضي مع أمثلة من العمل والدراسة، وركزي على صيغة was were plus past participle.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['The file was send.', 'The file was sent.', 'The file sent was.'], correctIndex: 1 }
-      },
-      {
-        id: 27, level: 3, titleAr: 'الشرط الأول', titleEn: 'First Conditional',
-        description: 'إذا أردت الحديث عن نتيجة مستقبلية محتملة فهذه هي البنية الذهبية. الدرس عملي جدًا ويظهر في النصيحة والتخطيط.',
-        content: {
-          arabicFull: paragraph('الشرط الأول', 'يُستخدم للتعبير عن احتمال حقيقي في المستقبل، وبنيته المعتادة if مع المضارع البسيط ثم will في الجملة الرئيسية.'),
-          englishSummary: 'Use if + present simple, then will + base verb for real future possibilities.',
-          examples: ['If you study, you will pass. — إذا درست فستنجح.', 'If it rains, we will stay home. — إذا أمطرت فسنمكث في المنزل.', 'If she calls, I will answer. — إذا اتصلت فسأرد.'],
-          expertTip: 'لا تضع will داخل جملة if في الشرط الأول العادي.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قدّمي الشرط الأول بوصفه احتمالًا واقعيًا للمستقبل، واشرحي الصيغة if plus present simple ثم will، مع أمثلة سهلة من الدراسة والطقس.',
-        quiz: { question: 'أي جملة صحيحة؟', options: ['If you will come, I will help.', 'If you come, I will help.', 'If you came, I will help.'], correctIndex: 1 }
-      },
-      {
-        id: 28, level: 3, titleAr: 'الشرط الثاني', titleEn: 'Second Conditional',
-        description: 'هذا الدرس يمنحك لغة الخيال والافتراض والنصيحة الراقية. ستتحدث عن مواقف غير واقعية أو بعيدة الاحتمال بسهولة.',
-        content: {
-          arabicFull: paragraph('الشرط الثاني', 'نستخدم if مع الماضي البسيط ثم would مع الفعل الأساسي للتعبير عن حالة افتراضية غير حقيقية أو غير مرجحة في الحاضر أو المستقبل.'),
-          englishSummary: 'Use if + past simple, then would + base verb for unreal or unlikely situations.',
-          examples: ['If I had more time, I would travel. — لو كان لدي وقت أكثر لسافرت.', 'If she were here, she would help us. — لو كانت هنا لساعدتنا.', 'If they studied more, they would improve. — لو درسوا أكثر لتحسنوا.'],
-          expertTip: 'تعامل مع الشرط الثاني كأداة للخيال، لا كتقرير واقع.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي الشرط الثاني للمواقف الافتراضية، واذكري أن if تأتي مع الماضي البسيط بينما الجملة الأخرى مع would، مع مثال واقعي ومثال خيالي.',
-        quiz: { question: 'أي خيار صحيح؟', options: ['If I have money, I would buy it.', 'If I had money, I would buy it.', 'If I had money, I will buy it.'], correctIndex: 1 }
-      },
-      {
-        id: 29, level: 3, titleAr: 'الروابط المنطقية', titleEn: 'Logical Connectors',
-        description: 'الجمل الجيدة لا تكفي وحدها؛ تحتاج روابط تصنع الانسياب. هذا الدرس يطور الكتابة والكلام الأكاديمي معًا.',
-        content: {
-          arabicFull: paragraph('الروابط المنطقية', 'كلمات مثل because وso وalthough وhowever تساعد على بيان السبب والنتيجة والتناقض والإضافة بطريقة منظمة.'),
-          englishSummary: 'Logical connectors improve flow by expressing reason, contrast, result, and addition.',
-          examples: ['I stayed home because I was tired. — بقيت في المنزل لأنني كنت متعبًا.', 'He studied hard, so he passed. — درس بجد، لذلك نجح.', 'Although it was late, we continued. — رغم أنه كان متأخرًا، واصلنا.'],
-          expertTip: 'اختر الرابط أولًا بحسب العلاقة المنطقية بين الجملتين.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي أهمية الروابط المنطقية في الكتابة والكلام، وميّزي بين السبب والنتيجة والتناقض والإضافة، مع أمثلة موجزة مفهومة.',
-        quiz: { question: 'أي رابط يدل على سبب؟', options: ['because', 'however', 'although'], correctIndex: 0 }
-      },
-      {
-        id: 30, level: 3, titleAr: 'الأسماء المعدودة وغير المعدودة', titleEn: 'Countable and Uncountable Nouns',
-        description: 'هذا الدرس يحل مشكلة كمية الأشياء والطعام والمعلومات. ستعرف متى تستخدم much وmany وa few وa little بدقة.',
-        content: {
-          arabicFull: paragraph('الأسماء المعدودة وغير المعدودة', 'الأسماء المعدودة يمكن عدها مباشرة، بينما غير المعدودة مثل water أو information لا تأخذ عادة جمعًا ولا رقمًا مباشرًا.'),
-          englishSummary: 'Countable nouns can be counted directly; uncountable nouns cannot.',
-          examples: ['Many students attended. — حضر كثير من الطلاب.', 'There is little water left. — بقي قليل من الماء.', 'I need some information. — أحتاج بعض المعلومات.'],
-          expertTip: 'إذا استطعت وضع رقم مباشر قبل الاسم بسهولة فهو غالبًا معدود.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قدّمي الفرق بين المعدود وغير المعدود، ووضحي أثر ذلك على استخدام much وmany وsome، مع أمثلة عن الطعام والمعلومات والطلاب.',
-        quiz: { question: 'أي اسم غير معدود غالبًا؟', options: ['chair', 'water', 'book'], correctIndex: 1 }
-      },
+function saveProgress(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.progress));}
 
-      {
-        id: 31, level: 4, titleAr: 'الماضي التام', titleEn: 'Past Perfect',
-        description: 'إذا أردت رواية حدثين ماضيين بترتيب زمني واضح فهذا الدرس ضروري. ستفهم الحدث الأسبق والحدث اللاحق دون غموض.',
-        content: {
-          arabicFull: paragraph('الماضي التام', 'يبنى باستخدام had مع التصريف الثالث، ويُستخدم لبيان أن حدثًا وقع قبل حدث ماضٍ آخر، خصوصًا في السرد والتحليل.'),
-          englishSummary: 'Use had + past participle for the earlier of two past actions.',
-          examples: ['I had finished before they arrived. — كنت قد أنهيت قبل أن يصلوا.', 'She had left when I called. — كانت قد غادرت عندما اتصلت.', 'They had studied well, so the test was easy. — كانوا قد درسوا جيدًا، لذلك كان الاختبار سهلًا.'],
-          expertTip: 'ابحث عن حدثين في الماضي واسأل: أيهما حدث أولًا؟ هذا هو الماضي التام.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي الماضي التام بوصفه الزمن الذي يسبق ماضيًا آخر، مع أمثلة واضحة تظهر التسلسل الزمني في القصة أو التقرير.',
-        quiz: { question: 'أي حدث وقع أولًا في الجملة: She had left when I arrived?', options: ['my arrival', 'her leaving', 'لا يمكن معرفة ذلك'], correctIndex: 1 }
-      },
-      {
-        id: 32, level: 4, titleAr: 'تحويل الكلام المباشر إلى غير مباشر', titleEn: 'Reported Speech Basics',
-        description: 'هذا الدرس ينقلك من نقل الكلام كما هو إلى إعادة صياغته بمهارة. إنه مهم جدًا في السرد والتقارير والمحادثات الرسمية.',
-        content: {
-          arabicFull: paragraph('أساسيات الكلام المنقول', 'عند تحويل الكلام المباشر إلى غير مباشر قد يتغير الضمير والزمن والإشارة الزمنية والمكانية بحسب السياق.'),
-          englishSummary: 'Reported speech often changes pronouns, tense, and time expressions.',
-          examples: ['He said, “I am tired.” → He said that he was tired. — قال إنه كان متعبًا.', 'She said, “I will come.” → She said that she would come. — قالت إنها ستأتي.', 'They said, “We are ready.” → They said that they were ready. — قالوا إنهم كانوا جاهزين.'],
-          expertTip: 'ابدأ بتحديد من المتكلم، ثم حدّد الزمن، ثم عدّل الضمائر والإشارات الزمنية.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: عرّفي الكلام المنقول، واشرحي كيف ننتقل من الاقتباس المباشر إلى الجملة المروية مع تغيّر الضمائر والأزمنة، وقدمي مثالين واضحين.',
-        quiz: { question: 'ما التحويل الصحيح لـ She said, “I am busy.”؟', options: ['She said that she was busy.', 'She said that I was busy.', 'She said that she is busy.'], correctIndex: 0 }
-      },
-      {
-        id: 33, level: 4, titleAr: 'الأسئلة في الكلام المنقول', titleEn: 'Reported Questions',
-        description: 'نقل الأسئلة يتطلب دقة أكبر من نقل الجمل العادية. ستتعلم كيف تحافظ على المعنى وتغيّر البنية بذكاء.',
-        content: {
-          arabicFull: paragraph('الأسئلة المنقولة', 'عند نقل السؤال نحذف ترتيب السؤال المباشر ونعود إلى ترتيب الجملة الخبرية، مع استخدام asked أو wanted to know غالبًا.'),
-          englishSummary: 'Reported questions use statement word order after asked/wanted to know.',
-          examples: ['He asked, “Where do you live?” → He asked where I lived. — سألني أين أعيش.', 'She asked, “Are you ready?” → She asked if I was ready. — سألت إن كنت جاهزًا.', 'They asked, “When will he arrive?” → They asked when he would arrive. — سألوا متى سيصل.'],
-          expertTip: 'بعد نقل السؤال، لا تستخدم ترتيب السؤال المباشر مرة أخرى.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي نقل الأسئلة، وركزي على حذف القلب المعتاد في السؤال المباشر، مع أمثلة لسؤال yes no وسؤال بأداة استفهام.',
-        quiz: { question: 'أي تحويل صحيح؟ He asked, “Are you tired?”', options: ['He asked if I was tired.', 'He asked was I tired.', 'He asked if was I tired.'], correctIndex: 0 }
-      },
-      {
-        id: 34, level: 4, titleAr: 'هيكل الفقرة الأكاديمية', titleEn: 'Academic Paragraph Structure',
-        description: 'الكتابة الأكاديمية لا تقوم على الجمل العشوائية. هنا ستتعلم كيف تبني فقرة ذات فكرة رئيسية ودعم وخاتمة مصغرة.',
-        content: {
-          arabicFull: paragraph('هيكل الفقرة الأكاديمية', 'الفقرة الجيدة تبدأ بجملة رئيسية واضحة، ثم جمل داعمة بالأمثلة أو الشرح، ثم جملة ختامية تعزز الفكرة.'),
-          englishSummary: 'A strong paragraph has a topic sentence, supporting details, and a closing sentence.',
-          examples: ['Topic sentence: Learning English opens opportunities. — الجملة الرئيسة: تعلم الإنجليزية يفتح الفرص.', 'Support: It improves communication and access to knowledge. — الدعم: يحسن التواصل والوصول إلى المعرفة.', 'Closing: لذلك يعد استثمارًا مهمًا للمستقبل. — الخاتمة: Therefore, it is a valuable investment for the future.'],
-          expertTip: 'اسأل عن وظيفة كل جملة: هل تقدّم الفكرة؟ تدعمها؟ أم تغلقها؟'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: فسري مكوّنات الفقرة الأكاديمية: الجملة الرئيسة، الدعم، والخاتمة، ثم قدّمي نموذجًا بسيطًا يمكن للطالب تقليده.',
-        quiz: { question: 'ما أول عنصر في الفقرة الأكاديمية غالبًا؟', options: ['Closing sentence', 'Topic sentence', 'Random example'], correctIndex: 1 }
-      },
-      {
-        id: 35, level: 4, titleAr: 'هيكل المقالة الأكاديمية', titleEn: 'Academic Essay Structure',
-        description: 'المقالة القوية ليست مجرد فقرات متجاورة. هذا الدرس يشرح البنية الكبرى للمقدمة والمتن والخاتمة بطريقة عملية.',
-        content: {
-          arabicFull: paragraph('هيكل المقالة الأكاديمية', 'المقالة تتكون عادة من مقدمة تمهّد للفكرة وتعرض الأطروحة، ثم فقرات جسم منظّمة، ثم خاتمة تلخص وتقفل الحجة.'),
-          englishSummary: 'An essay includes an introduction, body paragraphs, and a conclusion built around a thesis.',
-          examples: ['Introduction presents the topic and thesis. — المقدمة تعرض الموضوع والأطروحة.', 'Body paragraphs develop main arguments. — فقرات المتن تطور الحجج الأساسية.', 'Conclusion restates and closes the discussion. — الخاتمة تعيد صياغة الفكرة وتغلق النقاش.'],
-          expertTip: 'اكتب الأطروحة أولًا بوضوح؛ فهي البوصلة التي توجه المقالة كلها.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي أجزاء المقالة الأكاديمية الثلاثة، ووضحي دور الأطروحة في المقدمة، وكيف تخدمها فقرات الجسم، ثم كيف تلخّصها الخاتمة.',
-        quiz: { question: 'أين تظهر الأطروحة غالبًا؟', options: ['في المقدمة', 'في منتصف الخاتمة', 'لا مكان محدد'], correctIndex: 0 }
-      },
-      {
-        id: 36, level: 4, titleAr: 'لغة الربط الأكاديمي', titleEn: 'Academic Cohesion',
-        description: 'المستوى العالي لا يعني كلمات صعبة فقط، بل ترابطًا ذكيًا. هذا الدرس يصنع انسيابًا احترافيًا في الكتابة.',
-        content: {
-          arabicFull: paragraph('الترابط الأكاديمي', 'نستخدم عبارات مثل furthermore وin addition وhowever وtherefore وfor example لتنظيم الفكرة وربط أجزاء النص بأناقة ومنطق.'),
-          englishSummary: 'Academic cohesion uses linking phrases to guide the reader through ideas logically.',
-          examples: ['However, the results were limited. — ومع ذلك، كانت النتائج محدودة.', 'Furthermore, students need practice. — إضافة إلى ذلك، يحتاج الطلاب إلى تدريب.', 'Therefore, a new strategy is necessary. — لذلك، من الضروري اتباع استراتيجية جديدة.'],
-          expertTip: 'لا تكثر الروابط بلا حاجة؛ اختر الرابط الذي يخدم العلاقة المنطقية بدقة.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: وضحي مفهوم الترابط الأكاديمي، وقدمي أشهر عبارات الربط مع تصنيفها إلى إضافة وتناقض ونتيجة ومثال، ثم نبهي إلى عدم الإفراط فيها.',
-        quiz: { question: 'أي عبارة تدل على نتيجة؟', options: ['Therefore', 'However', 'For example'], correctIndex: 0 }
-      },
-      {
-        id: 37, level: 4, titleAr: 'لغة الرأي الرسمي', titleEn: 'Formal Opinion Language',
-        description: 'إبداء الرأي في المستوى المتقدم يحتاج توازنًا ولباقة. ستتعلم كيف تعرض موقفك دون أن يبدو أسلوبك عاميًا أو حادًا.',
-        content: {
-          arabicFull: paragraph('لغة الرأي الرسمي', 'في السياقات الأكاديمية والمهنية نفضّل تعبيرات مثل In my view وIt seems that وFrom an academic perspective بدل العبارات العامية المباشرة.'),
-          englishSummary: 'Formal opinion language presents ideas politely, clearly, and professionally.',
-          examples: ['In my view, the policy needs revision. — في رأيي، تحتاج السياسة إلى مراجعة.', 'It seems that the data is incomplete. — يبدو أن البيانات غير مكتملة.', 'From a practical perspective, this approach is effective. — من منظور عملي، هذا الأسلوب فعال.'],
-          expertTip: 'خفف حدّة الرأي باستخدام صيغ مهنية تجعل كلامك أقوى لا أضعف.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي كيف نقدّم الرأي بصياغة رسمية متزنة، وميّزي بين الأسلوب الأكاديمي والأسلوب اليومي، مع نماذج جاهزة للاستعمال.',
-        quiz: { question: 'أي تعبير أكثر رسمية لإبداء الرأي؟', options: ['I think so, yeah.', 'In my view, this is beneficial.', 'This is cool.'], correctIndex: 1 }
-      },
-      {
-        id: 38, level: 4, titleAr: 'بناء الحجة في المناظرة', titleEn: 'Argument Building',
-        description: 'المناظرة ليست رفع صوت بل ترتيب منطق. هذا الدرس يمنحك نموذجًا واضحًا لبناء حجة مقنعة.',
-        content: {
-          arabicFull: paragraph('بناء الحجة', 'الحجة القوية تبدأ بادعاء واضح، ثم سبب يدعمه، ثم دليل أو مثال، ثم شرح يربط الدليل بالنتيجة المقصودة.'),
-          englishSummary: 'A strong argument includes a claim, a reason, evidence, and explanation.',
-          examples: ['Claim: Online learning should be improved. — الادعاء: يجب تحسين التعليم الإلكتروني.', 'Evidence: Student feedback shows engagement issues. — الدليل: ملاحظات الطلاب تظهر مشكلات في التفاعل.', 'Explanation: Better interaction raises completion rates. — الشرح: التفاعل الأفضل يرفع معدلات الإكمال.'],
-          expertTip: 'لا تكتفِ بالرأي؛ اسأل دائمًا: ما الدليل؟ وما الصلة بينه وبين ادعائي؟'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: فسري نموذج بناء الحجة في المناظرة: ادعاء، سبب، دليل، وشرح، مع مثال مبسط يمكن للطالب تقليده في النقاشات الأكاديمية.',
-        quiz: { question: 'أي عنصر يجعل الحجة أكثر إقناعًا؟', options: ['الصوت المرتفع', 'الدليل', 'الإطالة بلا تنظيم'], correctIndex: 1 }
-      },
-      {
-        id: 39, level: 4, titleAr: 'الاعتراض المهذب والرد', titleEn: 'Polite Rebuttal',
-        description: 'الاحتراف الحقيقي يظهر عندما تختلف باحترام. هذا الدرس يعلمك كيف تعترض وترد دون فقدان الرسمية أو المنطق.',
-        content: {
-          arabicFull: paragraph('الاعتراض المهذب والرد', 'يمكنك بدء الاعتراض بعبارات مثل I understand your point, however أو While that is valid, we should also consider، ثم تقديم رد منظم ومدعوم.'),
-          englishSummary: 'Polite rebuttal acknowledges the other side before presenting a reasoned response.',
-          examples: ['I see your point; however, the data suggests otherwise. — أتفهم وجهة نظرك، لكن البيانات تشير إلى غير ذلك.', 'While that may be true, the long-term effects are different. — مع أن ذلك قد يكون صحيحًا، فإن الآثار بعيدة المدى مختلفة.', 'Respectfully, I would argue that this solution is costly. — باحترام، أرى أن هذا الحل مكلف.'],
-          expertTip: 'ابدأ بالاعتراف بجزء من كلام الطرف الآخر، فهذا يجعل ردك أقوى وأكثر توازنًا.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: اشرحي مفهوم الاعتراض المهذب في المناظرة، وقدمي صيغًا عملية لبدء الرد باحترام ثم الانتقال إلى النقطة المضادة المدعومة.',
-        quiz: { question: 'أي افتتاحية أكثر لباقة؟', options: ['You are wrong.', 'I understand your point; however...', 'That makes no sense.'], correctIndex: 1 }
-      },
-      {
-        id: 40, level: 4, titleAr: 'الافتتاح والخاتمة في المناظرة الرسمية', titleEn: 'Formal Debate Openings and Closings',
-        description: 'الانطباع الأول والأخير يصنعان أثرًا قويًا. في هذا الدرس ستتعلم كيف تبدأ وتنهي المداخلة بطريقة مهنية وواثقة.',
-        content: {
-          arabicFull: paragraph('الافتتاح والخاتمة في المناظرة الرسمية', 'الافتتاح الفعال يحدد الموقف بوضوح ويهيئ المستمع للحجة، أما الخاتمة فتوجز النقاط الأساسية وتعيد تأكيد الرسالة النهائية بنبرة رصينة.'),
-          englishSummary: 'Formal openings state the position clearly, while closings summarize and reinforce the core message.',
-          examples: ['Today, I would like to argue that... — اليوم أود أن أجادل بأن...', 'My main point is that effective policy requires evidence. — نقطتي الأساسية هي أن السياسة الفعالة تحتاج إلى دليل.', 'In conclusion, our position remains the most practical. — ختامًا، يبقى موقفنا الأكثر عملية.'],
-          expertTip: 'اكتب جملة افتتاحية وجملة ختامية جاهزتين وعدّل بينهما بحسب الموضوع.'
-        },
-        voiceScript: 'Say in a professional, warm Arabic female voice: قدّمي للمتعلم نماذج جاهزة لافتتاح المناظرة وخاتمتها، ووضحي كيف يمكنه إعلان الموقف ثم تلخيصه بثقة ووضوح في النهاية.',
-        quiz: { question: 'ما وظيفة الخاتمة في المناظرة؟', options: ['إدخال موضوع جديد', 'تلخيص الموقف وتعزيزه', 'الاعتذار عن الرأي'], correctIndex: 1 }
-      }
-    ];
+/* ---------------- LESSON DATABASE (SHORTENED) ---------------- */
 
-    const levelsMeta = {
-      1: { nameAr: 'المستوى الأول', nameEn: 'Basics', lessons: 'Be, Pronouns, Articles, Plurals, Present Simple, Questions' },
-      2: { nameAr: 'المستوى الثاني', nameEn: 'Timeline', lessons: 'Past, Future, Continuous, Comparatives' },
-      3: { nameAr: 'المستوى الثالث', nameEn: 'Precision', lessons: 'Present Perfect, Modals, Passive, Conditionals' },
-      4: { nameAr: 'المستوى الرابع', nameEn: 'Mastery', lessons: 'Past Perfect, Reported Speech, Academic Essay, Debate' }
-    };
+const lessonsDB=[
+{id:1,level:1,titleAr:'فعل الكينونة',titleEn:'Be Verb',description:'أساس بناء الجملة الإنجليزية.'},
+{id:2,level:1,titleAr:'الضمائر',titleEn:'Pronouns',description:'التعرف على الضمائر الأساسية.'},
+{id:3,level:1,titleAr:'أدوات التعريف',titleEn:'Articles',description:'فهم a / an / the.'},
+{id:4,level:1,titleAr:'الجمع',titleEn:'Plurals',description:'تحويل المفرد إلى جمع.'},
+{id:5,level:1,titleAr:'المضارع البسيط',titleEn:'Present Simple',description:'وصف العادات اليومية.'},
+{id:6,level:1,titleAr:'الأسئلة',titleEn:'Questions',description:'صياغة الأسئلة.'},
+{id:7,level:1,titleAr:'النفي',titleEn:'Negatives',description:'بناء الجمل المنفية.'},
+{id:8,level:1,titleAr:'أسماء الإشارة',titleEn:'Demonstratives',description:'this / that / these / those'},
+{id:9,level:1,titleAr:'صفات الملكية',titleEn:'Possessive',description:'my / your / his'},
+{id:10,level:1,titleAr:'أسئلة Wh',titleEn:'Wh Questions',description:'where / why / when'},
 
-    function getLessonsByLevel(level) {
-      return lessonsDB.filter(l => l.level === level);
-    }
+{id:11,level:2,titleAr:'الماضي البسيط',titleEn:'Past Simple',description:'التحدث عن الماضي.'},
+{id:12,level:2,titleAr:'الأفعال غير المنتظمة',titleEn:'Irregular verbs',description:'أفعال الماضي.'},
 
-    function getLesson(id) {
-      return lessonsDB.find(l => l.id === Number(id));
-    }
+{id:21,level:3,titleAr:'المضارع التام',titleEn:'Present Perfect',description:'ربط الماضي بالحاضر.'},
 
-    function levelProgress(level) {
-      const lessonIds = getLessonsByLevel(level).map(l => l.id);
-      const completed = lessonIds.filter(id => state.progress.completedLessonIds.includes(id)).length;
-      return Math.round((completed / lessonIds.length) * 100);
-    }
+{id:31,level:4,titleAr:'الماضي التام',titleEn:'Past Perfect',description:'تسلسل الأحداث.'}
+];
 
-    function isLessonLocked(lesson) {
-      return !state.progress.unlockedLevels.includes(lesson.level);
-    }
+/* ---------------- ROUTER ---------------- */
 
-    function markLessonComplete(id) {
-      if (!state.progress.completedLessonIds.includes(id)) {
-        state.progress.completedLessonIds.push(id);
-      }
-      const lesson = getLesson(id);
-      const currentLevelLessons = getLessonsByLevel(lesson.level);
-      const allCompleted = currentLevelLessons.every(l => state.progress.completedLessonIds.includes(l.id));
-      if (allCompleted && lesson.level < 4 && !state.progress.unlockedLevels.includes(lesson.level + 1)) {
-        state.progress.unlockedLevels.push(lesson.level + 1);
-      }
-      state.progress.lastLessonId = id;
-      saveProgress();
-    }
+function navigate(route,params={}){
+state.route=route;
+if(params.level) state.currentLevel=params.level;
+if(params.lessonId) state.selectedLessonId=params.lessonId;
+render();
+}
 
-    function navigate(route, params = {}) {
-      state.route = route;
-      if (params.lessonId) state.selectedLessonId = Number(params.lessonId);
-      render();
-    }
+function router(){
 
-    function router() {
-      const route = state.route;
-      if (route === 'home') return homeView();
-      if (route === 'lessons') return lessonsView();
-      if (route === 'lesson-detail') return lessonDetailView();
-      if (route === 'quiz') return quizView();
-      return homeView();
-    }
+if(state.route==='home') return homeView();
 
-    function progressOverview() {
-      const total = lessonsDB.length;
-      const completed = state.progress.completedLessonIds.length;
-      return Math.round((completed / total) * 100);
-    }
+if(state.route==='lessons') return levelsView();
 
-    function homeView() {
-      return `
-        <section class="grid lg:grid-cols-2 gap-8 items-center py-8 fade-in">
-          <div class="space-y-6">
-            <span class="inline-flex items-center gap-2 bg-white border border-indigo-100 shadow-sm px-4 py-2 rounded-full text-sm font-semibold text-brand-indigo">
-              <span>✨</span> منصة احترافية لتعلّم الإنجليزية بالعربية
-            </span>
-            <h1 class="text-4xl md:text-6xl font-bold leading-tight text-slate-900">
-              تعلّم الإنجليزية <span class="text-brand-indigo">بعمق وأناقة</span><br>
-              داخل أكاديمية مصممة للمستوى الجاد.
-            </h1>
-            <p class="text-lg text-slate-600 leading-9 max-w-2xl">
-              The Elite English Academy تقدم منهجًا احترافيًا من 40 درسًا موزعة على 4 مستويات، مع شرح عربي عميق، ملخصات إنجليزية، اختبارات سريعة، وصوت تعليمي مباشر مدعوم بالذكاء الاصطناعي.
-            </p>
-            <div class="flex flex-wrap gap-3">
-              <button onclick="navigate('lessons')" class="px-8 py-4 rounded-2xl bg-brand-indigo text-white font-bold shadow-soft hover:opacity-95">ابدأ المنهج الآن</button>
-              <button onclick="continueLearning()" class="px-8 py-4 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold">تابع من آخر درس</button>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4">
-              <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"><div class="text-2xl font-bold text-slate-900">40</div><div class="text-sm text-slate-500">درسًا كاملًا</div></div>
-              <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"><div class="text-2xl font-bold text-slate-900">4</div><div class="text-sm text-slate-500">مستويات</div></div>
-              <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"><div class="text-2xl font-bold text-slate-900">${state.progress.completedLessonIds.length}</div><div class="text-sm text-slate-500">دروس مكتملة</div></div>
-              <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"><div class="text-2xl font-bold text-slate-900">${progressOverview()}%</div><div class="text-sm text-slate-500">التقدم العام</div></div>
-            </div>
-          </div>
-          <div class="relative">
-            <div class="absolute inset-0 bg-gradient-to-br from-brand-indigo/10 to-brand-cyan/20 rounded-[2rem] blur-2xl"></div>
-            <div class="relative bg-white rounded-[2rem] p-6 md:p-8 shadow-soft border border-white/70">
-              <div class="grid md:grid-cols-2 gap-4">
-                ${[1,2,3,4].map(level => `
-                  <div class="rounded-3xl border border-slate-100 p-5 bg-slate-50">
-                    <div class="flex items-center justify-between mb-3">
-                      <span class="text-xs font-bold px-3 py-1 rounded-full ${state.progress.unlockedLevels.includes(level) ? 'bg-cyan-100 text-cyan-700' : 'bg-slate-200 text-slate-500'}">
-                        ${state.progress.unlockedLevels.includes(level) ? 'Unlocked' : 'Locked'}
-                      </span>
-                      <span class="text-sm text-slate-500">Level ${level}</span>
-                    </div>
-                    <h3 class="font-bold text-lg text-slate-900">${levelsMeta[level].nameAr}</h3>
-                    <p class="english-snippet text-sm text-slate-500 mt-1">${levelsMeta[level].nameEn}</p>
-                    <div class="mt-4 h-2 bg-slate-200 rounded-full overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-indigo to-brand-cyan" style="width:${levelProgress(level)}%"></div></div>
-                    <div class="mt-2 text-xs text-slate-500">${levelProgress(level)}% complete</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-        </section>
-      `;
-    }
+if(state.route==='level-lessons') return levelLessonsView();
 
-    function lessonsView() {
-      return `
-        <section class="space-y-8 fade-in">
-          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-            <div>
-              <h2 class="text-3xl md:text-4xl font-bold text-slate-900">لوحة المستويات التعليمية</h2>
-              <p class="text-slate-600 mt-3 max-w-3xl leading-8">اختر المستوى المناسب وادخل إلى دروس مصممة بعناية. كل بطاقة تعرض حالة المستوى ونسبة الإنجاز حتى تبقى رحلتك التعليمية واضحة ومنظمة.</p>
-            </div>
-            <div class="bg-white rounded-2xl px-5 py-4 border border-slate-100 shadow-sm">
-              <div class="text-sm text-slate-500">التقدم العام</div>
-              <div class="text-3xl font-bold text-brand-indigo">${progressOverview()}%</div>
-            </div>
-          </div>
+if(state.route==='lesson-detail') return lessonView();
 
-          <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-            ${[1,2,3,4].map(level => {
-              const unlocked = state.progress.unlockedLevels.includes(level);
-              const progress = levelProgress(level);
-              return `
-                <div class="lesson-card transition-all bg-white rounded-[1.75rem] border border-slate-100 shadow-sm p-6 flex flex-col gap-4 ${unlocked ? '' : 'opacity-70'}">
-                  <div class="flex items-center justify-between">
-                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-brand-indigo to-brand-cyan text-white flex items-center justify-center font-bold">${level}</div>
-                    <span class="px-3 py-1 rounded-full text-xs font-bold ${unlocked ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-600'}">${progress === 100 ? 'Completed' : unlocked ? 'Available' : 'Locked'}</span>
-                  </div>
-                  <div>
-                    <h3 class="text-xl font-bold text-slate-900">${levelsMeta[level].nameAr}</h3>
-                    <p class="english-snippet text-slate-500 mt-1">${levelsMeta[level].nameEn}</p>
-                    <p class="text-sm text-slate-500 mt-3 leading-7">${levelsMeta[level].lessons}</p>
-                  </div>
-                  <div>
-                    <div class="flex justify-between text-xs text-slate-500 mb-2"><span>Progress</span><span>${progress}%</span></div>
-                    <div class="h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-indigo to-brand-cyan" style="width:${progress}%"></div></div>
-                  </div>
-                  <button ${unlocked ? '' : 'disabled'} onclick="openLevel(${level})" class="mt-auto rounded-2xl px-4 py-3 font-bold ${unlocked ? 'bg-brand-indigo text-white hover:opacity-95' : 'bg-slate-200 text-slate-500 cursor-not-allowed'}">${unlocked ? 'استعراض الدروس' : 'مغلق حتى إكمال المستوى السابق'}</button>
-                </div>
-              `;
-            }).join('')}
-          </div>
+return homeView();
+}
 
-          <div id="level-lessons"></div>
-        </section>
-      `;
-    }
+/* ---------------- HOME ---------------- */
 
-    function lessonCardsForLevel(level) {
-      return `
-        <section class="mt-10 fade-in">
-          <div class="flex items-center justify-between mb-5">
-            <div>
-              <h3 class="text-2xl font-bold text-slate-900">${levelsMeta[level].nameAr}</h3>
-              <p class="english-snippet text-slate-500">${levelsMeta[level].nameEn}</p>
-            </div>
-            <div class="text-sm font-semibold text-brand-indigo">10 Lessons</div>
-          </div>
-          <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-            ${getLessonsByLevel(level).map(lesson => {
-              const completed = state.progress.completedLessonIds.includes(lesson.id);
-              return `
-                <button onclick="openLessonDetail(${lesson.id})" class="text-right bg-white rounded-3xl border border-slate-100 p-5 shadow-sm hover:shadow-md transition-all">
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="w-10 h-10 rounded-2xl flex items-center justify-center bg-slate-100 font-bold text-slate-700">${lesson.id}</span>
-                    <span class="text-xs px-3 py-1 rounded-full ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${completed ? 'Completed' : 'In Progress'}</span>
-                  </div>
-                  <h4 class="font-bold text-lg text-slate-900 mt-4">${lesson.titleAr}</h4>
-                  <p class="english-snippet text-sm text-slate-500">${lesson.titleEn}</p>
-                  <p class="text-sm text-slate-600 mt-3 leading-7">${lesson.description}</p>
-                </button>
-              `;
-            }).join('')}
-          </div>
-        </section>
-      `;
-    }
+function homeView(){
+return `
+<section class="text-center space-y-6">
 
-    function lessonDetailView() {
-      const lesson = getLesson(state.selectedLessonId);
-      const completed = state.progress.completedLessonIds.includes(lesson.id);
-      return `
-        <section class="grid xl:grid-cols-[340px,1fr] gap-6 fade-in">
-          <aside class="xl:sticky xl:top-28 h-fit space-y-4">
-            <div class="bg-white rounded-[1.75rem] p-6 border border-slate-100 shadow-sm">
-              <div class="flex items-center justify-between">
-                <div>
-                  <div class="text-xs uppercase tracking-wider text-slate-400 english-snippet">Audio Control</div>
-                  <h3 class="font-bold text-xl text-slate-900 mt-1">الشرح الصوتي</h3>
-                </div>
-                <div id="visualizer" class="visualizer ${state.isPlaying ? 'active' : ''}">
-                  <span></span><span></span><span></span><span></span><span></span>
-                </div>
-              </div>
-              <p class="text-sm text-slate-600 mt-4 leading-7">اضغط لتشغيل شرح عربي احترافي بصوت أنثوي دافئ. يتم توليد الصوت مباشرة باستخدام Gemini TTS.</p>
-              <div class="grid gap-3 mt-5">
-                <button id="playBtn" onclick="playLessonAudio(${lesson.id})" class="rounded-2xl px-4 py-3 bg-brand-indigo text-white font-bold">${state.isPlaying ? 'جاري التشغيل...' : 'تشغيل الشرح الصوتي'}</button>
-                <button onclick="downloadAudio(${lesson.id})" class="rounded-2xl px-4 py-3 bg-white border border-slate-200 text-slate-700 font-bold">تحميل الصوت</button>
-                <button onclick="markCurrentComplete()" class="rounded-2xl px-4 py-3 ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-cyan-100 text-cyan-700'} font-bold">${completed ? 'تم تعليم الدرس كمكتمل' : 'علّم الدرس كمكتمل'}</button>
-                <button onclick="navigate('quiz', { lessonId: ${lesson.id} })" class="rounded-2xl px-4 py-3 bg-slate-900 text-white font-bold">الاختبار السريع</button>
-              </div>
-            </div>
-            <div class="bg-white rounded-[1.75rem] p-6 border border-slate-100 shadow-sm">
-              <div class="text-xs uppercase tracking-wider text-slate-400 english-snippet">Quick Quiz</div>
-              <h3 class="font-bold text-xl text-slate-900 mt-1">اختبار خاطف</h3>
-              <p class="text-sm text-slate-600 mt-3 leading-7">سؤال واحد سريع لتثبيت الفكرة مباشرة بعد القراءة أو الاستماع.</p>
-              <button onclick="navigate('quiz', { lessonId: ${lesson.id} })" class="mt-4 w-full rounded-2xl px-4 py-3 bg-gradient-to-l from-brand-indigo to-brand-cyan text-white font-bold">ابدأ الاختبار</button>
-            </div>
-          </aside>
+<span class="inline-block bg-white px-4 py-2 rounded-full border">✨ منصة احترافية لتعلّم الإنجليزية</span>
 
-          <article class="bg-white rounded-[2rem] p-6 md:p-8 lg:p-10 border border-slate-100 shadow-sm">
-            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 pb-6 border-b border-slate-100">
-              <div>
-                <div class="text-sm font-semibold text-brand-indigo mb-2">Level ${lesson.level}</div>
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-900">${lesson.titleAr}</h1>
-                <p class="english-snippet text-lg text-slate-500 mt-2">${lesson.titleEn}</p>
-              </div>
-              <div class="px-4 py-2 rounded-2xl ${completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'} font-bold text-sm h-fit">${completed ? 'Completed' : 'In Progress'}</div>
-            </div>
+<h1 class="text-4xl font-bold">
+تعلم اللغة الانجليزية باحتراف
+</h1>
 
-            <div class="pt-6 space-y-8 prose-elite max-w-none">
-              <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">وصف الدرس</h2>
-                <p class="text-slate-700 leading-9">${lesson.description}</p>
-              </section>
+<p class="text-slate-600">منهج احترافي من عدة مستويات مع دروس تفاعلية.</p>
 
-              <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">الشرح العربي الكامل</h2>
-                <p class="text-slate-700 leading-9">${lesson.content.arabicFull}</p>
-              </section>
+<button onclick="navigate('lessons')" class="px-8 py-4 bg-brand-indigo text-white rounded-xl">ابدأ التعلم</button>
 
-              <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">English Summary</h2>
-                <p class="english-snippet text-slate-700 bg-slate-50 rounded-2xl p-5 border border-slate-100">${lesson.content.englishSummary}</p>
-              </section>
+</section>
+`}
 
-              <section>
-                <h2 class="text-2xl font-bold text-slate-900 mb-4">أمثلة ثنائية اللغة</h2>
-                <div class="grid gap-3">
-                  ${lesson.content.examples.map(ex => `<div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-slate-700 leading-8">${ex}</div>`).join('')}
-                </div>
-              </section>
+/* ---------------- LEVELS ---------------- */
 
-              <section>
-                <div class="rounded-[1.5rem] bg-gradient-to-l from-indigo-50 to-cyan-50 border border-indigo-100 p-6">
-                  <div class="text-sm font-bold text-brand-indigo mb-2">Pro Tip</div>
-                  <p class="text-slate-700 leading-8">${lesson.content.expertTip}</p>
-                </div>
-              </section>
-            </div>
+function levelsView(){
 
-            <div class="mt-10 pt-6 border-t border-slate-100 flex flex-wrap gap-3 justify-between items-center">
-              <button onclick="navigate('lessons')" class="px-6 py-3 rounded-2xl bg-slate-100 text-slate-700 font-bold">العودة إلى المنهج</button>
-              <div class="flex gap-3">
-                <button onclick="markCurrentComplete()" class="px-6 py-3 rounded-2xl bg-cyan-500 text-white font-bold">حفظ التقدم</button>
-                <button onclick="navigate('quiz', { lessonId: ${lesson.id} })" class="px-6 py-3 rounded-2xl bg-brand-indigo text-white font-bold">اختبر نفسك</button>
-              </div>
-            </div>
-          </article>
-        </section>
-      `;
-    }
+return `
 
-    function quizView() {
-      const lesson = getLesson(state.selectedLessonId);
-      return `
-        <section class="max-w-3xl mx-auto fade-in">
-          <div class="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-100 shadow-sm">
-            <div class="flex items-center justify-between gap-4 flex-wrap pb-5 border-b border-slate-100">
-              <div>
-                <div class="text-sm text-brand-indigo font-semibold">Quick Assessment</div>
-                <h1 class="text-3xl font-bold text-slate-900 mt-1">${lesson.titleAr}</h1>
-                <p class="english-snippet text-slate-500 mt-1">${lesson.titleEn}</p>
-              </div>
-              <button onclick="navigate('lesson-detail', { lessonId: ${lesson.id} })" class="px-5 py-3 rounded-2xl bg-slate-100 text-slate-700 font-bold">العودة إلى الدرس</button>
-            </div>
+<section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div class="pt-8">
-              <h2 class="text-2xl font-bold text-slate-900">${lesson.quiz.question}</h2>
-              <div class="grid gap-4 mt-6">
-                ${lesson.quiz.options.map((opt, index) => `
-                  <button onclick="submitQuiz(${lesson.id}, ${index})" class="text-right w-full rounded-2xl border border-slate-200 p-5 hover:border-brand-indigo hover:bg-indigo-50 transition font-semibold text-slate-700">
-                    ${opt}
-                  </button>
-                `).join('')}
-              </div>
-              <div id="quiz-result" class="mt-6"></div>
-            </div>
-          </div>
-        </section>
-      `;
-    }
+${[1,2,3,4].map(level=>{
 
-    function render() {
-      document.getElementById('app').innerHTML = router();
-      if (state.route === 'lessons' && window.currentOpenedLevel) {
-        document.getElementById('level-lessons').innerHTML = lessonCardsForLevel(window.currentOpenedLevel);
-      }
-      if (state.route === 'lesson-detail') state.progress.lastLessonId = state.selectedLessonId, saveProgress();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+const unlocked=state.progress.unlockedLevels.includes(level);
 
-    function openLevel(level) {
-      window.currentOpenedLevel = level;
-      navigate('lessons');
-    }
+return `
 
-    function openLessonDetail(id) {
-      const lesson = getLesson(id);
-      if (isLessonLocked(lesson)) return;
-      navigate('lesson-detail', { lessonId: id });
-    }
+<div class="bg-white p-6 rounded-2xl border space-y-4 ${!unlocked?'opacity-50':''}">
 
-    function continueLearning() {
-      if (state.progress.lastLessonId) {
-        navigate('lesson-detail', { lessonId: state.progress.lastLessonId });
-      } else {
-        navigate('lessons');
-      }
-    }
+<h3 class="font-bold text-xl">المستوى ${level}</h3>
 
-    function markCurrentComplete() {
-      markLessonComplete(state.selectedLessonId);
-      render();
-    }
+<button ${unlocked?`onclick="openLevel(${level})"`:''}
+class="w-full py-3 rounded-xl ${unlocked?'bg-brand-indigo text-white':'bg-slate-200'}">
+استعراض الدروس
+</button>
 
-    async function playLessonAudio(lessonId) {
-      const lesson = getLesson(lessonId);
-      try {
-        stopAudio();
-        state.isPlaying = true;
-        render();
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: lesson.voiceScript }] }],
-            generationConfig: {
-              responseModalities: ['AUDIO'],
-              speechConfig: {
-                voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } }
-              }
-            },
-            model: 'gemini-2.5-flash-preview-tts'
-          })
-        });
+</div>
 
-        const data = await response.json();
-        const audioBase64 = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
-        if (!audioBase64) throw new Error('No audio data returned');
-        state.currentAudioBlob = pcm16ToWav(audioBase64, 24000);
-        const url = URL.createObjectURL(state.currentAudioBlob);
-        const audio = new Audio(url);
-        state.audio = audio;
-        audio.onended = () => { state.isPlaying = false; render(); };
-        audio.onerror = () => { state.isPlaying = false; render(); };
-        await audio.play();
-      } catch (error) {
-        console.error(error);
-        alert('تعذر تشغيل الصوت الآن. تأكد من الاتصال بالإنترنت وصحة المفتاح البرمجي.');
-        state.isPlaying = false;
-        render();
-      }
-    }
+`}).join('')}
 
-    function stopAudio() {
-      if (state.audio) {
-        state.audio.pause();
-        state.audio.currentTime = 0;
-      }
-      state.isPlaying = false;
-    }
+</section>
 
-    function pcm16ToWav(base64Data, sampleRate) {
-      const binary = atob(base64Data);
-      const pcmData = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) pcmData[i] = binary.charCodeAt(i);
-      const wavBuffer = new ArrayBuffer(44 + pcmData.length);
-      const view = new DataView(wavBuffer);
+`}
 
-      writeString(view, 0, 'RIFF');
-      view.setUint32(4, 36 + pcmData.length, true);
-      writeString(view, 8, 'WAVE');
-      writeString(view, 12, 'fmt ');
-      view.setUint32(16, 16, true);
-      view.setUint16(20, 1, true);
-      view.setUint16(22, 1, true);
-      view.setUint32(24, sampleRate, true);
-      view.setUint32(28, sampleRate * 2, true);
-      view.setUint16(32, 2, true);
-      view.setUint16(34, 16, true);
-      writeString(view, 36, 'data');
-      view.setUint32(40, pcmData.length, true);
+/* ---------------- LEVEL LESSON LIST PAGE ---------------- */
 
-      const wavBytes = new Uint8Array(wavBuffer);
-      wavBytes.set(pcmData, 44);
-      return new Blob([wavBuffer], { type: 'audio/wav' });
-    }
+function openLevel(level){
+state.currentLevel=level;
+navigate('level-lessons',{level});
+}
 
-    function writeString(view, offset, string) {
-      for (let i = 0; i < string.length; i++) {
-        view.setUint8(offset + i, string.charCodeAt(i));
-      }
-    }
+function levelLessonsView(){
 
-    function downloadAudio(lessonId) {
-      if (!state.currentAudioBlob) {
-        alert('شغّل الصوت أولًا ثم حاول التحميل.');
-        return;
-      }
-      const lesson = getLesson(lessonId);
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(state.currentAudioBlob);
-      a.download = `${slugify(lesson.titleEn)}.wav`;
-      a.click();
-    }
+const lessons=lessonsDB.filter(l=>l.level===state.currentLevel);
 
-    function submitQuiz(lessonId, selectedIndex) {
-      const lesson = getLesson(lessonId);
-      const correct = selectedIndex === lesson.quiz.correctIndex;
-      state.progress.quizScores[lessonId] = correct ? 100 : 0;
-      if (correct) markLessonComplete(lessonId);
-      saveProgress();
-      const box = document.getElementById('quiz-result');
-      box.innerHTML = `
-        <div class="rounded-[1.5rem] p-5 ${correct ? 'bg-emerald-50 border border-emerald-200 text-emerald-700' : 'bg-rose-50 border border-rose-200 text-rose-700'}">
-          <div class="font-bold text-lg">${correct ? 'إجابة صحيحة ✨' : 'إجابة غير صحيحة'}</div>
-          <p class="mt-2 leading-8">${correct ? 'أحسنت. تم حفظ تقدمك تلقائيًا في المتصفح ويمكنك الانتقال إلى الدرس التالي بثقة.' : 'أعد قراءة الشرح ثم جرّب مرة أخرى. التعلم الحقيقي يبدأ من مراجعة الخطأ وفهم سببه.'}</p>
-          <div class="mt-4 flex flex-wrap gap-3">
-            <button onclick="navigate('lesson-detail', { lessonId: ${lessonId} })" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-bold">العودة للدرس</button>
-            <button onclick="goToNextLesson(${lessonId})" class="px-5 py-3 rounded-2xl bg-brand-indigo text-white font-bold">الدرس التالي</button>
-          </div>
-        </div>
-      `;
-      renderProgressIfNeeded();
-    }
+return `
 
-    function renderProgressIfNeeded() {
-      // placeholder to keep state extensible
-    }
+<section>
 
-    function goToNextLesson(currentId) {
-      const next = getLesson(currentId + 1);
-      if (next && !isLessonLocked(next)) navigate('lesson-detail', { lessonId: next.id });
-      else navigate('lessons');
-    }
+<h2 class="text-3xl font-bold mb-6">دروس المستوى ${state.currentLevel}</h2>
 
-    render();
-  </script>
+<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+${lessons.map(l=>`
+
+<div onclick="openLesson(${l.id})" class="cursor-pointer bg-white p-5 rounded-xl border hover:shadow">
+
+<h4 class="font-bold">${l.titleAr}</h4>
+
+<p class="english-snippet text-sm text-slate-500">${l.titleEn}</p>
+
+<p class="text-sm text-slate-600 mt-2">${l.description}</p>
+
+</div>
+
+`).join('')}
+
+</div>
+
+</section>
+
+`}
+
+/* ---------------- LESSON PAGE ---------------- */
+
+function openLesson(id){
+state.selectedLessonId=id;
+navigate('lesson-detail',{lessonId:id});
+}
+
+function lessonView(){
+
+const lesson=lessonsDB.find(l=>l.id===state.selectedLessonId);
+
+return `
+
+<section class="space-y-6">
+
+<h1 class="text-3xl font-bold">${lesson.titleAr}</h1>
+
+<p class="english-snippet text-slate-500">${lesson.titleEn}</p>
+
+<p>${lesson.description}</p>
+
+<button onclick="navigate('level-lessons',{level:${lesson.level}})"
+class="px-6 py-3 bg-slate-200 rounded-xl">
+العودة لدروس المستوى
+</button>
+
+</section>
+
+`}
+
+/* ---------------- RENDER ---------------- */
+
+function render(){
+
+document.getElementById('app').innerHTML=router();
+
+}
+
+render();
+
+</script>
+
 </body>
 </html>
