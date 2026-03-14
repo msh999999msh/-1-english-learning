@@ -1,391 +1,2094 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Elite English Academy</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Elite English Academy Pro</title>
+  <meta name="description" content="منصة تعليم اللغة الإنجليزية - نسخة احترافية" />
+  <style>
+    :root{
+      --bg:#0b1120;
+      --bg2:#0f172a;
+      --panel:#111827;
+      --panel2:#1f2937;
+      --soft:#334155;
+      --line:rgba(255,255,255,.08);
+      --text:#f8fafc;
+      --muted:#cbd5e1;
+      --primary:#6366f1;
+      --primary2:#8b5cf6;
+      --success:#10b981;
+      --warning:#f59e0b;
+      --danger:#ef4444;
+      --info:#06b6d4;
+      --shadow:0 20px 50px rgba(0,0,0,.28);
+      --radius:22px;
+    }
 
-<style>
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Tahoma, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(99,102,241,.20), transparent 22%),
+        radial-gradient(circle at top left, rgba(139,92,246,.10), transparent 18%),
+        linear-gradient(180deg, var(--bg), var(--bg2));
+      min-height:100vh;
+    }
 
-:root{
---bg:#07101f;
---bg2:#0b1220;
---panel:#101a2f;
---panel2:#17233d;
---line:rgba(255,255,255,.08);
---text:#f8fafc;
---muted:#cbd5e1;
---primary:#6366f1;
---primary2:#8b5cf6;
---shadow:0 20px 60px rgba(0,0,0,.3);
---radius:24px;
-}
+    a{text-decoration:none;color:inherit}
+    button,input,textarea,select{font:inherit}
+    img{max-width:100%;display:block}
 
-*{box-sizing:border-box}
+    .container{width:min(1240px,92%);margin:auto}
 
-body{
-margin:0;
-font-family:tahoma;
-background:linear-gradient(180deg,var(--bg),var(--bg2));
-color:var(--text);
-}
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      backdrop-filter:blur(14px);
+      background:rgba(11,17,32,.74);
+      border-bottom:1px solid var(--line);
+    }
 
-.container{
-width:min(1200px,92%);
-margin:auto;
-}
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      padding:14px 0;
+      flex-wrap:wrap;
+    }
 
-.topbar{
-padding:18px;
-background:#081022;
-border-bottom:1px solid var(--line);
-}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
 
-.brand{
-display:flex;
-align-items:center;
-gap:12px;
-}
+    .brand-icon{
+      width:46px;
+      height:46px;
+      border-radius:16px;
+      display:grid;
+      place-items:center;
+      font-size:22px;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      box-shadow:var(--shadow);
+    }
 
-.brand-icon{
-width:45px;
-height:45px;
-border-radius:12px;
-background:linear-gradient(135deg,var(--primary),var(--primary2));
-display:grid;
-place-items:center;
-font-size:20px;
-}
+    .brand h1{
+      margin:0;
+      font-size:1.1rem;
+    }
 
-.hero{
-padding:40px 0;
-}
+    .brand p{
+      margin:4px 0 0;
+      color:var(--muted);
+      font-size:.9rem;
+    }
 
-.btn{
-border:none;
-border-radius:12px;
-padding:10px 16px;
-cursor:pointer;
-background:#1c2742;
-color:white;
-}
+    .nav-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
 
-.btn-primary{
-background:linear-gradient(135deg,var(--primary),var(--primary2));
-}
+    .btn{
+      border:none;
+      border-radius:16px;
+      padding:11px 15px;
+      cursor:pointer;
+      transition:.2s ease;
+      color:#fff;
+      background:var(--panel2);
+      border:1px solid var(--line);
+    }
 
-.card{
-background:#0e1a33;
-border:1px solid var(--line);
-border-radius:var(--radius);
-padding:24px;
-}
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2))}
+    .btn-success{background:linear-gradient(135deg,#059669,#10b981)}
+    .btn-warning{background:linear-gradient(135deg,#d97706,#f59e0b)}
+    .btn-danger{background:linear-gradient(135deg,#dc2626,#ef4444)}
+    .btn-info{background:linear-gradient(135deg,#0891b2,#06b6d4)}
+    .btn-soft{background:rgba(255,255,255,.04)}
 
-.section{
-padding:30px 0;
-}
+    .hero{padding:34px 0 18px}
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1.15fr .85fr;
+      gap:20px;
+    }
 
-.levels-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:18px;
-}
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
 
-.level-card{
-padding:20px;
-border-radius:18px;
-background:#0f1b34;
-border:1px solid var(--line);
-}
+    .hero-main{padding:28px}
+    .hero-side{padding:24px}
 
-.lessons-list{
-display:grid;
-gap:10px;
-}
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid rgba(99,102,241,.28);
+      background:rgba(99,102,241,.15);
+      color:#e0e7ff;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.92rem;
+    }
 
-.lesson-item{
-padding:14px;
-border-radius:14px;
-border:1px solid var(--line);
-cursor:pointer;
-background:#0c1830;
-}
+    .hero h2{
+      margin:18px 0 10px;
+      font-size:clamp(1.8rem,3vw,3rem);
+      line-height:1.2;
+    }
 
-.viewer{
-padding:20px;
-border:1px solid var(--line);
-border-radius:16px;
-min-height:300px;
-background:#0c1830;
-}
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.9;
+    }
 
-.footer{
-padding:30px;
-text-align:center;
-border-top:1px solid var(--line);
-margin-top:40px;
-}
+    .hero-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
 
-/* زر المطور */
-.dev-btn{
-position:fixed;
-bottom:20px;
-left:20px;
-z-index:999;
-background:linear-gradient(135deg,#9333ea,#6366f1);
-padding:10px 16px;
-border-radius:20px;
-border:none;
-color:white;
-cursor:pointer;
-box-shadow:0 8px 20px rgba(0,0,0,.4);
-}
+    .stats{
+      margin-top:20px;
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
 
-.modal{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.7);
-display:none;
-align-items:center;
-justify-content:center;
-}
+    .stat{
+      padding:16px;
+      border-radius:18px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+    }
 
-.modal.show{
-display:flex;
-}
+    .stat strong{
+      display:block;
+      font-size:1.35rem;
+      margin-bottom:6px;
+    }
 
-.modal-box{
-background:#0e1a33;
-padding:30px;
-border-radius:20px;
-width:350px;
-}
+    .stat span{
+      color:var(--muted);
+      font-size:.92rem;
+    }
 
-.field{
-margin-bottom:12px;
-}
+    .section{
+      padding:18px 0;
+    }
 
-.field input{
-width:100%;
-padding:10px;
-border-radius:10px;
-border:1px solid var(--line);
-background:#081022;
-color:white;
-}
+    .section-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
 
-</style>
+    .section-head h3{
+      margin:0;
+      font-size:1.45rem;
+    }
+
+    .section-head p{
+      margin:6px 0 0;
+      color:var(--muted);
+    }
+
+    .levels-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:16px;
+    }
+
+    .level-card{
+      position:relative;
+      overflow:hidden;
+      padding:22px;
+    }
+
+    .level-card::after{
+      content:"";
+      position:absolute;
+      width:150px;
+      height:150px;
+      border-radius:50%;
+      inset:auto -44px -44px auto;
+      background:radial-gradient(circle, rgba(99,102,241,.22), transparent 60%);
+      pointer-events:none;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:7px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      color:#c7d2fe;
+      font-size:.9rem;
+      margin-bottom:10px;
+    }
+
+    .level-card h4{
+      margin:0 0 8px;
+      font-size:1.25rem;
+    }
+
+    .level-card p{
+      color:var(--muted);
+      line-height:1.8;
+      min-height:70px;
+      margin:0;
+    }
+
+    .meta-row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:14px 0 16px;
+    }
+
+    .meta{
+      font-size:.9rem;
+      padding:8px 10px;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.04);
+      color:#dbeafe;
+    }
+
+    .progress-line{
+      height:10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid var(--line);
+      overflow:hidden;
+      margin:10px 0 14px;
+    }
+
+    .progress-fill{
+      height:100%;
+      background:linear-gradient(90deg,var(--primary),var(--primary2));
+      width:0%;
+      transition:.3s ease;
+    }
+
+    .dashboard{
+      display:grid;
+      grid-template-columns:.92fr 1.08fr;
+      gap:18px;
+      padding-bottom:30px;
+    }
+
+    .panel{padding:20px}
+
+    .search-wrap{
+      display:grid;
+      gap:12px;
+      margin-bottom:14px;
+    }
+
+    .filters{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .field{
+      display:grid;
+      gap:8px;
+    }
+
+    .field label{
+      font-size:.92rem;
+      color:#dbeafe;
+    }
+
+    .field input,
+    .field textarea,
+    .field select{
+      width:100%;
+      border:none;
+      outline:none;
+      padding:13px 14px;
+      border-radius:14px;
+      background:#091120;
+      color:#fff;
+      border:1px solid var(--line);
+    }
+
+    .field textarea{
+      min-height:110px;
+      resize:vertical;
+    }
+
+    .lessons-list{
+      display:grid;
+      gap:12px;
+      max-height:780px;
+      overflow:auto;
+      padding-right:2px;
+    }
+
+    .lesson-item{
+      padding:15px;
+      border-radius:18px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+      cursor:pointer;
+      transition:.2s ease;
+    }
+
+    .lesson-item:hover{
+      transform:translateY(-1px);
+      border-color:rgba(99,102,241,.35);
+    }
+
+    .lesson-item.active{
+      background:linear-gradient(180deg, rgba(99,102,241,.18), rgba(99,102,241,.06));
+      border-color:rgba(99,102,241,.46);
+    }
+
+    .lesson-item-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      margin-bottom:8px;
+    }
+
+    .lesson-item h5{
+      margin:0;
+      font-size:1.04rem;
+    }
+
+    .lesson-item p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.7;
+      font-size:.93rem;
+    }
+
+    .score-tag{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:.82rem;
+      background:rgba(16,185,129,.14);
+      border:1px solid rgba(16,185,129,.25);
+      color:#d1fae5;
+      white-space:nowrap;
+    }
+
+    .viewer-empty{
+      min-height:440px;
+      display:grid;
+      place-items:center;
+      text-align:center;
+      color:var(--muted);
+      border:1px dashed rgba(255,255,255,.12);
+      border-radius:20px;
+      background:rgba(255,255,255,.02);
+      padding:20px;
+    }
+
+    .lesson-view{display:none}
+    .lesson-view.active{display:block}
+
+    .lesson-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+
+    .lesson-header h4{
+      margin:0;
+      font-size:1.55rem;
+    }
+
+    .lesson-header p{
+      margin:8px 0 0;
+      color:var(--muted);
+    }
+
+    .block{
+      margin-top:14px;
+      padding:18px;
+      border-radius:18px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.03);
+    }
+
+    .block h5{
+      margin:0 0 10px;
+      font-size:1.05rem;
+    }
+
+    .block p,.block li{
+      line-height:1.95;
+      color:#e5e7eb;
+    }
+
+    .examples,.words-grid{
+      display:grid;
+      gap:10px;
+    }
+
+    .example,.word-review-item{
+      padding:14px;
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+    }
+
+    .example strong,
+    .word-review-item strong{
+      display:block;
+      margin-bottom:6px;
+    }
+
+    .muted{color:var(--muted)}
+
+    .quiz-wrap{
+      display:grid;
+      gap:14px;
+    }
+
+    .question{
+      padding:16px;
+      border-radius:16px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--line);
+    }
+
+    .question h6{
+      margin:0 0 12px;
+      font-size:1rem;
+    }
+
+    .choices{
+      display:grid;
+      gap:10px;
+    }
+
+    .choice{
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      border-radius:14px;
+      padding:12px;
+    }
+
+    .result-box{
+      display:none;
+      margin-top:14px;
+      padding:18px;
+      border-radius:18px;
+      border:1px solid rgba(16,185,129,.25);
+      background:rgba(16,185,129,.12);
+    }
+
+    .tiny{
+      font-size:.88rem;
+      color:var(--muted);
+    }
+
+    .embed-video{
+      width:100%;
+      min-height:320px;
+      border:none;
+      border-radius:16px;
+      background:#020617;
+    }
+
+    .lesson-nav{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,.7);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      z-index:100;
+    }
+
+    .modal.show{display:flex}
+
+    .modal-box{
+      width:min(1060px,96vw);
+      max-height:92vh;
+      overflow:auto;
+      border-radius:24px;
+      background:linear-gradient(180deg,#0f172a,#111827);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      padding:20px;
+    }
+
+    .admin-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+    }
+
+    .admin-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+
+    .footer{
+      border-top:1px solid var(--line);
+      padding:22px 0 36px;
+      text-align:center;
+      color:var(--muted);
+    }
+
+    .dev-btn{
+      position:fixed;
+      left:18px;
+      bottom:18px;
+      z-index:120;
+      padding:12px 18px;
+      border-radius:999px;
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      color:#fff;
+      border:none;
+      cursor:pointer;
+      box-shadow:var(--shadow);
+    }
+
+    .status-good,.status-mid,.status-low{
+      display:inline-block;
+      margin-top:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      font-size:.9rem;
+    }
+
+    .status-good{
+      background:rgba(16,185,129,.14);
+      border:1px solid rgba(16,185,129,.25);
+      color:#d1fae5;
+    }
+
+    .status-mid{
+      background:rgba(245,158,11,.14);
+      border:1px solid rgba(245,158,11,.25);
+      color:#fef3c7;
+    }
+
+    .status-low{
+      background:rgba(239,68,68,.14);
+      border:1px solid rgba(239,68,68,.25);
+      color:#fee2e2;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid var(--line);
+      color:#e2e8f0;
+      font-size:.84rem;
+    }
+
+    .review-box{
+      display:grid;
+      gap:12px;
+    }
+
+    @media (max-width:980px){
+      .hero-grid,.dashboard,.admin-grid,.levels-grid{grid-template-columns:1fr}
+      .stats{grid-template-columns:1fr 1fr}
+      .filters{grid-template-columns:1fr}
+    }
+
+    @media (max-width:640px){
+      .topbar-inner,.section-head,.lesson-header{flex-direction:column;align-items:stretch}
+      .nav-actions .btn{flex:1}
+      .hero-main,.hero-side,.panel,.modal-box{padding:16px}
+      .embed-video{min-height:220px}
+      .stats{grid-template-columns:1fr}
+      .dev-btn{left:12px;bottom:12px}
+    }
+  </style>
 </head>
-
 <body>
-
-<header class="topbar">
-<div class="container brand">
-<div class="brand-icon">🎓</div>
-<div>
-<h3>Elite English Academy</h3>
-<p style="color:#aaa;margin:0">تعلم الإنجليزية</p>
-</div>
-</div>
-</header>
-
-<main class="container">
-
-<section class="hero">
-<div class="card">
-
-<h2>تعلم الإنجليزية بسهولة</h2>
-
-<p>
-منصة تعليمية تحتوي على مستويات ودروس وشرح وأمثلة واختبارات.
-</p>
-
-<button class="btn btn-primary" onclick="startLearning()">ابدأ التعلم</button>
-
-</div>
-</section>
-
-<section class="section">
-
-<h3>المستويات</h3>
-
-<div class="levels-grid" id="levelsGrid"></div>
-
-</section>
-
-<section class="section">
-
-<h3>الدروس</h3>
-
-<div class="lessons-list" id="lessonsList"></div>
-
-<br>
-
-<div class="viewer" id="lessonViewer">
-اختر درس لعرضه
-</div>
-
-</section>
-
-</main>
-
-<footer class="footer">
-Elite English Academy
-</footer>
-
-<!-- زر المطور -->
-<button class="dev-btn" onclick="openAdminLogin()">المطور</button>
-
-<!-- نافذة دخول المطور -->
-
-<div class="modal" id="adminModal">
-
-<div class="modal-box">
-
-<h3>تسجيل دخول المطور</h3>
-
-<div class="field">
-<input id="user" placeholder="اسم المستخدم">
-</div>
-
-<div class="field">
-<input id="pass" type="password" placeholder="كلمة المرور">
-</div>
-
-<button class="btn btn-primary" onclick="loginAdmin()">دخول</button>
-
-<br><br>
-
-<button class="btn" onclick="closeAdmin()">إغلاق</button>
-
-</div>
-
-</div>
-
-<script>
-
-const ADMIN_USERNAME="msh999"
-const ADMIN_PASSWORD="123456"
-
-const levels=[
-{
-id:1,
-title:"Beginner",
-lessons:[
-{
-id:101,
-title:"Alphabet",
-text:"الحروف الإنجليزية هي أساس اللغة."
-},
-{
-id:102,
-title:"Greetings",
-text:"Hello تعني مرحبا"
-}
-]
-},
-{
-id:2,
-title:"Intermediate",
-lessons:[
-{
-id:201,
-title:"Sentences",
-text:"تعلم الجمل الإنجليزية"
-}
-]
-}
-]
-
-function renderLevels(){
-
-const grid=document.getElementById("levelsGrid")
-
-levels.forEach(level=>{
-
-const card=document.createElement("div")
-
-card.className="level-card"
-
-card.innerHTML=`
-<h4>${level.title}</h4>
-<p>${level.lessons.length} دروس</p>
-<button class="btn btn-primary" onclick="openLevel(${level.id})">فتح</button>
-`
-
-grid.appendChild(card)
-
-})
-
-}
-
-function openLevel(id){
-
-const level=levels.find(l=>l.id===id)
-
-const list=document.getElementById("lessonsList")
-
-list.innerHTML=""
-
-level.lessons.forEach(lesson=>{
-
-const div=document.createElement("div")
-
-div.className="lesson-item"
-
-div.innerText=lesson.title
-
-div.onclick=()=>openLesson(lesson)
-
-list.appendChild(div)
-
-})
-
-}
-
-function openLesson(lesson){
-
-document.getElementById("lessonViewer").innerHTML=`
-<h3>${lesson.title}</h3>
-<p>${lesson.text}</p>
-`
-
-}
-
-function startLearning(){
-openLevel(1)
-}
-
-function openAdminLogin(){
-document.getElementById("adminModal").classList.add("show")
-}
-
-function closeAdmin(){
-document.getElementById("adminModal").classList.remove("show")
-}
-
-function loginAdmin(){
-
-const user=document.getElementById("user").value
-const pass=document.getElementById("pass").value
-
-if(user===ADMIN_USERNAME && pass===ADMIN_PASSWORD){
-
-alert("تم الدخول كـ مطور")
-
-closeAdmin()
-
-}else{
-
-alert("بيانات خاطئة")
-
-}
-
-}
-
-renderLevels()
-
-</script>
-
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-icon">🎓</div>
+        <div>
+          <h1>Elite English Academy Pro</h1>
+          <p>تعلم الإنجليزية — 40 درس جاهز + XP + مراجعة كلمات</p>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn btn-soft" onclick="scrollToSection('levelsSection')">المستويات</button>
+        <button class="btn btn-soft" onclick="scrollToSection('dashboardSection')">الدروس</button>
+        <button class="btn btn-soft" onclick="scrollToSection('reviewSection')">مراجعة الكلمات</button>
+        <button class="btn btn-warning" onclick="resetProgress()">تصفير التقدم</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-grid">
+        <div class="card hero-main">
+          <span class="pill">🚀 نسخة احترافية + 40 درس + XP + مراجعة ذكية</span>
+          <h2>تعلم الإنجليزية من الصفر إلى مستوى متقدم بطريقة مرتبة واحترافية</h2>
+          <p>
+            منصة تعليمية جاهزة تحتوي على ثلاثة مستويات رئيسية، مع 40 درسًا جاهزًا.
+            كل درس يشمل شرحًا عربيًا، أمثلة عملية، قراءة صوتية، فيديو اختياري، واختبارًا تفاعليًا.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="startLearning()">ابدأ الآن</button>
+            <button class="btn btn-success" onclick="continueLearning()">تابع آخر درس</button>
+            <button class="btn btn-info" onclick="speakText('مرحباً بك في النسخة الاحترافية من منصة تعلم اللغة الإنجليزية')">تجربة النطق</button>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong id="statLevels">0</strong>
+              <span>مستويات</span>
+            </div>
+            <div class="stat">
+              <strong id="statLessons">0</strong>
+              <span>عدد الدروس</span>
+            </div>
+            <div class="stat">
+              <strong id="statCompletion">0%</strong>
+              <span>نسبة الإنجاز</span>
+            </div>
+            <div class="stat">
+              <strong id="statXP">0</strong>
+              <span>نقاط XP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card hero-side">
+          <h3 style="margin-top:0">ملخص تقدمك</h3>
+          <p class="muted" id="progressSummary">لم تبدأ أي درس بعد.</p>
+
+          <div class="meta-row">
+            <div class="meta">✅ المنجز: <strong id="doneLessons">0</strong></div>
+            <div class="meta">📝 الاختبارات: <strong id="solvedQuizzes">0</strong></div>
+            <div class="meta">🏆 أعلى نتيجة: <strong id="bestScore">0%</strong></div>
+            <div class="meta">⭐ XP: <strong id="xpPoints">0</strong></div>
+          </div>
+
+          <div class="hero-actions">
+            <button class="btn btn-success" onclick="continueLearning()">استكمال التعلم</button>
+            <button class="btn btn-soft" onclick="openReviewFirstWord()">افتح مراجعة الكلمات</button>
+          </div>
+
+          <p class="tiny">هذه النسخة تحفظ البيانات داخل المتصفح وتدعم GitHub Pages.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="levelsSection">
+      <div class="section-head">
+        <div>
+          <h3>المستويات التعليمية</h3>
+          <p>كل مستوى يحتوي على شريط تقدم خاص به وعدد الدروس المنجزة والمتبقية.</p>
+        </div>
+      </div>
+      <div class="levels-grid" id="levelsGrid"></div>
+    </section>
+
+    <section class="section" id="dashboardSection">
+      <div class="section-head">
+        <div>
+          <h3>مساحة التعلم</h3>
+          <p>اختر مستوى، ابحث عن الدرس، افتحه، ثم اقرأ الشرح واستمع للنطق وحل الاختبار.</p>
+        </div>
+        <div class="meta-row">
+          <div class="meta" id="selectedLevelLabel">المستوى الحالي: غير محدد</div>
+          <div class="meta" id="selectedLevelProgress">التقدم: 0%</div>
+        </div>
+      </div>
+
+      <div class="dashboard">
+        <div class="card panel">
+          <div class="search-wrap">
+            <div class="field">
+              <label>بحث داخل الدروس</label>
+              <input id="lessonSearchInput" type="text" placeholder="ابحث عن اسم الدرس..." oninput="renderLessonsList(selectedLevelId)">
+            </div>
+
+            <div class="filters">
+              <div class="field">
+                <label>فلترة الدروس</label>
+                <select id="lessonFilterSelect" onchange="renderLessonsList(selectedLevelId)">
+                  <option value="all">الكل</option>
+                  <option value="completed">المنجزة فقط</option>
+                  <option value="notCompleted">غير المنجزة فقط</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>ترتيب الدروس</label>
+                <select id="lessonSortSelect" onchange="renderLessonsList(selectedLevelId)">
+                  <option value="default">الترتيب الافتراضي</option>
+                  <option value="score">حسب النتيجة</option>
+                  <option value="title">أبجديًا</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="lessons-list" id="lessonsList"></div>
+        </div>
+
+        <div class="card panel">
+          <div id="viewerEmpty" class="viewer-empty">
+            <div>
+              <h4>ابدأ باختيار مستوى ثم درس</h4>
+              <p>سيظهر هنا الشرح، الأمثلة، الصوت، الفيديو، الاختبار، والتنقل بين الدروس.</p>
+            </div>
+          </div>
+          <div class="lesson-view" id="lessonView"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="reviewSection">
+      <div class="section-head">
+        <div>
+          <h3>مراجعة الكلمات الصعبة</h3>
+          <p>هنا تظهر الكلمات والإجابات التي أخطأت فيها أثناء الاختبارات لتراجعها لاحقًا.</p>
+        </div>
+      </div>
+
+      <div class="card panel">
+        <div class="review-box">
+          <div class="meta-row">
+            <div class="meta">📚 كلمات للمراجعة: <strong id="reviewWordsCount">0</strong></div>
+            <div class="meta">🧠 مراجعة ذكية حسب أخطائك السابقة</div>
+          </div>
+          <div class="words-grid" id="reviewWordsList"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">Elite English Academy Pro — نسخة احترافية كاملة قابلة للتطوير</div>
+  </footer>
+
+  <button class="dev-btn" onclick="openAdminLogin()">المطور</button>
+
+  <!-- Admin Login -->
+  <div class="modal" id="adminLoginModal">
+    <div class="modal-box" style="max-width:540px">
+      <div class="section-head">
+        <div>
+          <h3>دخول المطور</h3>
+          <p>دخول لوحة الإدارة لتعديل المستويات والدروس والاختبارات.</p>
+        </div>
+        <button class="btn btn-soft" onclick="closeModal('adminLoginModal')">إغلاق</button>
+      </div>
+
+      <div class="field">
+        <label>اسم المستخدم</label>
+        <input id="adminUsernameInput" placeholder="msh999">
+      </div>
+
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input id="adminPasswordInput" type="password" placeholder="123456">
+      </div>
+
+      <div class="admin-actions">
+        <button class="btn btn-primary" onclick="loginAdmin()">دخول</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="modal" id="adminPanelModal">
+    <div class="modal-box">
+      <div class="section-head">
+        <div>
+          <h3>لوحة المطور الاحترافية</h3>
+          <p>إدارة كاملة للمستويات والدروس والصوت والفيديو والاختبارات، مع أدوات أسرع للتعديل.</p>
+        </div>
+        <div class="nav-actions">
+          <button class="btn btn-success" onclick="exportData()">تصدير JSON</button>
+          <button class="btn btn-warning" onclick="document.getElementById('importJsonInput').click()">استيراد JSON</button>
+          <button class="btn btn-info" onclick="seedDefaultData(true)">إعادة تعيين 40 درس الجاهزة</button>
+          <button class="btn btn-danger" onclick="closeModal('adminPanelModal')">إغلاق</button>
+        </div>
+      </div>
+
+      <input id="importJsonInput" type="file" accept=".json" style="display:none" onchange="importData(event)">
+
+      <div class="admin-grid">
+        <div class="block">
+          <h5>إدارة المستويات</h5>
+
+          <div class="field">
+            <label>اختر مستوى للتعديل</label>
+            <select id="adminLevelSelect"></select>
+          </div>
+
+          <div class="field">
+            <label>اسم المستوى</label>
+            <input id="adminLevelTitle" placeholder="مثال: Beginner">
+          </div>
+
+          <div class="field">
+            <label>وصف المستوى</label>
+            <textarea id="adminLevelDescription" placeholder="وصف المستوى"></textarea>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-primary" onclick="saveLevel()">حفظ المستوى</button>
+            <button class="btn btn-danger" onclick="deleteLevel()">حذف المستوى</button>
+            <button class="btn btn-soft" onclick="clearLevelForm()">جديد</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <h5>إدارة الدروس</h5>
+
+          <div class="field">
+            <label>اختر درسًا للتعديل</label>
+            <select id="adminLessonSelect"></select>
+          </div>
+
+          <div class="field">
+            <label>المستوى</label>
+            <select id="adminLessonLevel"></select>
+          </div>
+
+          <div class="field">
+            <label>عنوان الدرس</label>
+            <input id="adminLessonTitle" placeholder="مثال: Greetings">
+          </div>
+
+          <div class="field">
+            <label>وصف قصير</label>
+            <input id="adminLessonShort" placeholder="ملخص قصير يظهر في القائمة">
+          </div>
+
+          <div class="field">
+            <label>شرح الدرس بالعربية</label>
+            <textarea id="adminLessonExplanation" placeholder="شرح مفصل للدرس"></textarea>
+          </div>
+
+          <div class="field">
+            <label>قيمة XP لهذا الدرس</label>
+            <input id="adminLessonXP" type="number" placeholder="25">
+          </div>
+
+          <div class="field">
+            <label>رابط الصوت MP3</label>
+            <input id="adminLessonAudio" placeholder="https://example.com/audio.mp3">
+          </div>
+
+          <div class="field">
+            <label>رابط الفيديو Embed</label>
+            <input id="adminLessonVideo" placeholder="https://www.youtube.com/embed/xxxx">
+          </div>
+
+          <div class="field">
+            <label>أمثلة الدرس - كل سطر بهذا الشكل: English | العربية</label>
+            <textarea id="adminLessonExamples" placeholder="Hello | مرحباً&#10;How are you? | كيف حالك؟"></textarea>
+          </div>
+
+          <div class="field">
+            <label>أسئلة الاختبار بصيغة JSON</label>
+            <textarea id="adminLessonQuiz" placeholder='[{"question":"Hello معناها؟","choices":["وداعاً","مرحباً","شكراً"],"answer":1}]'></textarea>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-primary" onclick="saveLesson()">حفظ الدرس</button>
+            <button class="btn btn-danger" onclick="deleteLesson()">حذف الدرس</button>
+            <button class="btn btn-soft" onclick="clearLessonForm()">جديد</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <h5>ملاحظات مهمة</h5>
+        <p class="muted">
+          هذه النسخة تحفظ البيانات محليًا في المتصفح. يمكنك لاحقًا ربطها مع Firebase أو أي Backend
+          إذا أردت حسابات مستخدمين وتخزينًا دائمًا للجميع.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "elite_english_pro_v4_data";
+    const PROGRESS_KEY = "elite_english_pro_v4_progress";
+    const ADMIN_USERNAME = "msh999";
+    const ADMIN_PASSWORD = "123456";
+
+    let appData = null;
+    let progressData = null;
+    let selectedLevelId = null;
+    let selectedLessonId = null;
+    let editingLevelId = null;
+    let editingLessonId = null;
+
+    const beginnerLessonsSeed = [
+      ["Greetings", "تعلم التحيات الأساسية المستخدمة يوميًا.", "ستتعلم Hello و Good morning و Good evening وكيف تبدأ أي محادثة بسيطة."],
+      ["Self Introduction", "تقديم النفس بطريقة بسيطة وواضحة.", "ستتعلم كيف تقول اسمك وبلدك ومهنتك بطريقة سهلة ومناسبة للمبتدئين."],
+      ["Numbers 1-10", "تعلم الأرقام من 1 إلى 10.", "في هذا الدرس ستتعلم الأرقام الأساسية وكيف تستخدمها في مواقف يومية."],
+      ["Colors", "تعلم أسماء الألوان الأساسية.", "ستتعرف على الألوان الشائعة وتستخدمها في وصف الأشياء."],
+      ["Family Members", "تعلم أفراد العائلة.", "ستتعلم كلمات مثل father و mother و brother و sister."],
+      ["Days of the Week", "تعلم أيام الأسبوع.", "ستتعلم Monday إلى Sunday مع أمثلة عملية."],
+      ["Months", "تعلم أشهر السنة.", "ستتعلم January إلى December وكيف تستخدمها عند الحديث عن التاريخ."],
+      ["Common Verbs", "أفعال يومية أساسية.", "ستتعلم أفعالًا شائعة مثل go و eat و sleep و study."],
+      ["At School", "مفردات المدرسة.", "ستتعرف على كلمات مثل book و pen و class و teacher."],
+      ["At Home", "مفردات المنزل.", "ستتعلم كلمات تستخدم داخل البيت مثل door و room و kitchen."],
+      ["Food and Drink", "الطعام والشراب.", "ستتعلم كلمات أساسية تستخدم عند الحديث عن الطعام والمشروبات."],
+      ["Questions Basics", "أساسيات الأسئلة.", "ستتعلم What و Where و Who و How بطريقة سهلة."],
+      ["Simple Sentences", "بناء الجمل البسيطة.", "ستتعلم تكوين جمل قصيرة مثل I am happy و He is tall."],
+      ["Daily Routine", "الروتين اليومي.", "ستتعلم وصف يومك باستخدام جمل سهلة وواضحة."],
+      ["Time Basics", "معرفة الوقت بشكل بسيط.", "ستتعلم how to ask the time وكيف تقول الساعة بشكل أساسي."]
+    ];
+
+    const intermediateLessonsSeed = [
+      ["Present Simple", "استخدام المضارع البسيط.", "ستتعلم التعبير عن العادات والحقائق والأشياء المتكررة."],
+      ["Present Continuous", "استخدام المضارع المستمر.", "ستتعلم كيف تصف ما يحدث الآن مثل I am studying."],
+      ["Past Simple", "استخدام الماضي البسيط.", "ستتعلم وصف أحداث وقعت في الماضي."],
+      ["Future Will", "التعبير عن المستقبل باستخدام will.", "ستتعلم كيف تعبّر عن خطط أو توقعات مستقبلية."],
+      ["Prepositions", "حروف الجر الأساسية.", "ستتعلم in و on و at و under مع أمثلة واضحة."],
+      ["Comparatives", "المقارنة بين الأشياء.", "ستتعلم bigger و smaller و faster وكيف تستخدمها."],
+      ["Superlatives", "صيغة التفضيل.", "ستتعلم best و biggest و most important."],
+      ["Countable and Uncountable", "المعدود وغير المعدود.", "ستتعلم الفرق بين much و many و some و any."],
+      ["Shopping English", "الإنجليزية في التسوق.", "ستتعلم السؤال عن السعر والمقاس والشراء."],
+      ["Travel English", "الإنجليزية في السفر.", "ستتعلم مفردات وجمل تستخدم في المطار والفندق."],
+      ["Restaurant English", "الإنجليزية في المطاعم.", "ستتعلم كيف تطلب الطعام وتفهم القائمة."],
+      ["Health and Body", "الصحة والجسم.", "ستتعلم كلمات أساسية تتعلق بالجسم والصحة."],
+      ["Work and Jobs", "العمل والمهن.", "ستتعلم كلمات خاصة بالوظائف والعمل المكتبي."],
+      ["Making Requests", "طلب الأشياء بأدب.", "ستتعلم Can you و Could you و Would you mind."],
+      ["Phone Conversations", "المحادثات الهاتفية.", "ستتعلم عبارات الرد والاتصال والاستفسار عبر الهاتف."]
+    ];
+
+    const advancedLessonsSeed = [
+      ["Advanced Conversation", "المحادثة المتقدمة الطبيعية.", "ستتعلم التعبير عن رأيك والموافقة والاعتراض بطريقة أكثر طبيعية."],
+      ["Professional Emails", "البريد الإلكتروني المهني.", "ستتعلم كتابة رسائل مهنية واضحة ومختصرة."],
+      ["Meetings English", "الإنجليزية في الاجتماعات.", "ستتعلم عبارات مهمة للاجتماعات والمناقشات."],
+      ["Opinion and Debate", "التعبير عن الرأي والنقاش.", "ستتعلم كيف تطرح رأيك وتدعمه بأسباب منطقية."],
+      ["Problem Solving", "حل المشكلات باللغة الإنجليزية.", "ستتعلم مفردات وعبارات خاصة بتحليل المشكلات والحلول."],
+      ["Negotiation Skills", "مهارات التفاوض.", "ستتعلم عبارات تفاوض مهني ولغة مرنة للإقناع."],
+      ["Presentation Skills", "مهارات العروض التقديمية.", "ستتعلم كيف تبدأ العرض وتنتقل بين النقاط وتختم بثقة."],
+      ["Academic English", "اللغة الإنجليزية الأكاديمية.", "ستتعلم عبارات مناسبة للكتابة والقراءة الأكاديمية."],
+      ["Fluency Practice", "تمارين الطلاقة.", "ستتعلم استراتيجيات لتحسين الانسيابية والسرعة في التحدث."],
+      ["Idioms and Natural English", "تعبيرات طبيعية واصطلاحية.", "ستتعلم مجموعة من التعابير المستخدمة بكثرة في الإنجليزية الطبيعية."]
+    ];
+
+    function createExamples(title, idx){
+      const map = {
+        "Greetings": [
+          {en:"Hello", ar:"مرحباً"},
+          {en:"Good morning", ar:"صباح الخير"},
+          {en:"How are you?", ar:"كيف حالك؟"}
+        ],
+        "Self Introduction": [
+          {en:"My name is Ahmed.", ar:"اسمي أحمد."},
+          {en:"I am from Medina.", ar:"أنا من المدينة."},
+          {en:"I am a student.", ar:"أنا طالب."}
+        ],
+        "Numbers 1-10": [
+          {en:"One", ar:"واحد"},
+          {en:"Five", ar:"خمسة"},
+          {en:"Ten", ar:"عشرة"}
+        ],
+        "Colors": [
+          {en:"Red", ar:"أحمر"},
+          {en:"Blue", ar:"أزرق"},
+          {en:"Green", ar:"أخضر"}
+        ],
+        "Family Members": [
+          {en:"Father", ar:"أب"},
+          {en:"Mother", ar:"أم"},
+          {en:"Brother", ar:"أخ"}
+        ],
+        "Present Simple": [
+          {en:"I go to work every day.", ar:"أنا أذهب إلى العمل كل يوم."},
+          {en:"She drinks tea every morning.", ar:"هي تشرب الشاي كل صباح."},
+          {en:"They live in Riyadh.", ar:"هم يعيشون في الرياض."}
+        ],
+        "Present Continuous": [
+          {en:"I am studying الآن.", ar:"أنا أدرس الآن."},
+          {en:"She is cooking dinner.", ar:"هي تطبخ العشاء."},
+          {en:"They are playing football.", ar:"هم يلعبون كرة القدم."}
+        ],
+        "Past Simple": [
+          {en:"I visited Jeddah last week.", ar:"زرت جدة الأسبوع الماضي."},
+          {en:"He watched a movie أمس.", ar:"هو شاهد فيلمًا أمس."},
+          {en:"We finished the lesson.", ar:"أنهينا الدرس."}
+        ],
+        "Advanced Conversation": [
+          {en:"In my opinion, this is the best option.", ar:"في رأيي، هذا هو الخيار الأفضل."},
+          {en:"I completely agree with you.", ar:"أنا أتفق معك تمامًا."},
+          {en:"That depends on the situation.", ar:"ذلك يعتمد على الموقف."}
+        ]
+      };
+
+      if (map[title]) return map[title];
+
+      return [
+        { en: `Example ${idx} A for ${title}`, ar: `مثال ${idx} أ للدرس ${title}` },
+        { en: `Example ${idx} B for ${title}`, ar: `مثال ${idx} ب للدرس ${title}` },
+        { en: `Useful sentence in ${title}`, ar: `جملة مفيدة في درس ${title}` }
+      ];
+    }
+
+    function createQuiz(title, examples){
+      const first = examples[0]?.en || title;
+      const firstAr = examples[0]?.ar || "المعنى الصحيح";
+      const second = examples[1]?.en || "Useful English";
+      const secondAr = examples[1]?.ar || "ترجمة صحيحة";
+      return [
+        {
+          question: `ما معنى "${first}"؟`,
+          choices: [firstAr, "معنى غير صحيح", "خيار خاطئ"],
+          answer: 0
+        },
+        {
+          question: `اختر الترجمة الصحيحة لـ "${second}"`,
+          choices: ["خيار خاطئ", secondAr, "ترجمة غير مناسبة"],
+          answer: 1
+        },
+        {
+          question: `هذا الدرس بعنوان:`,
+          choices: ["درس مختلف", title, "عنوان غير صحيح"],
+          answer: 1
+        }
+      ];
+    }
+
+    function buildLevel(levelId, title, description, seedArray, baseId, xpBase){
+      return {
+        id: levelId,
+        title,
+        description,
+        lessons: seedArray.map((item, i) => {
+          const lessonTitle = item[0];
+          const shortDescription = item[1];
+          const explanation = item[2];
+          const examples = createExamples(lessonTitle, i + 1);
+          return {
+            id: baseId + i + 1,
+            title: lessonTitle,
+            shortDescription,
+            explanation,
+            xp: xpBase,
+            audio: "",
+            video: "",
+            examples,
+            quiz: createQuiz(lessonTitle, examples)
+          };
+        })
+      };
+    }
+
+    function getDefaultData(){
+      return {
+        levels: [
+          buildLevel(
+            1,
+            "Beginner",
+            "مناسب للمبتدئين: التحيات، الأساسيات، المفردات اليومية، والجمل السهلة.",
+            beginnerLessonsSeed,
+            100,
+            20
+          ),
+          buildLevel(
+            2,
+            "Intermediate",
+            "مناسب لمن لديه أساس جيد ويريد تطوير القواعد، المحادثة، والاستماع.",
+            intermediateLessonsSeed,
+            200,
+            30
+          ),
+          buildLevel(
+            3,
+            "Advanced",
+            "مناسب لمن يريد الطلاقة، العمل، الكتابة الاحترافية، والتعبير الطبيعي.",
+            advancedLessonsSeed,
+            300,
+            40
+          )
+        ]
+      };
+    }
+
+    function getDefaultProgress(){
+      return {
+        completedLessons: {},
+        quizResults: {},
+        xp: 0,
+        awardedXP: {},
+        reviewWords: []
+      };
+    }
+
+    function structuredCopy(obj){
+      return JSON.parse(JSON.stringify(obj));
+    }
+
+    function loadData(){
+      const saved = localStorage.getItem(STORAGE_KEY);
+      appData = saved ? JSON.parse(saved) : getDefaultData();
+    }
+
+    function saveData(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    function loadProgress(){
+      const saved = localStorage.getItem(PROGRESS_KEY);
+      progressData = saved ? JSON.parse(saved) : getDefaultProgress();
+
+      if (!progressData.reviewWords) progressData.reviewWords = [];
+      if (typeof progressData.xp !== "number") progressData.xp = 0;
+      if (!progressData.awardedXP) progressData.awardedXP = {};
+      if (!progressData.completedLessons) progressData.completedLessons = {};
+      if (!progressData.quizResults) progressData.quizResults = {};
+    }
+
+    function saveProgress(){
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressData));
+    }
+
+    function initApp(){
+      loadData();
+      loadProgress();
+      renderLevels();
+      renderLessonsList(null);
+      updateStats();
+      updateProgressWidgets();
+      renderReviewWords();
+    }
+
+    function seedDefaultData(force = false){
+      if (!force && !confirm("هل تريد تحميل بيانات 40 درس الجاهزة؟")) return;
+      appData = getDefaultData();
+      saveData();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      updateStats();
+      updateProgressWidgets();
+      syncAdminSelectors();
+      alert("تم تحميل بيانات الـ 40 درس الجاهزة.");
+    }
+
+    function updateStats(){
+      const levelsCount = appData.levels.length;
+      const lessonsCount = appData.levels.reduce((sum, level) => sum + level.lessons.length, 0);
+      document.getElementById("statLevels").textContent = levelsCount;
+      document.getElementById("statLessons").textContent = lessonsCount;
+
+      const completedCount = Object.keys(progressData.completedLessons).length;
+      const completion = lessonsCount ? Math.round((completedCount / lessonsCount) * 100) : 0;
+      document.getElementById("statCompletion").textContent = completion + "%";
+      document.getElementById("statXP").textContent = progressData.xp || 0;
+    }
+
+    function updateProgressWidgets(){
+      const done = Object.keys(progressData.completedLessons).length;
+      const scores = Object.values(progressData.quizResults);
+      const solved = scores.length;
+      const best = scores.length ? Math.max(...scores) : 0;
+      const totalLessons = appData.levels.reduce((sum, level) => sum + level.lessons.length, 0);
+
+      document.getElementById("doneLessons").textContent = done;
+      document.getElementById("solvedQuizzes").textContent = solved;
+      document.getElementById("bestScore").textContent = best + "%";
+      document.getElementById("xpPoints").textContent = progressData.xp || 0;
+
+      if (!done && !solved) {
+        document.getElementById("progressSummary").textContent = "لم تبدأ أي درس بعد.";
+      } else {
+        document.getElementById("progressSummary").textContent =
+          `أنهيت ${done} درسًا من أصل ${totalLessons}، وحللت ${solved} اختبارًا، وأعلى نتيجة حققتها هي ${best}%، وجمعت ${progressData.xp || 0} نقطة XP.`;
+      }
+
+      updateStats();
+
+      if (selectedLevelId) {
+        const level = appData.levels.find(l => l.id === selectedLevelId);
+        if (level) {
+          const doneInLevel = level.lessons.filter(lesson => progressData.completedLessons[lesson.id]).length;
+          const progress = level.lessons.length ? Math.round((doneInLevel / level.lessons.length) * 100) : 0;
+          document.getElementById("selectedLevelProgress").textContent = `التقدم: ${progress}%`;
+        }
+      }
+    }
+
+    function renderLevels(){
+      const grid = document.getElementById("levelsGrid");
+      grid.innerHTML = "";
+
+      appData.levels.forEach((level, index) => {
+        const doneInLevel = level.lessons.filter(lesson => progressData.completedLessons[lesson.id]).length;
+        const progress = level.lessons.length ? Math.round((doneInLevel / level.lessons.length) * 100) : 0;
+        const levelXP = level.lessons.reduce((sum, lesson) => sum + Number(lesson.xp || 0), 0);
+
+        const el = document.createElement("div");
+        el.className = "card level-card";
+        el.innerHTML = `
+          <div class="badge">المستوى ${index + 1}</div>
+          <h4>${escapeHtml(level.title)}</h4>
+          <p>${escapeHtml(level.description)}</p>
+
+          <div class="progress-line">
+            <div class="progress-fill" style="width:${progress}%"></div>
+          </div>
+
+          <div class="meta-row">
+            <div class="meta">📘 ${level.lessons.length} درس</div>
+            <div class="meta">✅ ${doneInLevel} منجز</div>
+            <div class="meta">📈 ${progress}%</div>
+            <div class="meta">⭐ ${levelXP} XP</div>
+          </div>
+          <button class="btn btn-primary" onclick="selectLevel(${level.id})">عرض الدروس</button>
+        `;
+        grid.appendChild(el);
+      });
+    }
+
+    function renderLessonsList(levelId){
+      const list = document.getElementById("lessonsList");
+      const label = document.getElementById("selectedLevelLabel");
+      const progressLabel = document.getElementById("selectedLevelProgress");
+      const searchTerm = document.getElementById("lessonSearchInput").value.trim().toLowerCase();
+      const filterValue = document.getElementById("lessonFilterSelect").value;
+      const sortValue = document.getElementById("lessonSortSelect").value;
+
+      list.innerHTML = "";
+
+      if (!levelId) {
+        label.textContent = "المستوى الحالي: غير محدد";
+        progressLabel.textContent = "التقدم: 0%";
+        list.innerHTML = `<div class="viewer-empty" style="min-height:230px">اختر مستوى لعرض دروسه هنا.</div>`;
+        return;
+      }
+
+      selectedLevelId = levelId;
+      const level = appData.levels.find(l => l.id === levelId);
+      if (!level) return;
+
+      const doneInLevel = level.lessons.filter(lesson => progressData.completedLessons[lesson.id]).length;
+      const progress = level.lessons.length ? Math.round((doneInLevel / level.lessons.length) * 100) : 0;
+
+      label.textContent = `المستوى الحالي: ${level.title}`;
+      progressLabel.textContent = `التقدم: ${progress}%`;
+
+      let lessons = [...level.lessons];
+
+      if (searchTerm) {
+        lessons = lessons.filter(lesson =>
+          lesson.title.toLowerCase().includes(searchTerm) ||
+          (lesson.shortDescription || "").toLowerCase().includes(searchTerm) ||
+          (lesson.explanation || "").toLowerCase().includes(searchTerm)
+        );
+      }
+
+      if (filterValue === "completed") {
+        lessons = lessons.filter(lesson => progressData.completedLessons[lesson.id]);
+      } else if (filterValue === "notCompleted") {
+        lessons = lessons.filter(lesson => !progressData.completedLessons[lesson.id]);
+      }
+
+      if (sortValue === "score") {
+        lessons.sort((a, b) => (progressData.quizResults[b.id] || 0) - (progressData.quizResults[a.id] || 0));
+      } else if (sortValue === "title") {
+        lessons.sort((a, b) => a.title.localeCompare(b.title));
+      }
+
+      if (!lessons.length) {
+        list.innerHTML = `<div class="viewer-empty" style="min-height:230px">لا توجد دروس مطابقة للبحث أو الفلترة.</div>`;
+        return;
+      }
+
+      lessons.forEach((lesson, idx) => {
+        const bestScore = progressData.quizResults[lesson.id] || 0;
+        const done = !!progressData.completedLessons[lesson.id];
+        const item = document.createElement("div");
+        item.className = "lesson-item" + (selectedLessonId === lesson.id ? " active" : "");
+        item.onclick = () => openLesson(lesson.id);
+
+        item.innerHTML = `
+          <div class="lesson-item-top">
+            <h5>${idx + 1}. ${escapeHtml(lesson.title)}</h5>
+            <span class="score-tag">${bestScore}%</span>
+          </div>
+          <p>${escapeHtml(lesson.shortDescription || "درس تفاعلي مع شرح واختبار")}</p>
+          <div class="meta-row" style="margin-top:10px">
+            <span class="chip">${done ? "✅ منجز" : "🕒 غير منجز"}</span>
+            <span class="chip">⭐ ${lesson.xp || 0} XP</span>
+            <span class="chip">📝 ${(lesson.quiz || []).length} أسئلة</span>
+          </div>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function openLesson(lessonId){
+      selectedLessonId = lessonId;
+      renderLessonsList(selectedLevelId);
+
+      const lesson = findLessonById(lessonId);
+      if (!lesson) return;
+
+      document.getElementById("viewerEmpty").style.display = "none";
+      const lessonView = document.getElementById("lessonView");
+      lessonView.classList.add("active");
+
+      const examplesHtml = (lesson.examples || []).map(ex => `
+        <div class="example">
+          <strong>${escapeHtml(ex.en)}</strong>
+          <div class="muted">${escapeHtml(ex.ar)}</div>
+        </div>
+      `).join("");
+
+      const quizHtml = (lesson.quiz || []).map((q, qIndex) => `
+        <div class="question">
+          <h6>${qIndex + 1}) ${escapeHtml(q.question)}</h6>
+          <div class="choices">
+            ${q.choices.map((choice, cIndex) => `
+              <label class="choice">
+                <input type="radio" name="q_${qIndex}" value="${cIndex}">
+                <span>${escapeHtml(choice)}</span>
+              </label>
+            `).join("")}
+          </div>
+        </div>
+      `).join("");
+
+      const oldScore = progressData.quizResults[lesson.id] || 0;
+
+      lessonView.innerHTML = `
+        <div class="lesson-header">
+          <div>
+            <h4>${escapeHtml(lesson.title)}</h4>
+            <p>${escapeHtml(lesson.shortDescription || "")}</p>
+            ${renderLessonStatus(oldScore)}
+            <div class="meta-row">
+              <div class="meta">⭐ ${lesson.xp || 0} XP</div>
+              <div class="meta">📝 ${(lesson.quiz || []).length} أسئلة</div>
+              <div class="meta">${progressData.completedLessons[lesson.id] ? "✅ مكتمل" : "🕒 لم يكتمل بعد"}</div>
+            </div>
+          </div>
+
+          <div class="nav-actions">
+            <button class="btn btn-success" onclick="speakLesson(${lesson.id})">🔊 قراءة الشرح</button>
+            <button class="btn btn-soft" onclick="stopSpeaking()">⏹ إيقاف</button>
+          </div>
+        </div>
+
+        <div class="block">
+          <h5>شرح الدرس</h5>
+          <p>${escapeHtml(lesson.explanation || "")}</p>
+        </div>
+
+        ${(lesson.audio || "").trim() ? `
+          <div class="block">
+            <h5>الشرح الصوتي</h5>
+            <audio controls style="width:100%">
+              <source src="${escapeHtmlAttr(lesson.audio)}" type="audio/mpeg">
+            </audio>
+          </div>
+        ` : ""}
+
+        ${(lesson.video || "").trim() ? `
+          <div class="block">
+            <h5>شرح بالفيديو</h5>
+            <iframe class="embed-video" src="${escapeHtmlAttr(lesson.video)}" allowfullscreen></iframe>
+          </div>
+        ` : ""}
+
+        ${(lesson.examples || []).length ? `
+          <div class="block">
+            <h5>أمثلة</h5>
+            <div class="examples">${examplesHtml}</div>
+          </div>
+        ` : ""}
+
+        ${(lesson.quiz || []).length ? `
+          <div class="block">
+            <h5>اختبار الدرس</h5>
+            <div class="quiz-wrap">${quizHtml}</div>
+            <div class="admin-actions">
+              <button class="btn btn-primary" onclick="submitQuiz(${lesson.id})">تصحيح الاختبار</button>
+            </div>
+            <div class="result-box" id="quizResultBox"></div>
+          </div>
+        ` : ""}
+
+        <div class="lesson-nav">
+          <button class="btn btn-soft" onclick="openPrevLesson()">الدرس السابق</button>
+          <button class="btn btn-primary" onclick="openNextLesson()">الدرس التالي</button>
+        </div>
+      `;
+    }
+
+    function renderLessonStatus(score){
+      if (score >= 80) return `<div class="status-good">نتيجتك السابقة: ${score}% — ممتاز</div>`;
+      if (score >= 50) return `<div class="status-mid">نتيجتك السابقة: ${score}% — جيد</div>`;
+      if (score > 0) return `<div class="status-low">نتيجتك السابقة: ${score}% — يحتاج مراجعة</div>`;
+      return `<div class="tiny">لا توجد نتيجة سابقة لهذا الدرس.</div>`;
+    }
+
+    function submitQuiz(lessonId){
+      const lesson = findLessonById(lessonId);
+      if (!lesson || !lesson.quiz || !lesson.quiz.length) return;
+
+      let correct = 0;
+      let answered = 0;
+      const feedback = [];
+      const wrongAnswersForReview = [];
+
+      lesson.quiz.forEach((q, qIndex) => {
+        const checked = document.querySelector(`input[name="q_${qIndex}"]:checked`);
+        if (checked) {
+          answered++;
+          const chosen = Number(checked.value);
+          const ok = chosen === q.answer;
+          if (ok) correct++;
+
+          feedback.push(`
+            <div class="example" style="margin-top:8px">
+              <strong>السؤال ${qIndex + 1}</strong>
+              <div class="muted">${escapeHtml(q.question)}</div>
+              <div>${ok ? "✅ إجابة صحيحة" : "❌ إجابة غير صحيحة"}</div>
+              ${!ok ? `<div class="tiny">الإجابة الصحيحة: ${escapeHtml(q.choices[q.answer])}</div>` : ""}
+            </div>
+          `);
+
+          if (!ok) {
+            wrongAnswersForReview.push({
+              lessonId: lesson.id,
+              lessonTitle: lesson.title,
+              question: q.question,
+              correctAnswer: q.choices[q.answer]
+            });
+          }
+        } else {
+          feedback.push(`
+            <div class="example" style="margin-top:8px">
+              <strong>السؤال ${qIndex + 1}</strong>
+              <div class="muted">${escapeHtml(q.question)}</div>
+              <div>⚠️ لم تتم الإجابة عليه</div>
+              <div class="tiny">الإجابة الصحيحة: ${escapeHtml(q.choices[q.answer])}</div>
+            </div>
+          `);
+
+          wrongAnswersForReview.push({
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            question: q.question,
+            correctAnswer: q.choices[q.answer]
+          });
+        }
+      });
+
+      const score = Math.round((correct / lesson.quiz.length) * 100);
+      const oldScore = progressData.quizResults[lesson.id] || 0;
+      progressData.quizResults[lesson.id] = Math.max(oldScore, score);
+
+      if (score >= 60) {
+        progressData.completedLessons[lesson.id] = true;
+      }
+
+      if (score >= 60 && !progressData.awardedXP[lesson.id]) {
+        progressData.xp += Number(lesson.xp || 0);
+        progressData.awardedXP[lesson.id] = true;
+      }
+
+      addReviewWords(wrongAnswersForReview);
+
+      saveProgress();
+      updateProgressWidgets();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      renderReviewWords();
+
+      const box = document.getElementById("quizResultBox");
+      box.style.display = "block";
+      box.innerHTML = `
+        <h4 style="margin-top:0">نتيجتك: ${score}%</h4>
+        <p class="muted">أجبت على ${answered} من أصل ${lesson.quiz.length} سؤال، والإجابات الصحيحة ${correct}.</p>
+        ${score >= 80
+          ? `<div class="status-good">أداء ممتاز — ربحت ${progressData.awardedXP[lesson.id] ? lesson.xp : 0} XP إذا كانت أول مرة تنجح فيها.</div>`
+          : score >= 50
+            ? `<div class="status-mid">أداء جيد — يفضّل إعادة مراجعة الدرس</div>`
+            : `<div class="status-low">أداء ضعيف — أعد شرح الدرس ثم حاول مرة أخرى</div>`
+        }
+        <div style="margin-top:12px">${feedback.join("")}</div>
+      `;
+    }
+
+    function addReviewWords(items){
+      if (!Array.isArray(items) || !items.length) return;
+
+      items.forEach(item => {
+        const exists = progressData.reviewWords.some(word =>
+          word.lessonId === item.lessonId &&
+          word.question === item.question &&
+          word.correctAnswer === item.correctAnswer
+        );
+
+        if (!exists) {
+          progressData.reviewWords.unshift(item);
+        }
+      });
+
+      progressData.reviewWords = progressData.reviewWords.slice(0, 100);
+    }
+
+    function renderReviewWords(){
+      const container = document.getElementById("reviewWordsList");
+      const countEl = document.getElementById("reviewWordsCount");
+      container.innerHTML = "";
+
+      const reviewWords = progressData.reviewWords || [];
+      countEl.textContent = reviewWords.length;
+
+      if (!reviewWords.length) {
+        container.innerHTML = `<div class="viewer-empty" style="min-height:220px">لا توجد كلمات أو أسئلة للمراجعة حتى الآن. ستظهر هنا العناصر التي تخطئ فيها أثناء الاختبارات.</div>`;
+        return;
+      }
+
+      reviewWords.forEach((item, index) => {
+        const div = document.createElement("div");
+        div.className = "word-review-item";
+        div.innerHTML = `
+          <strong>${index + 1}. ${escapeHtml(item.lessonTitle)}</strong>
+          <div class="muted" style="margin-bottom:6px">${escapeHtml(item.question)}</div>
+          <div>الإجابة الصحيحة: <strong>${escapeHtml(item.correctAnswer)}</strong></div>
+          <div class="admin-actions" style="margin-top:10px">
+            <button class="btn btn-soft" onclick="openLesson(${item.lessonId}); scrollToSection('dashboardSection')">افتح الدرس</button>
+            <button class="btn btn-danger" onclick="removeReviewItem(${index})">حذف من المراجعة</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function removeReviewItem(index){
+      progressData.reviewWords.splice(index, 1);
+      saveProgress();
+      renderReviewWords();
+    }
+
+    function openReviewFirstWord(){
+      scrollToSection("reviewSection");
+    }
+
+    function speakLesson(lessonId){
+      const lesson = findLessonById(lessonId);
+      if (!lesson) return;
+      const examplesText = (lesson.examples || []).map(ex => `${ex.en}. معناها ${ex.ar}.`).join(" ");
+      const text = `عنوان الدرس ${lesson.title}. شرح الدرس: ${lesson.explanation}. ${examplesText}`;
+      speakText(text);
+    }
+
+    function speakText(text){
+      stopSpeaking();
+      if (!("speechSynthesis" in window)) {
+        alert("المتصفح لا يدعم النطق الصوتي.");
+        return;
+      }
+
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = "ar-SA";
+      utter.rate = 0.95;
+      utter.pitch = 1.1;
+      utter.volume = 1;
+
+      const voices = speechSynthesis.getVoices();
+      const arabicVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
+      if (arabicVoices.length) utter.voice = arabicVoices[0];
+
+      speechSynthesis.speak(utter);
+    }
+
+    function stopSpeaking(){
+      if ("speechSynthesis" in window) speechSynthesis.cancel();
+    }
+
+    function selectLevel(levelId){
+      selectedLevelId = levelId;
+      selectedLessonId = null;
+      renderLessonsList(levelId);
+      document.getElementById("viewerEmpty").style.display = "grid";
+      document.getElementById("lessonView").classList.remove("active");
+      scrollToSection("dashboardSection");
+    }
+
+    function startLearning(){
+      if (!appData.levels.length) return;
+      const firstLevel = appData.levels[0];
+      selectLevel(firstLevel.id);
+      if (firstLevel.lessons.length) openLesson(firstLevel.lessons[0].id);
+    }
+
+    function continueLearning(){
+      const allLessons = appData.levels.flatMap(level => level.lessons);
+      const nextLesson = allLessons.find(lesson => !progressData.completedLessons[lesson.id]) || allLessons[0];
+      if (!nextLesson) return;
+
+      const level = findLevelByLessonId(nextLesson.id);
+      if (!level) return;
+
+      selectLevel(level.id);
+      openLesson(nextLesson.id);
+    }
+
+    function openNextLesson(){
+      if (!selectedLessonId) return;
+      const allLessons = getCurrentLevelLessons();
+      const index = allLessons.findIndex(lesson => lesson.id === selectedLessonId);
+      if (index === -1) return;
+      const next = allLessons[index + 1];
+      if (next) openLesson(next.id);
+    }
+
+    function openPrevLesson(){
+      if (!selectedLessonId) return;
+      const allLessons = getCurrentLevelLessons();
+      const index = allLessons.findIndex(lesson => lesson.id === selectedLessonId);
+      if (index <= 0) return;
+      const prev = allLessons[index - 1];
+      if (prev) openLesson(prev.id);
+    }
+
+    function getCurrentLevelLessons(){
+      const level = appData.levels.find(l => l.id === selectedLevelId);
+      return level ? level.lessons : [];
+    }
+
+    function resetProgress(){
+      if (!confirm("هل تريد تصفير التقدم والنتائج وXP ومراجعة الكلمات؟")) return;
+      progressData = getDefaultProgress();
+      saveProgress();
+      updateProgressWidgets();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      renderReviewWords();
+      if (selectedLessonId) openLesson(selectedLessonId);
+    }
+
+    function scrollToSection(id){
+      document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+    }
+
+    function openAdminLogin(){
+      document.getElementById("adminLoginModal").classList.add("show");
+    }
+
+    function closeModal(id){
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function loginAdmin(){
+      const user = document.getElementById("adminUsernameInput").value.trim();
+      const pass = document.getElementById("adminPasswordInput").value.trim();
+
+      if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+        closeModal("adminLoginModal");
+        openAdminPanel();
+      } else {
+        alert("بيانات الدخول غير صحيحة.");
+      }
+    }
+
+    function openAdminPanel(){
+      syncAdminSelectors();
+      document.getElementById("adminPanelModal").classList.add("show");
+    }
+
+    function syncAdminSelectors(){
+      const levelSelect = document.getElementById("adminLevelSelect");
+      const lessonLevel = document.getElementById("adminLessonLevel");
+      const lessonSelect = document.getElementById("adminLessonSelect");
+
+      levelSelect.innerHTML = `<option value="">-- مستوى جديد --</option>`;
+      lessonLevel.innerHTML = "";
+      lessonSelect.innerHTML = `<option value="">-- درس جديد --</option>`;
+
+      appData.levels.forEach(level => {
+        levelSelect.innerHTML += `<option value="${level.id}">${escapeHtml(level.title)}</option>`;
+        lessonLevel.innerHTML += `<option value="${level.id}">${escapeHtml(level.title)}</option>`;
+
+        level.lessons.forEach(lesson => {
+          lessonSelect.innerHTML += `<option value="${lesson.id}">${escapeHtml(level.title)} — ${escapeHtml(lesson.title)}</option>`;
+        });
+      });
+
+      levelSelect.onchange = populateLevelForm;
+      lessonSelect.onchange = populateLessonForm;
+
+      clearLevelForm();
+      clearLessonForm();
+    }
+
+    function populateLevelForm(){
+      const id = Number(document.getElementById("adminLevelSelect").value);
+      if (!id) return clearLevelForm();
+
+      const level = appData.levels.find(l => l.id === id);
+      editingLevelId = id;
+      document.getElementById("adminLevelTitle").value = level.title;
+      document.getElementById("adminLevelDescription").value = level.description;
+    }
+
+    function clearLevelForm(){
+      editingLevelId = null;
+      document.getElementById("adminLevelSelect").value = "";
+      document.getElementById("adminLevelTitle").value = "";
+      document.getElementById("adminLevelDescription").value = "";
+    }
+
+    function saveLevel(){
+      const title = document.getElementById("adminLevelTitle").value.trim();
+      const description = document.getElementById("adminLevelDescription").value.trim();
+
+      if (!title || !description) {
+        alert("أدخل اسم ووصف المستوى.");
+        return;
+      }
+
+      if (editingLevelId) {
+        const level = appData.levels.find(l => l.id === editingLevelId);
+        level.title = title;
+        level.description = description;
+      } else {
+        appData.levels.push({
+          id: generateId(),
+          title,
+          description,
+          lessons: []
+        });
+      }
+
+      saveData();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      syncAdminSelectors();
+      updateStats();
+      alert("تم حفظ المستوى.");
+    }
+
+    function deleteLevel(){
+      if (!editingLevelId) {
+        alert("اختر مستوى أولاً.");
+        return;
+      }
+
+      const level = appData.levels.find(l => l.id === editingLevelId);
+      if (!level) return;
+
+      if (!confirm(`هل تريد حذف المستوى "${level.title}" وكل دروسه؟`)) return;
+
+      level.lessons.forEach(lesson => {
+        delete progressData.completedLessons[lesson.id];
+        delete progressData.quizResults[lesson.id];
+        delete progressData.awardedXP[lesson.id];
+      });
+
+      appData.levels = appData.levels.filter(l => l.id !== editingLevelId);
+
+      if (selectedLevelId === editingLevelId) {
+        selectedLevelId = null;
+        selectedLessonId = null;
+        document.getElementById("viewerEmpty").style.display = "grid";
+        document.getElementById("lessonView").classList.remove("active");
+      }
+
+      saveData();
+      saveProgress();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      syncAdminSelectors();
+      updateStats();
+      updateProgressWidgets();
+      renderReviewWords();
+      alert("تم حذف المستوى.");
+    }
+
+    function populateLessonForm(){
+      const id = Number(document.getElementById("adminLessonSelect").value);
+      if (!id) return clearLessonForm();
+
+      const lesson = findLessonById(id);
+      const level = findLevelByLessonId(id);
+      if (!lesson || !level) return;
+
+      editingLessonId = id;
+      document.getElementById("adminLessonLevel").value = level.id;
+      document.getElementById("adminLessonTitle").value = lesson.title || "";
+      document.getElementById("adminLessonShort").value = lesson.shortDescription || "";
+      document.getElementById("adminLessonExplanation").value = lesson.explanation || "";
+      document.getElementById("adminLessonXP").value = lesson.xp || 25;
+      document.getElementById("adminLessonAudio").value = lesson.audio || "";
+      document.getElementById("adminLessonVideo").value = lesson.video || "";
+      document.getElementById("adminLessonExamples").value = (lesson.examples || []).map(ex => `${ex.en} | ${ex.ar}`).join("\n");
+      document.getElementById("adminLessonQuiz").value = JSON.stringify(lesson.quiz || [], null, 2);
+    }
+
+    function clearLessonForm(){
+      editingLessonId = null;
+      document.getElementById("adminLessonSelect").value = "";
+      if (appData.levels[0]) document.getElementById("adminLessonLevel").value = appData.levels[0].id;
+      document.getElementById("adminLessonTitle").value = "";
+      document.getElementById("adminLessonShort").value = "";
+      document.getElementById("adminLessonExplanation").value = "";
+      document.getElementById("adminLessonXP").value = "25";
+      document.getElementById("adminLessonAudio").value = "";
+      document.getElementById("adminLessonVideo").value = "";
+      document.getElementById("adminLessonExamples").value = "";
+      document.getElementById("adminLessonQuiz").value = "";
+    }
+
+    function saveLesson(){
+      const levelId = Number(document.getElementById("adminLessonLevel").value);
+      const title = document.getElementById("adminLessonTitle").value.trim();
+      const shortDescription = document.getElementById("adminLessonShort").value.trim();
+      const explanation = document.getElementById("adminLessonExplanation").value.trim();
+      const xp = Number(document.getElementById("adminLessonXP").value.trim() || 25);
+      const audio = document.getElementById("adminLessonAudio").value.trim();
+      const video = document.getElementById("adminLessonVideo").value.trim();
+      const examplesText = document.getElementById("adminLessonExamples").value.trim();
+      const quizText = document.getElementById("adminLessonQuiz").value.trim();
+
+      if (!levelId || !title || !explanation) {
+        alert("أدخل المستوى، عنوان الدرس، وشرح الدرس.");
+        return;
+      }
+
+      let examples = [];
+      if (examplesText) {
+        examples = examplesText.split("\n").filter(Boolean).map(line => {
+          const parts = line.split("|");
+          return {
+            en: (parts[0] || "").trim(),
+            ar: (parts[1] || "").trim()
+          };
+        });
+      }
+
+      let quiz = [];
+      if (quizText) {
+        try {
+          quiz = JSON.parse(quizText);
+          if (!Array.isArray(quiz)) throw new Error();
+        } catch {
+          alert("تنسيق JSON الخاص بالاختبار غير صحيح.");
+          return;
+        }
+      }
+
+      const newLessonData = {
+        title,
+        shortDescription,
+        explanation,
+        xp: isNaN(xp) ? 25 : xp,
+        audio,
+        video,
+        examples,
+        quiz
+      };
+
+      const targetLevel = appData.levels.find(level => level.id === levelId);
+      if (!targetLevel) {
+        alert("المستوى غير موجود.");
+        return;
+      }
+
+      if (editingLessonId) {
+        const oldLevel = findLevelByLessonId(editingLessonId);
+        const lesson = findLessonById(editingLessonId);
+        if (!lesson || !oldLevel) return;
+
+        lesson.title = newLessonData.title;
+        lesson.shortDescription = newLessonData.shortDescription;
+        lesson.explanation = newLessonData.explanation;
+        lesson.xp = newLessonData.xp;
+        lesson.audio = newLessonData.audio;
+        lesson.video = newLessonData.video;
+        lesson.examples = newLessonData.examples;
+        lesson.quiz = newLessonData.quiz;
+
+        if (oldLevel.id !== targetLevel.id) {
+          oldLevel.lessons = oldLevel.lessons.filter(l => l.id !== editingLessonId);
+          targetLevel.lessons.push(lesson);
+        }
+      } else {
+        targetLevel.lessons.push({
+          id: generateId(),
+          ...newLessonData
+        });
+      }
+
+      saveData();
+      renderLevels();
+      renderLessonsList(selectedLevelId || levelId);
+      syncAdminSelectors();
+      updateStats();
+      alert("تم حفظ الدرس.");
+    }
+
+    function deleteLesson(){
+      if (!editingLessonId) {
+        alert("اختر درسًا أولاً.");
+        return;
+      }
+
+      const level = findLevelByLessonId(editingLessonId);
+      const lesson = findLessonById(editingLessonId);
+      if (!level || !lesson) return;
+
+      if (!confirm(`هل تريد حذف الدرس "${lesson.title}"؟`)) return;
+
+      level.lessons = level.lessons.filter(l => l.id !== editingLessonId);
+
+      delete progressData.completedLessons[editingLessonId];
+      delete progressData.quizResults[editingLessonId];
+      delete progressData.awardedXP[editingLessonId];
+      progressData.reviewWords = (progressData.reviewWords || []).filter(item => item.lessonId !== editingLessonId);
+
+      if (selectedLessonId === editingLessonId) {
+        selectedLessonId = null;
+        document.getElementById("viewerEmpty").style.display = "grid";
+        document.getElementById("lessonView").classList.remove("active");
+      }
+
+      saveData();
+      saveProgress();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      syncAdminSelectors();
+      updateStats();
+      updateProgressWidgets();
+      renderReviewWords();
+      alert("تم حذف الدرس.");
+    }
+
+    function exportData(){
+      const blob = new Blob([JSON.stringify(appData, null, 2)], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "elite-english-academy-pro-data.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    function importData(event){
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!imported.levels || !Array.isArray(imported.levels)) throw new Error();
+
+          appData = imported;
+          saveData();
+          renderLevels();
+          renderLessonsList(selectedLevelId);
+          syncAdminSelectors();
+          updateStats();
+          updateProgressWidgets();
+          renderReviewWords();
+          alert("تم استيراد البيانات بنجاح.");
+        } catch {
+          alert("ملف JSON غير صالح.");
+        }
+      };
+      reader.readAsText(file, "utf-8");
+    }
+
+    function findLessonById(id){
+      for (const level of appData.levels) {
+        const lesson = level.lessons.find(l => l.id === id);
+        if (lesson) return lesson;
+      }
+      return null;
+    }
+
+    function findLevelByLessonId(lessonId){
+      return appData.levels.find(level => level.lessons.some(lesson => lesson.id === lessonId)) || null;
+    }
+
+    function generateId(){
+      return Date.now() + Math.floor(Math.random() * 1000);
+    }
+
+    function escapeHtml(text){
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function escapeHtmlAttr(text){
+      return String(text ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    window.addEventListener("click", function(e){
+      ["adminLoginModal", "adminPanelModal"].forEach(id => {
+        const modal = document.getElementById(id);
+        if (e.target === modal) modal.classList.remove("show");
+      });
+    });
+
+    window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
+
+    initApp();
+  </script>
 </body>
 </html>
