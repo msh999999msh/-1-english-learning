@@ -90,7 +90,8 @@
 <main id="app" class="max-w-6xl mx-auto px-6 py-12"></main>
 
 <script>
-const apiKey = ""; 
+// تم تحديث مفتاح API بناءً على طلبك
+const apiKey = "AIzaSyAF0s4wN37-ieIM_fCx5fJF7byHkYyPgs0"; 
 
 const state = {
   route: 'home',
@@ -137,6 +138,7 @@ async function speak(text, elementId, lang = "en-US") {
     };
     await audio.play();
   } catch (err) {
+    console.error("Audio error:", err);
     state.isSpeaking = false;
     btn.classList.remove('playing-btn', 'audio-active');
   }
