@@ -23,230 +23,208 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
-
   <style>
-  body{font-family:'IBM Plex Sans Arabic',sans-serif;background:#f8fafc}
-  .english-snippet{direction:ltr;text-align:left;font-family:'Outfit',sans-serif}
-  .visualizer{display:flex;gap:4px;height:30px;align-items:flex-end}
-  .visualizer span{width:6px;background:#4f46e5;border-radius:10px;height:8px}
+    body { font-family:'IBM Plex Sans Arabic',sans-serif; background:#f8fafc; }
+    .english-snippet { direction:ltr; text-align:left; font-family:'Outfit',sans-serif; }
   </style>
 </head>
-
 <body class="text-slate-800">
 
-<header class="bg-white border-b">
-<div class="max-w-7xl mx-auto px-4 py-4 flex justify-between">
-
-<button onclick="navigate('home')" class="flex items-center gap-3">
-<div class="w-10 h-10 bg-brand-indigo text-white flex items-center justify-center rounded-xl">🎓</div>
-<div>
-<div class="font-bold">The Elite English Academy</div>
-<div class="text-xs english-snippet text-slate-500">Professional Arabic-English Learning</div>
-</div>
-</button>
-
-<nav class="flex gap-2">
-<button onclick="navigate('home')" class="px-4 py-2 bg-slate-100 rounded-xl">الرئيسية</button>
-<button onclick="navigate('lessons')" class="px-4 py-2 bg-brand-indigo text-white rounded-xl">ابدأ الآن</button>
-</nav>
-
-</div>
+<header class="bg-white border-b sticky top-0 z-40">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
+    <button onclick="navigate('home')" class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-brand-indigo text-white flex items-center justify-center rounded-xl">🎓</div>
+      <div>
+        <div class="font-bold">The Elite English Academy</div>
+        <div class="text-xs english-snippet text-slate-500">Professional Arabic-English Learning</div>
+      </div>
+    </button>
+    <nav class="flex gap-2">
+      <button onclick="navigate('home')" class="px-4 py-2 bg-slate-100 rounded-xl">الرئيسية</button>
+      <button onclick="navigate('lessons')" class="px-4 py-2 bg-brand-indigo text-white rounded-xl">ابدأ الآن</button>
+    </nav>
+  </div>
 </header>
 
 <main id="app" class="max-w-7xl mx-auto px-4 py-10"></main>
 
 <script>
+const STORAGE_KEY = 'academy_progress_v2';
 
-const STORAGE_KEY="academy_progress_v1";
-
-const state={
-route:'home',
-selectedLessonId:null,
-currentLevel:null,
-progress:loadProgress()
+const state = {
+  route: 'home',
+  selectedLessonId: null,
+  currentLevel: null,
+  progress: loadProgress()
 };
 
-function loadProgress(){
-const s=localStorage.getItem(STORAGE_KEY);
-if(s) return JSON.parse(s);
-return {completed:[], unlockedLevels:[1]};
+function loadProgress() {
+  const s = localStorage.getItem(STORAGE_KEY);
+  if (s) return JSON.parse(s);
+  return { completed: [], unlockedLevels: [1] };
 }
 
-function saveProgress(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state.progress));}
+function saveProgress() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.progress));
+}
 
-/* ---------------- LESSON DATABASE (SHORTENED) ---------------- */
+function longExplanation(title, focus) {
+  return `في هذا الدرس نتناول ${title} بطريقة مبسطة وعملية حتى تتحول القاعدة من معلومة نظرية إلى مهارة تستخدمها فعلًا في القراءة والكتابة والمحادثة. الفكرة الأساسية في ${title} هي ${focus}. من المهم أن يفهم المتعلم العربي متى تُستخدم القاعدة، ولماذا تظهر بهذا الشكل، وما الفرق بينها وبين القواعد القريبة منها، لأن أكبر سبب للأخطاء هو الترجمة الحرفية من العربية أو محاولة تطبيق قاعدة واحدة على جميع الجمل. لذلك لا يكفي أن تحفظ الصيغة فقط، بل يجب أن تراقب ترتيب الكلمات، ونوع الفعل، وعلاقة الجملة بالزمن أو بالمعنى المقصود. عندما تتدرب على أمثلة قصيرة وواضحة ثم تحاول تكوين جملك الخاصة، ستبدأ القاعدة بالثبات في ذهنك بشكل أفضل. كذلك من المفيد أن تقرأ المثال بصوت مرتفع، ثم تبدّل بعض عناصره، مثل الفاعل أو الزمن أو الكلمة الأساسية، حتى تلاحظ كيف تتغير الجملة من دون أن تنهار القاعدة. هذا الأسلوب يجعلك تنتقل من الحفظ إلى الفهم، ومن الفهم إلى الاستخدام الحقيقي. ومع التكرار ستجد أن ${title} لم تعد نقطة صعبة، بل أصبحت جزءًا طبيعيًا من طريقتك في التعبير.`;
+}
 
-const lessonsDB=[
-{id:1,level:1,titleAr:'فعل الكينونة',titleEn:'Be Verb',description:'أساس بناء الجملة الإنجليزية.'},
-{id:2,level:1,titleAr:'الضمائر',titleEn:'Pronouns',description:'التعرف على الضمائر الأساسية.'},
-{id:3,level:1,titleAr:'أدوات التعريف',titleEn:'Articles',description:'فهم a / an / the.'},
-{id:4,level:1,titleAr:'الجمع',titleEn:'Plurals',description:'تحويل المفرد إلى جمع.'},
-{id:5,level:1,titleAr:'المضارع البسيط',titleEn:'Present Simple',description:'وصف العادات اليومية.'},
-{id:6,level:1,titleAr:'الأسئلة',titleEn:'Questions',description:'صياغة الأسئلة.'},
-{id:7,level:1,titleAr:'النفي',titleEn:'Negatives',description:'بناء الجمل المنفية.'},
-{id:8,level:1,titleAr:'أسماء الإشارة',titleEn:'Demonstratives',description:'this / that / these / those'},
-{id:9,level:1,titleAr:'صفات الملكية',titleEn:'Possessive',description:'my / your / his'},
-{id:10,level:1,titleAr:'أسئلة Wh',titleEn:'Wh Questions',description:'where / why / when'},
+function makeLesson(id, level, titleAr, titleEn, description, focus, examples) {
+  return { id, level, titleAr, titleEn, description, explanation: longExplanation(titleAr, focus), examples };
+}
 
-{id:11,level:2,titleAr:'الماضي البسيط',titleEn:'Past Simple',description:'التحدث عن الماضي.'},
-{id:12,level:2,titleAr:'الأفعال غير المنتظمة',titleEn:'Irregular verbs',description:'أفعال الماضي.'},
+const lessonsDB = [
+  makeLesson(1,1,'فعل الكينونة مع الضمائر','Be Verb with Pronouns','المدخل الأساسي لفهم الجملة الإنجليزية الاسمية. هذا الدرس يعلّمك كيف تربط الفاعل بالمعلومة بشكل صحيح وواضح.','استخدام am وis وare مع الضمائر المختلفة لربط الفاعل بالصفة أو المهنة أو المكان.',['I am tired. — أنا متعب.','She is a doctor. — هي طبيبة.','They are at home. — هم في المنزل.']),
+  makeLesson(2,1,'الضمائر الشخصية','Personal Pronouns','الضمائر تسهّل الحديث وتمنع تكرار الأسماء. بإتقانها يصبح كلامك أسرع وأكثر طبيعية.','اختيار الضمير المناسب بحسب المتكلم أو المخاطب أو الغائب وربطه بالفعل الصحيح.',['He works here. — هو يعمل هنا.','We are ready. — نحن جاهزون.','It is old. — إنه قديم.']),
+  makeLesson(3,1,'أدوات التنكير والتعريف','Articles','هذا الدرس يوضح الفرق بين a وan وthe بطريقة سهلة وعملية. وهو من أكثر المواضيع التي يخطئ فيها المتعلم العربي.','التفريق بين الاسم غير المحدد والاسم المحدد واختيار الأداة المناسبة بحسب الصوت والسياق.',['She bought a bag. — اشترت حقيبة.','He ate an orange. — أكل برتقالة.','The teacher is here. — المعلم هنا.']),
+  makeLesson(4,1,'الجمع','Plurals','الانتقال من المفرد إلى الجمع قاعدة أساسية في اللغة. هذا الدرس يشرح القاعدة العامة مع أهم الاستثناءات.','إضافة s أو es في أكثر الحالات مع التعرف على الأشكال غير المنتظمة.',['One car / two cars. — سيارة واحدة / سيارتان.','One box / three boxes. — صندوق واحد / ثلاثة صناديق.','One child / two children. — طفل واحد / طفلان.']),
+  makeLesson(5,1,'المضارع البسيط','Present Simple','زمن العادات والحقائق والجداول اليومية. وهو من أكثر الأزمنة استخدامًا في الإنجليزية.','التعبير عن الروتين والحقائق العامة والانتباه إلى إضافة s مع he وshe وit.',['I study every day. — أدرس كل يوم.','She works in a hospital. — هي تعمل في مستشفى.','Water boils at 100°C. — الماء يغلي عند 100 درجة.']),
+  makeLesson(6,1,'الأسئلة في المضارع البسيط','Present Simple Questions','تعلم كيف تصوغ سؤالًا صحيحًا في الإنجليزية باستخدام Do وDoes. هذا أساس الحوار اليومي.','استخدام Do وDoes قبل الفاعل ثم الفعل الأساسي لتكوين السؤال.',['Do you speak English? — هل تتحدث الإنجليزية؟','Does he live here? — هل يسكن هنا؟','Where do they work? — أين يعملون؟']),
+  makeLesson(7,1,'النفي في المضارع البسيط','Present Simple Negatives','هذا الدرس يعلمك كيف تقول لا بشكل صحيح في الإنجليزية. وهو ضروري جدًا في المحادثات اليومية.','استخدام do not وdoes not قبل الفعل الأساسي مع ملاحظة رجوع الفعل إلى المصدر.',['I do not smoke. — أنا لا أدخن.','He doesn’t drive. — هو لا يقود.','They do not agree. — هم لا يوافقون.']),
+  makeLesson(8,1,'أسماء الإشارة','Demonstratives','هذا، هذه، ذلك، وتلك في الإنجليزية. درس بسيط لكنه مهم جدًا للدقة في الإشارة.','التمييز بين المفرد والجمع والقريب والبعيد باستخدام this وthat وthese وthose.',['This is my phone. — هذا هاتفي.','That is your car. — تلك سيارتك.','These are new shoes. — هذه أحذية جديدة.']),
+  makeLesson(9,1,'صفات الملكية','Possessive Adjectives','تعلم كيف تعبّر عن الملكية بطريقة صحيحة قبل الاسم. هذا يجعل كلامك أكثر دقة وطبيعية.','استخدام my وyour وhis وher وour وtheir قبل الاسم لتوضيح الملكية.',['My car is new. — سيارتي جديدة.','Her name is Sara. — اسمها سارة.','Their house is large. — بيتهم كبير.']),
+  makeLesson(10,1,'أسئلة Wh','Wh Questions','هذا الدرس يعلمك كيف تسأل عن المكان والزمان والسبب والشخص والمعلومة. وهو أساس المحادثة الحقيقية.','فهم معنى what وwhere وwhen وwhy وwho وhow وبناء السؤال بها داخل جملة سليمة.',['Where do you live? — أين تسكن؟','Why is she late? — لماذا هي متأخرة؟','Who is your teacher? — من معلمك؟']),
 
-{id:21,level:3,titleAr:'المضارع التام',titleEn:'Present Perfect',description:'ربط الماضي بالحاضر.'},
+  makeLesson(11,2,'الماضي البسيط للأفعال المنتظمة','Past Simple Regular Verbs','بداية الحديث عن الأحداث الماضية. هذا الدرس يشرح القاعدة العامة للأفعال المنتظمة.','إضافة ed إلى الأفعال المنتظمة للتعبير عن أحداث انتهت في الماضي.',['I watched a movie yesterday. — شاهدت فيلمًا أمس.','She cleaned the room. — نظفت الغرفة.','We visited our uncle last week. — زرنا عمنا الأسبوع الماضي.']),
+  makeLesson(12,2,'الماضي البسيط للأفعال غير المنتظمة','Past Simple Irregular Verbs','ليست كل الأفعال تأخذ ed في الماضي. هذا الدرس يشرح الأفعال الأكثر شيوعًا التي يتغير شكلها.','فهم الأفعال التي تتغير كليًا أو جزئيًا في الماضي مثل go/went وsee/saw.',['I went home early. — ذهبت إلى المنزل مبكرًا.','He saw his friend. — رأى صديقه.','They had lunch together. — تناولوا الغداء معًا.']),
+  makeLesson(13,2,'الأسئلة والنفي في الماضي','Past Questions and Negatives','تعلم كيف تسأل وتنفي في الماضي باستخدام did. هذا يكمل فهمك لزمن الماضي البسيط.','استخدام did وdid not مع الفعل الأساسي في السؤال والنفي.',['Did you call him? — هل اتصلت به؟','She did not come yesterday. — لم تأتِ أمس.','Why did they leave early? — لماذا غادروا مبكرًا؟']),
+  makeLesson(14,2,'المستقبل باستخدام Will','Future with Will','تعلم كيف تتحدث عن المستقبل والتوقعات والقرارات السريعة. هذا من أكثر التراكيب استخدامًا.','استخدام will مع الفعل الأساسي للتوقع أو الوعد أو القرار الفوري.',['I will call you later. — سأتصل بك لاحقًا.','She will help us. — ستساعدنا.','It will be fine. — سيكون الأمر بخير.']),
+  makeLesson(15,2,'المستقبل باستخدام Going to','Future with Going to','هذا الدرس يشرح طريقة أخرى للتعبير عن المستقبل، خاصة في الخطط والنيات الواضحة.','استخدام going to مع فعل الكينونة للتعبير عن خطة مسبقة أو توقع مبني على دليل.',['We are going to travel next month. — سنسافر الشهر القادم.','I am going to start a new course. — سأبدأ دورة جديدة.','Look at the sky! It is going to rain. — انظر إلى السماء، ستمطر.']),
+  makeLesson(16,2,'المضارع المستمر','Present Continuous','الزمن الذي يصف ما يحدث الآن أو حول الآن. وهو مهم جدًا للتمييز بين الحدث الحالي والعادة.','استخدام am/is/are مع verb+ing لوصف الحدث الجاري الآن أو في فترة مؤقتة.',['He is studying now. — هو يدرس الآن.','They are waiting outside. — هم ينتظرون في الخارج.','I am learning English these days. — أتعلم الإنجليزية هذه الأيام.']),
+  makeLesson(17,2,'الماضي المستمر','Past Continuous','درس مهم للسرد ووصف الخلفية الزمنية في الماضي. يساعدك على بناء مشهد أو قصة بشكل أفضل.','استخدام was/were مع verb+ing لحدث كان جاريًا في الماضي أو حين وقع حدث آخر.',['She was cooking when I arrived. — كانت تطبخ عندما وصلت.','We were talking at midnight. — كنا نتحدث عند منتصف الليل.','It was raining all evening. — كانت السماء تمطر طوال المساء.']),
+  makeLesson(18,2,'المستقبل المستمر','Future Continuous','تعلم كيف تتحدث عن شيء سيكون مستمرًا في وقت معين في المستقبل. هذا يعطي كلامك دقة أعلى.','استخدام will be مع verb+ing لوصف حدث سيكون جاريًا في لحظة مستقبلية معينة.',['I will be studying tonight. — سأكون أدرس الليلة.','They will be waiting for us. — سيكونون بانتظارنا.','She will be traveling next week. — ستكون مسافرة الأسبوع القادم.']),
+  makeLesson(19,2,'المقارنة','Comparatives','هذا الدرس يشرح كيف تقارن بين شخصين أو شيئين بطريقة صحيحة. وهو مهم جدًا في الوصف.','استخدام er أو more مع الصفة ثم than للمقارنة بين شيئين أو شخصين.',['My car is faster than yours. — سيارتي أسرع من سيارتك.','This book is easier than that one. — هذا الكتاب أسهل من ذاك.','English is more flexible than I thought. — الإنجليزية أكثر مرونة مما ظننت.']),
+  makeLesson(20,2,'التفضيل','Superlatives','تعلم كيف تعبر عن الأعلى أو الأفضل داخل مجموعة. هذا مهم في الوصف والكتابة.','استخدام est أو most مع the للتعبير عن أعلى درجة داخل مجموعة.',['She is the smartest student here. — هي أذكى طالبة هنا.','This is the best option. — هذا هو الخيار الأفضل.','Mount Everest is the highest mountain. — إيفرست هو أعلى جبل.']),
 
-{id:31,level:4,titleAr:'الماضي التام',titleEn:'Past Perfect',description:'تسلسل الأحداث.'}
+  makeLesson(21,3,'المضارع التام','Present Perfect','هذا الزمن يربط الماضي بالحاضر. وهو من أهم الأزمنة لفهم التجربة والنتيجة والاستمرارية.','استخدام have/has مع التصريف الثالث للتجربة أو النتيجة الحالية أو الاستمرار من الماضي حتى الآن.',['I have finished my homework. — أنهيت واجبي.','She has visited Dubai before. — لقد زارت دبي من قبل.','They have lived here for years. — لقد عاشوا هنا لسنوات.']),
+  makeLesson(22,3,'الفرق بين الماضي البسيط والمضارع التام','Past Simple vs Present Perfect','درس مهم جدًا لفهم متى تستخدم كل زمن. يساعدك على تجنب أحد أشهر الأخطاء عند المتعلمين.','التمييز بين الحدث المرتبط بزمن منتهٍ محدد والحدث ذي الأثر الحالي أو الزمن غير المحدد.',['I visited London in 2022. — زرت لندن في 2022.','I have visited London before. — لقد زرت لندن من قبل.','She finished the task yesterday. — أنهت المهمة أمس.']),
+  makeLesson(23,3,'الأفعال الناقصة للقدرة والاحتمال','Modals of Ability and Possibility','هذا الدرس يشرح can وcould وmight. وهي كلمات مهمة جدًا للقدرة واللباقة والاحتمال.','استخدام can للقدرة وcould للطلب المهذب أو القدرة الماضية وmight للاحتمال.',['I can speak English. — أستطيع التحدث بالإنجليزية.','Could you open the window? — هل يمكنك فتح النافذة؟','It might be true. — قد يكون ذلك صحيحًا.']),
+  makeLesson(24,3,'الأفعال الناقصة للوجوب والنصيحة','Modals of Obligation and Advice','درس عملي يوضح الفرق بين must وshould وhave to. وهو مهم جدًا للنصيحة والقواعد والالتزام.','التفريق بين الإلزام القوي والنصيحة والضرورة الخارجية باستخدام must وshould وhave to.',['You must be careful. — يجب أن تكون حذرًا.','You should drink more water. — ينبغي أن تشرب ماء أكثر.','I have to leave now. — يجب أن أغادر الآن.']),
+  makeLesson(25,3,'المبني للمجهول في الحاضر','Present Passive','تعلم كيف تركز على الفعل أو النتيجة بدل الفاعل. هذا مهم في الأسلوب الرسمي والتقارير.','استخدام am/is/are مع التصريف الثالث لإبراز الفعل أو النتيجة في الحاضر.',['The room is cleaned every day. — تُنظف الغرفة كل يوم.','English is taught in many schools. — تُدرَّس الإنجليزية في كثير من المدارس.','The emails are checked daily. — يتم فحص الرسائل يوميًا.']),
+  makeLesson(26,3,'المبني للمجهول في الماضي','Past Passive','هذا الدرس يكمل فهم المبني للمجهول في الزمن الماضي. وهو شائع في الأخبار والسرد الرسمي.','استخدام was/were مع التصريف الثالث للتعبير عن فعل تم في الماضي مع التركيز على النتيجة.',['The project was finished on time. — تم إنهاء المشروع في الوقت.','The letter was sent yesterday. — أُرسلت الرسالة أمس.','The rules were explained clearly. — شُرحت القواعد بوضوح.']),
+  makeLesson(27,3,'الشرط الأول','First Conditional','هذا الدرس يشرح كيف تتحدث عن احتمال حقيقي في المستقبل ونتيجته. وهو مفيد في النصائح والتخطيط.','استخدام if مع المضارع البسيط ثم will مع الفعل الأساسي للتعبير عن احتمال واقعي.',['If it rains, we will stay home. — إذا أمطرت فسنمكث في المنزل.','If you work hard, you will succeed. — إذا عملت بجد فستنجح.','If she calls, I will answer. — إذا اتصلت فسأرد.']),
+  makeLesson(28,3,'الشرط الثاني','Second Conditional','هذا الدرس يشرح لغة الخيال والافتراض غير الواقعي. وهو مهم للنصيحة والتصور والاحتمالات البعيدة.','استخدام if مع الماضي البسيط ثم would مع الفعل الأساسي للتعبير عن موقف افتراضي غير واقعي.',['If I were you, I would study more. — لو كنت مكانك لدرست أكثر.','If she had time, she would join us. — لو كان لديها وقت لانضمت إلينا.','If they practiced daily, they would improve. — لو تدربوا يوميًا لتحسنوا.']),
+  makeLesson(29,3,'الروابط المنطقية','Logical Connectors','تعلم كيف تربط الأفكار داخل الجملة أو بين الجمل. هذا يجعل الكتابة والكلام أكثر سلاسة وتنظيمًا.','استخدام because وso وhowever وalthough وtherefore لبيان السبب والنتيجة والتناقض والإضافة.',['I stayed home because I was tired. — بقيت في المنزل لأنني كنت متعبًا.','He studied hard, so he passed. — درس بجد، لذلك نجح.','Although it was late, we continued. — رغم أنه كان متأخرًا، واصلنا.']),
+  makeLesson(30,3,'الأسماء المعدودة وغير المعدودة','Countable and Uncountable Nouns','هذا الدرس يوضح الفرق بين ما يمكن عده وما لا يعد مباشرة. وهو مهم في أدوات الكمية.','التمييز بين الأسماء المعدودة وغير المعدودة وتأثير ذلك على much وmany وsome وa little.',['Many students came. — جاء كثير من الطلاب.','There is little water left. — بقي قليل من الماء.','I need some information. — أحتاج بعض المعلومات.']),
+
+  makeLesson(31,4,'الماضي التام','Past Perfect','هذا الزمن يوضح أي حدث وقع أولًا عندما نتحدث عن حدثين في الماضي. وهو مهم جدًا في السرد المنظم.','استخدام had مع التصريف الثالث لبيان أن حدثًا وقع قبل حدث ماضٍ آخر.',['I had finished the work before they came. — كنت قد أنهيت العمل قبل أن يأتوا.','She had left when I called. — كانت قد غادرت عندما اتصلت.','They had eaten before the meeting. — كانوا قد تناولوا الطعام قبل الاجتماع.']),
+  makeLesson(32,4,'الكلام المنقول','Reported Speech','هذا الدرس يشرح كيف تنقل كلام شخص آخر بطريقة غير مباشرة. وهو مهم في السرد والتقارير والكتابة.','تحويل الكلام المباشر إلى غير مباشر مع ملاحظة تغيّر الضمائر والأزمنة والإشارات الزمنية.',['He said that he was busy. — قال إنه كان مشغولًا.','She said that she would come. — قالت إنها ستأتي.','They told me that they were ready. — أخبروني أنهم كانوا جاهزين.']),
+  makeLesson(33,4,'الأسئلة في الكلام المنقول','Reported Questions','تعلم كيف تنقل السؤال بطريقة غير مباشرة. هذا يطور قدرتك على السرد والتعبير الرسمي.','استخدام asked وif أو أدوات السؤال مع ترتيب خبري بدل ترتيب السؤال المباشر.',['She asked if I was ready. — سألت إن كنت جاهزًا.','He asked where I lived. — سأل أين كنت أسكن.','They asked when he would arrive. — سألوا متى سيصل.']),
+  makeLesson(34,4,'هيكل الفقرة الأكاديمية','Academic Paragraph Structure','هذا الدرس يعلّمك كيف تبني فقرة قوية ومنظمة. وهو أساس الكتابة الأكاديمية الجيدة.','ترتيب الفقرة حول جملة رئيسية ثم دعم ثم خاتمة قصيرة أو جملة ختامية.',['Learning English opens many opportunities. — تعلم الإنجليزية يفتح فرصًا كثيرة.','It helps people communicate and access knowledge. — يساعد الناس على التواصل والوصول إلى المعرفة.','For this reason, it is an important skill today. — ولهذا فهو مهارة مهمة اليوم.']),
+  makeLesson(35,4,'هيكل المقالة الأكاديمية','Academic Essay Structure','هذا الدرس يشرح الشكل العام للمقالة الأكاديمية. وهو مهم جدًا لمن يريد كتابة نصوص أطول ومنظمة.','تقسيم المقالة إلى مقدمة ومتن وخاتمة مع وجود فكرة رئيسية واضحة تربط الأقسام.',['Introduction presents the topic. — المقدمة تعرض الموضوع.','Body paragraphs explain the main points. — فقرات المتن تشرح النقاط الأساسية.','Conclusion summarizes the essay. — الخاتمة تلخص المقالة.']),
+  makeLesson(36,4,'الترابط الأكاديمي','Academic Cohesion','هذا الدرس يرفع جودة الكتابة من جمل صحيحة إلى نص مترابط. وهو عنصر أساسي في الكتابة المتقدمة.','استخدام أدوات الربط والإحالة وتسلسل الأفكار لجعل النص منسجمًا وسهل المتابعة.',['However, the results were limited. — ومع ذلك، كانت النتائج محدودة.','Furthermore, students need practice. — إضافة إلى ذلك، يحتاج الطلاب إلى تدريب.','Therefore, a new strategy is necessary. — لذلك، من الضروري اتباع استراتيجية جديدة.']),
+  makeLesson(37,4,'لغة الرأي الرسمي','Formal Opinion Language','تعلم كيف تعبّر عن رأيك بطريقة مهذبة وأكاديمية. هذا مهم جدًا في النقاش والكتابة الرسمية.','اختيار صيغ رسمية ومتوازنة لعرض الرأي مثل In my view وIt seems that وربط الرأي بالحجة.',['In my view, this policy needs revision. — في رأيي، هذه السياسة تحتاج إلى مراجعة.','It seems that the data is incomplete. — يبدو أن البيانات غير مكتملة.','From a practical perspective, this method is useful. — من منظور عملي، هذه الطريقة مفيدة.']),
+  makeLesson(38,4,'بناء الحجة','Argument Building','هذا الدرس يشرح كيف تبني حجة قوية ومقنعة. وهو مهم جدًا في الكتابة والمناظرة.','تنظيم الحجة على شكل ادعاء وسبب ودليل وشرح يربط الدليل بالنتيجة.',['Online learning should be improved. — يجب تحسين التعليم الإلكتروني.','Student feedback shows engagement issues. — ملاحظات الطلاب تظهر مشكلات في التفاعل.','Better interaction can improve outcomes. — التفاعل الأفضل يمكن أن يحسن النتائج.']),
+  makeLesson(39,4,'الاعتراض المهذب','Polite Rebuttal','تعلم كيف تختلف مع الآخرين باحترام ومنطق. هذه مهارة متقدمة جدًا في النقاش.','البدء بالاعتراف بالرأي الآخر ثم تقديم الرد المخالف بلغة محترمة ومدعومة.',['I understand your point; however, the data suggests otherwise. — أتفهم وجهة نظرك، لكن البيانات تشير إلى غير ذلك.','While that may be true, the long-term effects are different. — مع أن ذلك قد يكون صحيحًا، فإن الآثار بعيدة المدى مختلفة.','Respectfully, I see the issue differently. — باحترام، أرى الأمر بشكل مختلف.']),
+  makeLesson(40,4,'الافتتاح والخاتمة في المناظرة','Debate Openings and Closings','هذا الدرس يساعدك على بدء الحديث وإنهائه بشكل قوي ومؤثر. وهو مهم جدًا في العرض والمناظرة.','صياغة مقدمة واضحة ومؤثرة ثم إنهاء منظم يلخص الفكرة الرئيسية ويثبت الموقف.',['Today, I would like to argue that education should be more flexible. — اليوم أود أن أجادل بأن التعليم يجب أن يكون أكثر مرونة.','My main point is that evidence matters. — نقطتي الأساسية هي أن الدليل مهم.','In conclusion, this solution is the most practical. — ختامًا، هذا الحل هو الأكثر عملية.'])
 ];
 
-/* ---------------- ROUTER ---------------- */
-
-function navigate(route,params={}){
-state.route=route;
-if(params.level) state.currentLevel=params.level;
-if(params.lessonId) state.selectedLessonId=params.lessonId;
-render();
+function navigate(route, params = {}) {
+  state.route = route;
+  if (params.level) state.currentLevel = params.level;
+  if (params.lessonId) state.selectedLessonId = params.lessonId;
+  render();
 }
 
-function router(){
-
-if(state.route==='home') return homeView();
-
-if(state.route==='lessons') return levelsView();
-
-if(state.route==='level-lessons') return levelLessonsView();
-
-if(state.route==='lesson-detail') return lessonView();
-
-return homeView();
+function router() {
+  if (state.route === 'home') return homeView();
+  if (state.route === 'lessons') return levelsView();
+  if (state.route === 'level-lessons') return levelLessonsView();
+  if (state.route === 'lesson-detail') return lessonView();
+  return homeView();
 }
 
-/* ---------------- HOME ---------------- */
-
-function homeView(){
-return `
-<section class="text-center space-y-6">
-
-<span class="inline-block bg-white px-4 py-2 rounded-full border">✨ منصة احترافية لتعلّم الإنجليزية</span>
-
-<h1 class="text-4xl font-bold">
-تعلم اللغة الانجليزية باحتراف
-</h1>
-
-<p class="text-slate-600">منهج احترافي من عدة مستويات مع دروس تفاعلية.</p>
-
-<button onclick="navigate('lessons')" class="px-8 py-4 bg-brand-indigo text-white rounded-xl">ابدأ التعلم</button>
-
-</section>
-`}
-
-/* ---------------- LEVELS ---------------- */
-
-function levelsView(){
-
-return `
-
-<section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-${[1,2,3,4].map(level=>{
-
-const unlocked=state.progress.unlockedLevels.includes(level);
-
-return `
-
-<div class="bg-white p-6 rounded-2xl border space-y-4 ${!unlocked?'opacity-50':''}">
-
-<h3 class="font-bold text-xl">المستوى ${level}</h3>
-
-<button ${unlocked?`onclick="openLevel(${level})"`:''}
-class="w-full py-3 rounded-xl ${unlocked?'bg-brand-indigo text-white':'bg-slate-200'}">
-استعراض الدروس
-</button>
-
-</div>
-
-`}).join('')}
-
-</section>
-
-`}
-
-/* ---------------- LEVEL LESSON LIST PAGE ---------------- */
-
-function openLevel(level){
-state.currentLevel=level;
-navigate('level-lessons',{level});
+function homeView() {
+  return `
+    <section class="text-center space-y-6">
+      <span class="inline-block bg-white px-4 py-2 rounded-full border">✨ منصة احترافية لتعلّم الإنجليزية</span>
+      <h1 class="text-4xl font-bold">تعلم اللغة الانجليزية باحتراف</h1>
+      <p class="text-slate-600">منهج احترافي من 40 درسًا موزعة على 4 مستويات مع شرح كامل لكل درس.</p>
+      <button onclick="navigate('lessons')" class="px-8 py-4 bg-brand-indigo text-white rounded-xl">ابدأ التعلم</button>
+    </section>
+  `;
 }
 
-function levelLessonsView(){
-
-const lessons=lessonsDB.filter(l=>l.level===state.currentLevel);
-
-return `
-
-<section>
-
-<h2 class="text-3xl font-bold mb-6">دروس المستوى ${state.currentLevel}</h2>
-
-<div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-
-${lessons.map(l=>`
-
-<div onclick="openLesson(${l.id})" class="cursor-pointer bg-white p-5 rounded-xl border hover:shadow">
-
-<h4 class="font-bold">${l.titleAr}</h4>
-
-<p class="english-snippet text-sm text-slate-500">${l.titleEn}</p>
-
-<p class="text-sm text-slate-600 mt-2">${l.description}</p>
-
-</div>
-
-`).join('')}
-
-</div>
-
-</section>
-
-`}
-
-/* ---------------- LESSON PAGE ---------------- */
-
-function openLesson(id){
-state.selectedLessonId=id;
-navigate('lesson-detail',{lessonId:id});
+function levelsView() {
+  return `
+    <section class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      ${[1,2,3,4].map(level => {
+        const unlocked = state.progress.unlockedLevels.includes(level);
+        return `
+          <div class="bg-white p-6 rounded-2xl border space-y-4 ${!unlocked ? 'opacity-50' : ''}">
+            <h3 class="font-bold text-xl">المستوى ${level}</h3>
+            <p class="text-sm text-slate-500">${lessonsDB.filter(l => l.level === level).length} دروس</p>
+            <button ${unlocked ? `onclick="openLevel(${level})"` : ''} class="w-full py-3 rounded-xl ${unlocked ? 'bg-brand-indigo text-white' : 'bg-slate-200'}">استعراض الدروس</button>
+          </div>
+        `;
+      }).join('')}
+    </section>
+  `;
 }
 
-function lessonView(){
+function openLevel(level) {
+  state.currentLevel = level;
+  navigate('level-lessons', { level });
+}
 
-const lesson=lessonsDB.find(l=>l.id===state.selectedLessonId);
+function levelLessonsView() {
+  const lessons = lessonsDB.filter(l => l.level === state.currentLevel);
+  return `
+    <section>
+      <h2 class="text-3xl font-bold mb-6">دروس المستوى ${state.currentLevel}</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${lessons.map(l => `
+          <div onclick="openLesson(${l.id})" class="cursor-pointer bg-white p-5 rounded-xl border hover:shadow">
+            <h4 class="font-bold">${l.titleAr}</h4>
+            <p class="english-snippet text-sm text-slate-500">${l.titleEn}</p>
+            <p class="text-sm text-slate-600 mt-2">${l.description}</p>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `;
+}
 
-return `
+function openLesson(id) {
+  state.selectedLessonId = id;
+  navigate('lesson-detail', { lessonId: id });
+}
 
-<section class="space-y-6">
+function lessonView() {
+  const lesson = lessonsDB.find(l => l.id === state.selectedLessonId);
+  return `
+    <section class="space-y-6">
+      <div class="bg-white p-6 rounded-2xl border space-y-3">
+        <h1 class="text-3xl font-bold">${lesson.titleAr}</h1>
+        <p class="english-snippet text-slate-500">${lesson.titleEn}</p>
+        <p class="text-slate-700 leading-8">${lesson.description}</p>
+      </div>
 
-<h1 class="text-3xl font-bold">${lesson.titleAr}</h1>
+      <div class="bg-white p-6 rounded-2xl border space-y-4">
+        <h2 class="text-2xl font-bold">الشرح الكامل</h2>
+        <p class="leading-9 text-slate-700">${lesson.explanation}</p>
+      </div>
 
-<p class="english-snippet text-slate-500">${lesson.titleEn}</p>
+      <div class="bg-white p-6 rounded-2xl border space-y-4">
+        <h2 class="text-2xl font-bold">أمثلة</h2>
+        <div class="grid gap-3">
+          ${lesson.examples.map(ex => `<div class="bg-slate-50 border rounded-xl p-4 text-slate-700">${ex}</div>`).join('')}
+        </div>
+      </div>
 
-<p>${lesson.description}</p>
+      <button onclick="navigate('level-lessons',{level:${lesson.level}})" class="px-6 py-3 bg-slate-200 rounded-xl">العودة لدروس المستوى</button>
+    </section>
+  `;
+}
 
-<button onclick="navigate('level-lessons',{level:${lesson.level}})"
-class="px-6 py-3 bg-slate-200 rounded-xl">
-العودة لدروس المستوى
-</button>
-
-</section>
-
-`}
-
-/* ---------------- RENDER ---------------- */
-
-function render(){
-
-document.getElementById('app').innerHTML=router();
-
+function render() {
+  document.getElementById('app').innerHTML = router();
 }
 
 render();
-
 </script>
 
 </body>
