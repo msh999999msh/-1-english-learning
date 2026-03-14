@@ -1,108 +1,234 @@
-const lessonsData = {
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>أكاديمية القواعد الإنجليزية</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+
+<body class="bg-gray-100 text-gray-800">
+
+<header class="bg-indigo-600 text-white p-6">
+
+<div class="max-w-6xl mx-auto flex justify-between">
+
+<h1 class="text-2xl font-bold">
+🇬🇧 أكاديمية القواعد
+</h1>
+
+<nav class="flex gap-4">
+
+<button onclick="showSection('home')">الرئيسية</button>
+<button onclick="showSection('lessons')">الدروس</button>
+
+</nav>
+
+</div>
+
+</header>
+
+
+
+<main class="max-w-6xl mx-auto p-6">
+
+<section id="home-section" class="text-center py-20">
+
+<h2 class="text-4xl font-bold mb-6">
+
+تعلم قواعد الإنجليزية
+
+</h2>
+
+<button onclick="showSection('lessons')"
+class="bg-indigo-600 text-white px-6 py-3 rounded-lg">
+
+ابدأ التعلم
+
+</button>
+
+</section>
+
+
+
+<section id="lessons-section" class="hidden">
+
+<h2 class="text-3xl font-bold text-center mb-10">
+
+الدروس
+
+</h2>
+
+<div id="lessons-grid" class="grid md:grid-cols-3 gap-6">
+
+</div>
+
+</section>
+
+
+
+<section id="content-section"
+class="hidden bg-white p-10 rounded-xl shadow max-w-3xl mx-auto">
+
+<div class="flex justify-between mb-6">
+
+<div id="lesson-title"></div>
+
+<button onclick="playLessonAudio()"
+class="bg-indigo-100 px-4 py-2 rounded-lg">
+
+🔊 شرح صوتي
+
+</button>
+
+</div>
+
+<div id="lesson-content"></div>
+
+</section>
+
+
+</main>
+
+
+
+<script>
+
+let currentLesson=0
+
+const lessons={
 
 1:{
-title:"هيكل الجملة البسيطة",
-desc:"أساس بناء أي جملة في الإنجليزية",
-content:"<p>Subject + Verb + Object</p>",
-quiz:[{q:"رتب: (reads - He - a book)",options:["He reads a book","A book reads he"],correct:0}]
+title:"هيكل الجملة",
+content:`
+<p>الجملة الإنجليزية تتكون من:</p>
+<b>Subject + Verb + Object</b>
+
+<p>مثال:</p>
+
+I eat apples
+`
 },
 
 2:{
-title:"الضمائر الشخصية",
-desc:"الكلمات التي تعبر عن الأشخاص",
-content:"<p>I He She It We You They</p>",
-quiz:[{q:"ماذا يعني We",options:["هم","نحن"],correct:1}]
+title:"الضمائر",
+content:`
+I
+You
+He
+She
+We
+They
+`
 },
 
 3:{
 title:"فعل الكينونة",
-desc:"To Be",
-content:"<ul><li>I am</li><li>He is</li><li>They are</li></ul>",
-quiz:[{q:"She ___ a nurse",options:["am","is","are"],correct:1}]
-},
-
-4:{
-title:"المضارع البسيط",
-desc:"العادات اليومية",
-content:"<p>I play / He plays</p>",
-quiz:[{q:"Ali ___ milk every day",options:["drink","drinks"],correct:1}]
-},
-
-5:{
-title:"المضارع المستمر",
-desc:"ما يحدث الآن",
-content:"<p>am/is/are + verb + ing</p>",
-quiz:[{q:"They ___ watching TV",options:["is","are"],correct:1}]
-},
-
-6:{
-title:"الماضي البسيط",
-desc:"الأحداث الماضية",
-content:"<p>I played yesterday</p>",
-quiz:[{q:"ماضي Go",options:["goed","went"],correct:1}]
-},
-
-7:{
-title:"المستقبل البسيط",
-desc:"Will",
-content:"<p>I will travel tomorrow</p>",
-quiz:[{q:"I ___ help you",options:["will","am"],correct:0}]
-},
-
-8:{
-title:"أسماء الإشارة",
-desc:"This That",
-content:"<p>This / That</p>",
-quiz:[{q:"___ is my pen",options:["This","That"],correct:0}]
-},
-
-9:{
-title:"صفات الملكية",
-desc:"My Your His",
-content:"<p>My car / His book</p>",
-quiz:[{q:"This is ___ book",options:["me","my"],correct:1}]
-},
-
-10:{
-title:"A An The",
-desc:"أدوات التعريف",
-content:"<p>A book / An apple</p>",
-quiz:[{q:"___ orange",options:["A","An"],correct:1}]
-},
-
-11:{
-title:"حروف الجر",
-desc:"In On At",
-content:"<p>On the table</p>",
-quiz:[{q:"The keys are ___ table",options:["in","on"],correct:1}]
-},
-
-12:{
-title:"السؤال",
-desc:"Do Does",
-content:"<p>Do you play?</p>",
-quiz:[{q:"___ he like coffee",options:["Do","Does"],correct:1}]
-},
-
-13:{
-title:"النفي",
-desc:"Negative",
-content:"<p>I don't know</p>",
-quiz:[{q:"I ___ like fish",options:["not","don't"],correct:1}]
-},
-
-14:{
-title:"الصفات",
-desc:"Adjectives",
-content:"<p>A red car</p>",
-quiz:[{q:"رتب: (boy - smart - A)",options:["A smart boy","A boy smart"],correct:0}]
-},
-
-15:{
-title:"الماضي المستمر",
-desc:"Past Continuous",
-content:"<p>Was/Were + verb + ing</p>",
-quiz:[{q:"They ___ playing football",options:["was","were"],correct:1}]
+content:`
+I am
+He is
+They are
+`
 }
 
 }
+
+
+
+function playLessonAudio(){
+
+if(currentLesson==1){
+
+const audio=new Audio("lesson1.wav")
+
+audio.play()
+
+}else{
+
+alert("سيتم إضافة الصوت لاحقاً")
+
+}
+
+}
+
+
+
+function init(){
+
+const grid=document.getElementById("lessons-grid")
+
+Object.keys(lessons).forEach(id=>{
+
+const lesson=lessons[id]
+
+const card=document.createElement("div")
+
+card.className="bg-white p-6 rounded-lg shadow cursor-pointer"
+
+card.onclick=()=>openLesson(id)
+
+card.innerHTML=`
+
+<h3 class="text-xl font-bold">
+
+${lesson.title}
+
+</h3>
+
+`
+
+grid.appendChild(card)
+
+})
+
+}
+
+
+
+function openLesson(id){
+
+currentLesson=id
+
+const lesson=lessons[id]
+
+document.getElementById("lesson-title").innerHTML=
+
+`<h2 class="text-2xl font-bold">${lesson.title}</h2>`
+
+document.getElementById("lesson-content").innerHTML=
+
+lesson.content
+
+showSection("content")
+
+}
+
+
+
+function showSection(name){
+
+["home","lessons","content"].forEach(s=>{
+
+document.getElementById(s+"-section").classList.add("hidden")
+
+})
+
+document.getElementById(name+"-section").classList.remove("hidden")
+
+}
+
+
+
+init()
+
+</script>
+
+
+</body>
+</html>
