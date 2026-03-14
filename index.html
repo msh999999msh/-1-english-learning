@@ -3,180 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أكاديمية القواعد - المنهج المتكامل</title>
+    <title>Elite English Academy</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700&family=Noto+Sans+Arabic:wght@400;700;900&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #f43f5e;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
         body {
-            font-family: 'Tajawal', sans-serif;
-            background-color: #f0f4f8;
-            scroll-behavior: smooth;
+            font-family: 'Noto Sans Arabic', 'Plus Jakarta Sans', sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            overflow-x: hidden;
         }
-        .lesson-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; border: 2px solid transparent; }
-        .lesson-card:hover { transform: translateY(-8px); border-color: #4f46e5; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .audio-playing { animation: pulse 2s infinite; background-color: #4338ca !important; }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+
+        .hero-gradient {
+            background: radial-gradient(circle at 0% 0%, #4f46e5 0%, #7c3aed 50%, #db2777 100%);
         }
-        .gradient-mesh {
-            background-color: #4338ca;
-            background-image: 
-                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
         }
-        .shake { animation: shake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+
+        .lesson-node {
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
-        .word-btn { transition: all 0.2s; user-select: none; }
-        .word-btn:active { transform: scale(0.9); }
+
+        .lesson-node:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px -15px rgba(99, 102, 241, 0.2);
+        }
+
+        .word-chip {
+            transition: all 0.2s;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .word-chip:active { cursor: grabbing; transform: scale(0.95); }
+
+        .floating { animation: floating 3s ease-in-out infinite; }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .progress-ring { transition: stroke-dashoffset 0.35s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #818cf8; }
+
+        .correct-flash { animation: correct-bg 0.5s ease; }
+        @keyframes correct-bg {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(34, 197, 94, 0.2); }
+            100% { background-color: transparent; }
+        }
     </style>
 </head>
-<body class="text-slate-900">
+<body>
 
-    <!-- Navbar -->
-    <nav class="bg-white/80 backdrop-blur-md border-b border-slate-200 p-4 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-black flex items-center gap-2 cursor-pointer" onclick="showPage('home')">
-                <span class="bg-indigo-600 text-white p-1 rounded-lg">EN</span> أكاديمية القواعد
-            </h1>
-            <div class="flex gap-4 md:gap-8 font-bold text-slate-600">
-                <button onclick="showPage('home')" class="hover:text-indigo-600 transition">الرئيسية</button>
-                <button onclick="showPage('lessons')" class="hover:text-indigo-600 transition">الدروس</button>
-            </div>
+    <!-- Sidebar Navigation -->
+    <aside class="fixed right-0 top-0 h-full w-20 md:w-24 bg-white border-l border-slate-100 flex flex-col items-center py-8 z-50 gap-8 hidden sm:flex">
+        <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
+            <i class="fas fa-graduation-cap text-xl"></i>
         </div>
-    </nav>
+        <nav class="flex flex-col gap-6">
+            <button onclick="showPage('home')" class="nav-btn group relative p-3 text-slate-400 hover:text-indigo-600 transition">
+                <i class="fas fa-home text-xl"></i>
+                <span class="absolute right-full mr-4 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition">الرئيسية</span>
+            </button>
+            <button onclick="showPage('lessons')" class="nav-btn group relative p-3 text-slate-400 hover:text-indigo-600 transition">
+                <i class="fas fa-book-open text-xl"></i>
+                <span class="absolute right-full mr-4 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition">الدروس</span>
+            </button>
+            <button class="nav-btn group relative p-3 text-slate-400 hover:text-indigo-600 transition">
+                <i class="fas fa-award text-xl"></i>
+                <span class="absolute right-full mr-4 bg-slate-800 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 pointer-events-none transition">الإنجازات</span>
+            </button>
+        </nav>
+    </aside>
 
-    <main class="container mx-auto py-8 px-4">
+    <!-- Main Content Area -->
+    <main class="sm:mr-24 p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="max-w-7xl mx-auto flex justify-between items-center mb-12">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900">أهلاً بك، <span class="text-indigo-600">يا بطل!</span> ✨</h1>
+                <p class="text-slate-500 font-medium">أنت جاهز لتطوير لغتك اليوم؟</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="bg-white p-2 rounded-2xl flex items-center gap-3 px-4 shadow-sm border border-slate-100">
+                    <span class="text-orange-500 font-bold">500</span>
+                    <i class="fas fa-fire text-orange-500"></i>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-slate-200 overflow-hidden border-2 border-white shadow-sm">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Avatar">
+                </div>
+            </div>
+        </header>
 
         <!-- Home Section -->
-        <section id="page-home" class="max-w-5xl mx-auto space-y-12">
-            <div class="text-center py-20 gradient-mesh rounded-[3rem] shadow-2xl text-white px-6 relative overflow-hidden">
-                <div class="relative z-10">
-                    <span class="inline-block px-4 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold mb-6">مرحباً بك في مستقبل التعلم الذكي 🚀</span>
-                    <h2 class="text-4xl md:text-6xl font-black mb-6 leading-tight">احترف الإنجليزية <br>بصوت <span class="text-indigo-300">معلمتك الخاصة</span></h2>
-                    <p class="text-lg md:text-xl opacity-80 mb-10 max-w-2xl mx-auto">شرح عربي مبسط، واختبارات تفاعلية فورية، مع نظام تصحيح ذكي يخبرك أين الخطأ بالضبط.</p>
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="showPage('lessons')" class="bg-white text-indigo-900 px-10 py-4 rounded-2xl font-black hover:shadow-2xl transition-all text-lg">ابدأ الرحلة الآن</button>
-                        <button class="bg-indigo-500/30 backdrop-blur-md text-white border border-white/30 px-10 py-4 rounded-2xl font-black transition-all text-lg">كيف يعمل؟</button>
+        <section id="page-home" class="max-w-7xl mx-auto space-y-12 animate-in fade-in duration-700">
+            <!-- Hero Banner -->
+            <div class="hero-gradient rounded-[3rem] p-8 md:p-16 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+                <div class="relative z-10 max-w-2xl">
+                    <h2 class="text-5xl md:text-7xl font-black mb-6 leading-[1.1]">تعلم القواعد <br><span class="opacity-80">بذكاء فائق.</span></h2>
+                    <p class="text-xl opacity-90 mb-10 leading-relaxed font-medium">نظام تعليمي مدعوم بالذكاء الاصطناعي يحلل مستواك ويقدم لك شرحاً صوتياً وتفاعلياً مخصصاً.</p>
+                    <div class="flex gap-4">
+                        <button onclick="showPage('lessons')" class="bg-white text-indigo-700 px-8 py-4 rounded-2xl font-black hover:shadow-xl transition flex items-center gap-3">
+                            ابدأ التعلم الآن <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Abstract Shapes -->
+                <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute -top-20 -right-20 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl"></div>
+                <div class="absolute right-20 top-20 floating hidden lg:block">
+                   <i class="fas fa-brain text-[120px] opacity-20"></i>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-card p-8 rounded-[2.5rem] flex items-center gap-6">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-black">120</h4>
+                        <p class="text-slate-500 font-medium text-sm">دقيقة دراسة</p>
+                    </div>
+                </div>
+                <div class="glass-card p-8 rounded-[2.5rem] flex items-center gap-6">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-black">15</h4>
+                        <p class="text-slate-500 font-medium text-sm">درساً مكتمل</p>
+                    </div>
+                </div>
+                <div class="glass-card p-8 rounded-[2.5rem] flex items-center gap-6">
+                    <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-2xl">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-2xl font-black">80%</h4>
+                        <p class="text-slate-500 font-medium text-sm">معدل الدقة</p>
                     </div>
                 </div>
             </div>
-            
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                    <div class="text-3xl mb-4">🎙️</div>
-                    <h3 class="font-bold text-xl mb-2">صوت ذكي</h3>
-                    <p class="text-slate-500 text-sm">استمع للشرح بلهجة تعليمية واضحة تساعدك على النطق الصحيح.</p>
+        </section>
+
+        <!-- Lessons Section -->
+        <section id="page-lessons" class="hidden max-w-7xl mx-auto space-y-12">
+            <div class="flex flex-col md:flex-row justify-between items-end gap-6">
+                <div class="max-w-xl">
+                    <span class="text-indigo-600 font-black tracking-widest uppercase text-sm">المسار التعليمي</span>
+                    <h2 class="text-4xl font-black text-slate-900 mt-2">خارطة الطريق الخاصة بك</h2>
+                    <p class="text-slate-500 mt-4 leading-relaxed">لقد قمنا بتنظيم الدروس بناءً على تدرج منطقي يضمن لك الانتقال من الأساسيات إلى الاحتراف بسلاسة.</p>
                 </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                    <div class="text-3xl mb-4">🧩</div>
-                    <h3 class="font-bold text-xl mb-2">اختبارات تفاعلية</h3>
-                    <p class="text-slate-500 text-sm">نظام سحب وإفلات للكلمات يجعلك تبني الجملة بيدك لتثبيت المعلومة.</p>
+                <div class="flex bg-white p-1.5 rounded-2xl border border-slate-100 shadow-sm">
+                    <button class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">المستوى الأول</button>
+                    <button class="px-6 py-2 text-slate-500 hover:text-indigo-600 transition font-bold">المستوى الثاني</button>
                 </div>
-                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                    <div class="text-3xl mb-4">💡</div>
-                    <h3 class="font-bold text-xl mb-2">توضيح الأخطاء</h3>
-                    <p class="text-slate-500 text-sm">إذا أخطأت، سنخبرك لماذا كانت الإجابة خاطئة وكيف تصححها.</p>
-                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="lessons-grid">
+                <!-- Lessons will be injected here -->
             </div>
         </section>
 
-        <!-- Lessons List Section -->
-        <section id="page-lessons" class="hidden space-y-10">
-            <div class="text-center max-w-2xl mx-auto">
-                <h2 class="text-4xl font-black text-slate-900">منهجك التعليمي</h2>
-                <p class="text-slate-500 mt-4">دروس متسلسلة من البداية حتى التميز</p>
-            </div>
-            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8" id="lessons-grid"></div>
-        </section>
-
-        <!-- Lesson View Section -->
-        <section id="page-lesson-detail" class="hidden max-w-4xl mx-auto">
-            <div class="flex items-center justify-between mb-8">
-                <button onclick="showPage('lessons')" class="group flex items-center gap-2 font-bold text-indigo-600">
-                    <span class="group-hover:-translate-x-1 transition">🔙</span> العودة للدروس
+        <!-- Lesson Detailed View -->
+        <section id="page-lesson-detail" class="hidden max-w-5xl mx-auto pb-20">
+            <div class="flex items-center gap-6 mb-12">
+                <button onclick="showPage('lessons')" class="w-12 h-12 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-600 hover:text-indigo-600 transition">
+                    <i class="fas fa-chevron-right"></i>
                 </button>
-                <div id="detail-level-tag" class="px-4 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-black uppercase">Level A1</div>
+                <div>
+                    <h2 id="detail-title" class="text-3xl font-black text-slate-900">تحميل الدرس...</h2>
+                    <p id="detail-desc" class="text-slate-500 font-medium"></p>
+                </div>
             </div>
 
-            <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-100">
-                <div class="bg-slate-50 p-8 md:p-12 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-8">
-                    <div class="text-right">
-                        <h2 id="detail-title" class="text-4xl font-black text-slate-900 mb-3"></h2>
-                        <p id="detail-desc" class="text-indigo-600 font-bold text-lg"></p>
-                    </div>
-                    <button id="tts-btn" onclick="speakLessonContent()" class="relative group bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-5 rounded-3xl shadow-xl transition-all flex items-center gap-4">
-                        <div class="text-right">
-                            <span id="tts-text" class="block font-black">استمع للشرح بالعربي</span>
-                            <span class="text-[10px] opacity-70">بصوت المعلمة سارة</span>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Lesson Content -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass-card rounded-[3rem] overflow-hidden">
+                        <div class="p-8 md:p-12" id="detail-content">
+                            <!-- Dynamic Content -->
                         </div>
-                        <span id="tts-icon" class="text-2xl">🔊</span>
-                    </button>
+                    </div>
                 </div>
 
-                <div id="detail-content" class="p-8 md:p-16 prose prose-indigo max-w-none text-xl leading-relaxed text-slate-700">
-                    <!-- Dynamic Content -->
-                </div>
+                <!-- Teacher AI Sidebar -->
+                <div class="space-y-6">
+                    <div class="glass-card rounded-[2.5rem] p-8 text-center sticky top-24">
+                        <div class="w-24 h-24 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-3xl mx-auto mb-6 flex items-center justify-center text-4xl text-white shadow-xl shadow-indigo-100">
+                            <i class="fas fa-microphone-lines"></i>
+                        </div>
+                        <h3 class="text-xl font-black text-slate-900 mb-2">المعلمة سارة</h3>
+                        <p class="text-slate-500 text-sm mb-8">هل تريد سماع شرح مفصل للقاعدة بصوتي؟</p>
+                        
+                        <button id="tts-btn" onclick="speakLessonContent()" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black shadow-xl hover:bg-indigo-600 transition flex items-center justify-center gap-4 group">
+                            <span id="tts-text">تشغيل الشرح الصوتي</span>
+                            <i id="tts-icon" class="fas fa-play group-hover:scale-125 transition"></i>
+                        </button>
 
-                <div class="p-10 bg-indigo-50 border-t border-indigo-100 text-center">
-                    <button onclick="startLessonQuiz()" class="bg-indigo-600 text-white px-16 py-5 rounded-2xl font-black text-xl shadow-2xl hover:bg-indigo-700 transition transform hover:scale-105">
-                        جاهز للاختبار؟ ابدأ الآن ✍️
+                        <div id="audio-wave" class="flex justify-center gap-1 mt-6 h-4 items-end hidden">
+                            <div class="w-1 bg-indigo-400 animate-bounce h-2" style="animation-delay: 0.1s"></div>
+                            <div class="w-1 bg-indigo-500 animate-bounce h-4" style="animation-delay: 0.2s"></div>
+                            <div class="w-1 bg-indigo-600 animate-bounce h-3" style="animation-delay: 0.3s"></div>
+                            <div class="w-1 bg-indigo-500 animate-bounce h-4" style="animation-delay: 0.4s"></div>
+                            <div class="w-1 bg-indigo-400 animate-bounce h-2" style="animation-delay: 0.5s"></div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="startLessonQuiz()" class="w-full bg-emerald-500 text-white py-6 rounded-[2rem] font-black text-xl shadow-xl shadow-emerald-100 hover:bg-emerald-600 transition-all transform hover:scale-[1.02]">
+                        انطلق للاختبار <i class="fas fa-fire ml-2"></i>
                     </button>
                 </div>
             </div>
         </section>
 
-        <!-- Quiz Section -->
-        <section id="page-quiz" class="hidden max-w-3xl mx-auto">
-            <div class="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                <div class="absolute top-0 left-0 h-2 bg-indigo-600 transition-all duration-700" id="quiz-progress-bar" style="width: 0%"></div>
-                
+        <!-- Quiz Interface -->
+        <section id="page-quiz" class="hidden max-w-4xl mx-auto pb-20">
+            <div class="glass-card rounded-[3.5rem] p-8 md:p-16 relative">
+                <!-- Quiz Progress -->
+                <div class="flex justify-between items-center mb-12">
+                    <div class="flex items-center gap-4">
+                        <div class="w-16 h-16 relative flex items-center justify-center">
+                            <svg class="w-full h-full">
+                                <circle cx="32" cy="32" r="28" stroke="#f1f5f9" stroke-width="6" fill="transparent"/>
+                                <circle id="quiz-progress-circle" cx="32" cy="32" r="28" stroke="#6366f1" stroke-width="6" fill="transparent" stroke-dasharray="175.9" stroke-dashoffset="175.9" class="progress-ring"/>
+                            </svg>
+                            <span id="quiz-count-text" class="absolute font-black text-indigo-600 text-xs">1/3</span>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-slate-800">بناء الجملة</h4>
+                            <p class="text-slate-400 text-xs uppercase font-bold tracking-widest">تطبيق عملي</p>
+                        </div>
+                    </div>
+                    <button onclick="showPage('lesson-detail')" class="text-slate-300 hover:text-rose-500 transition">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+
                 <div id="quiz-active-zone">
-                    <div class="flex justify-between items-center mb-10">
-                        <span class="font-black text-indigo-600" id="quiz-step-info">السؤال 1 / 3</span>
-                        <button onclick="showPage('lesson-detail')" class="text-slate-400 font-bold hover:text-red-500 transition text-sm">إلغاء الاختبار</button>
-                    </div>
+                    <h2 class="text-2xl md:text-3xl font-black text-center mb-12 text-slate-800" id="quiz-prompt">...</h2>
 
-                    <div class="text-center mb-10">
-                        <h3 class="text-2xl md:text-3xl font-black text-slate-800" id="quiz-prompt">رتب الجملة التالية:</h3>
-                    </div>
-
-                    <!-- Answer Area -->
-                    <div id="quiz-slots" class="min-h-[120px] bg-slate-50 border-4 border-dashed border-slate-200 rounded-[2rem] p-6 flex flex-wrap justify-center gap-4 mb-8">
-                        <!-- User picks go here -->
+                    <!-- Workspace -->
+                    <div id="quiz-slots" class="min-h-[140px] bg-indigo-50/50 border-4 border-dashed border-indigo-100 rounded-[2.5rem] p-8 flex flex-wrap justify-center gap-4 mb-10 transition-colors">
+                        <!-- Drop zones -->
                     </div>
 
                     <!-- Word Bank -->
-                    <div id="quiz-options" class="flex flex-wrap justify-center gap-3 mb-10">
-                        <!-- Choices go here -->
+                    <div id="quiz-options" class="flex flex-wrap justify-center gap-4 mb-12">
+                        <!-- Word buttons -->
                     </div>
 
-                    <!-- Feedback Area -->
-                    <div id="quiz-feedback-box" class="hidden p-6 rounded-3xl mb-8 text-center font-bold animate-bounce"></div>
+                    <!-- Result Feedback -->
+                    <div id="quiz-feedback-box" class="hidden p-8 rounded-[2rem] mb-10 text-center animate-in slide-in-from-bottom-4 duration-300">
+                        <div class="flex items-center justify-center gap-4">
+                            <i id="feedback-icon" class="text-3xl"></i>
+                            <div class="text-right">
+                                <h4 id="feedback-title" class="font-black text-xl"></h4>
+                                <p id="feedback-desc" class="font-medium opacity-80"></p>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div class="flex flex-wrap justify-center gap-4">
-                        <button onclick="clearCurrentQuizAnswer()" class="px-8 py-4 bg-slate-100 text-slate-600 rounded-2xl font-bold hover:bg-slate-200 transition">مسح الإجابة</button>
-                        <button id="btn-check-answer" onclick="evaluateAnswer()" class="px-12 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg hover:bg-indigo-700 transition">تحقق من صحة الإجابة</button>
-                        <button id="btn-next-question" onclick="goToNextQuestion()" class="hidden px-12 py-4 bg-green-600 text-white rounded-2xl font-black shadow-lg hover:bg-green-700 transition">السؤال التالي ➔</button>
+                    <div class="flex justify-center gap-4">
+                        <button id="btn-check-answer" onclick="evaluateAnswer()" class="px-12 py-5 bg-indigo-600 text-white rounded-2xl font-black shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition transform hover:scale-105 active:scale-95">
+                            تحقق من الإجابة
+                        </button>
+                        <button id="btn-next-question" onclick="goToNextQuestion()" class="hidden px-12 py-5 bg-slate-900 text-white rounded-2xl font-black shadow-xl hover:bg-black transition animate-bounce">
+                            السؤال التالي <i class="fas fa-arrow-left mr-3"></i>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Score Result -->
-                <div id="quiz-final-result" class="hidden text-center py-10">
-                    <div class="w-32 h-32 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-6xl mx-auto mb-8 shadow-inner" id="result-medal">🏆</div>
-                    <h2 class="text-4xl font-black mb-4">أداء مذهل!</h2>
-                    <p class="text-slate-500 text-lg mb-8" id="result-summary"></p>
-                    <div class="text-6xl font-black text-indigo-600 mb-12" id="result-score-text">0 / 0</div>
-                    <div class="flex justify-center gap-4">
-                        <button onclick="showPage('lessons')" class="px-10 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg hover:bg-indigo-700 transition">العودة للدروس</button>
-                        <button onclick="startLessonQuiz()" class="px-10 py-4 border-2 border-indigo-600 text-indigo-600 rounded-2xl font-black hover:bg-indigo-50 transition">إعادة الاختبار</button>
+                <!-- Final Success View -->
+                <div id="quiz-final-result" class="hidden text-center py-10 animate-in zoom-in duration-500">
+                    <div class="w-40 h-40 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center text-7xl mx-auto mb-8 shadow-inner relative">
+                        🏆
+                        <div class="absolute inset-0 bg-indigo-400 rounded-full animate-ping opacity-20"></div>
+                    </div>
+                    <h2 class="text-5xl font-black mb-4 text-slate-900">عمل أسطوري!</h2>
+                    <p class="text-slate-500 text-xl mb-12 max-w-md mx-auto">لقد أتقنت هذه المهارة بنجاح. أنت الآن أقرب بخطوة نحو الطلاقة.</p>
+                    <div class="flex justify-center gap-6">
+                        <button onclick="showPage('lessons')" class="px-12 py-5 bg-indigo-600 text-white rounded-2xl font-black shadow-xl hover:bg-indigo-700 transition">العودة للدروس</button>
+                        <button onclick="startLessonQuiz()" class="px-12 py-5 border-2 border-slate-200 text-slate-600 rounded-2xl font-black hover:bg-slate-50 transition">إعادة المحاولة</button>
                     </div>
                 </div>
             </div>
@@ -185,72 +317,81 @@
     </main>
 
     <script>
-        // API Key injected directly
         const apiKey = "AIzaSyAF0s4wN37-ieIM_fCx5fJF7byHkYyPgs0";
 
         const lessonsDB = [
             {
                 id: 1,
-                level: "A1",
-                title: "تكوين الجملة البسيطة",
-                desc: "الفاعل أولاً دائماً (Subject + Verb)",
-                voiceText: "أهلاً بك. في الإنجليزية، نبدأ دائماً بالشخص أو الشيء الذي فعل الحركة. الفاعل ثم الفعل. مثلاً: آي إيت آبل. أنا آكل تفاحة. لا نبدأ أبداً بالفعل كما نفعل أحياناً في العربية.",
+                level: "Basic",
+                icon: "⚡",
+                title: "محرك الجملة الإنجليزية",
+                desc: "القاعدة الذهبية: الفاعل يسبق الفعل دائماً",
+                voiceText: "مرحباً بك يا بطل. تذكر دائماً: في الإنجليزية الشخص الذي يقوم بالفعل يأتي أولاً. لا تقل 'يأكل الولد' بل قل 'الولد يأكل'. جرب ترتيب الجمل في الاختبار!",
                 content: `
-                    <h3 class="text-2xl font-black mb-6 text-indigo-900">هيكلة الجملة الخبرية</h3>
-                    <p>في اللغة العربية يمكننا قول "يقرأ الولد"، لكن في الإنجليزية الترتيب مقدس:</p>
-                    <div class="my-10 grid grid-cols-3 gap-4 text-center">
-                        <div class="p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl">
-                            <span class="block text-blue-600 font-black text-xs uppercase mb-1">Subject</span>
-                            <span class="text-2xl font-bold">The boy</span>
-                            <p class="text-[10px] mt-1 text-slate-400">الفاعل</p>
+                    <div class="space-y-8">
+                        <div class="bg-indigo-50 p-6 rounded-2xl border-r-8 border-indigo-600">
+                            <h4 class="font-black text-indigo-900 text-xl mb-2">قاعدة (S-V-O)</h4>
+                            <p class="text-indigo-800 font-medium leading-relaxed">تتكون الجملة البسيطة من فاعل (Subject) ثم فعل (Verb) ثم مفعول به (Object).</p>
                         </div>
-                        <div class="p-4 bg-green-50 border-2 border-green-200 rounded-2xl">
-                            <span class="block text-green-600 font-black text-xs uppercase mb-1">Verb</span>
-                            <span class="text-2xl font-bold">reads</span>
-                            <p class="text-[10px] mt-1 text-slate-400">الفعل</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-6 bg-slate-50 rounded-3xl border border-slate-200">
+                                <span class="text-rose-500 font-bold block mb-2">❌ خطأ شائع (مثل العربي)</span>
+                                <p class="text-lg line-through text-slate-400 font-bold">Plays the boy football</p>
+                            </div>
+                            <div class="p-6 bg-emerald-50 rounded-3xl border border-emerald-100">
+                                <span class="text-emerald-600 font-bold block mb-2">✅ الترتيب الصحيح</span>
+                                <p class="text-lg text-emerald-900 font-bold italic">The boy plays football</p>
+                            </div>
                         </div>
-                        <div class="p-4 bg-pink-50 border-2 border-pink-200 rounded-2xl">
-                            <span class="block text-pink-600 font-black text-xs uppercase mb-1">Object</span>
-                            <span class="text-2xl font-bold">a book</span>
-                            <p class="text-[10px] mt-1 text-slate-400">المفعول</p>
+
+                        <div class="p-8 bg-amber-50 rounded-[2rem] border-2 border-amber-100">
+                            <h5 class="font-black text-amber-900 mb-3 uppercase tracking-tighter text-sm">💡 سر المهنة</h5>
+                            <p class="text-amber-800">إذا كان الفاعل مفرداً مثل (He / She / It)، يجب أن تضع حرف <span class="text-2xl font-black text-rose-500 underline">S</span> في نهاية الفعل بالمضارع.</p>
                         </div>
                     </div>
-                    <p class="bg-amber-50 border-r-8 border-amber-400 p-6 rounded-xl italic font-medium">
-                        "ملاحظة: إذا كان الفاعل مفرداً (He, She, It) نضيف s للفعل في المضارع البسيط."
-                    </p>
                 `,
                 quiz: [
-                    { words: ["I", "play", "football"], correct: "I play football", hint: "ابدأ بـ 'أنا' (I) ثم الفعل." },
-                    { words: ["She", "drinks", "water"], correct: "She drinks water", hint: "تذكر s المفرد مع الفعل drinks." },
-                    { words: ["They", "study", "English"], correct: "They study English", hint: "الفاعل هم (They)." }
+                    { words: ["Ali", "speaks", "English"], correct: "Ali speaks English", hint: "علي هو الفاعل، ضعه في البداية.", expl: "بدأنا بـ Ali (فاعل) ثم speaks (فعل) ثم المفعول به." },
+                    { words: ["We", "like", "pizza"], correct: "We like pizza", hint: "نحن (We) نحب البيتزا.", expl: "الجملة تتبع ترتيب: نحن + فعل الحب + البيتزا." },
+                    { words: ["The cat", "drinks", "milk"], correct: "The cat drinks milk", hint: "القطة هي الفاعل المفرد.", expl: "لاحظ إضافة s للفعل drinks لأن القطة مفرد." }
                 ]
             },
             {
                 id: 2,
-                level: "A1",
-                title: "فعل الكينونة (To Be)",
-                desc: "كيف تصف نفسك والآخرين (Am, Is, Are)",
-                voiceText: "فعل الكينونة هو أهم فعل في الإنجليزية. نستخدمه للوصف. آي تأخذ آم. هي وشي وإت تأخذ إز. والجمع يأخذ آر. اسمع جيداً: آي آم هابي. هي إز سمارت.",
+                level: "Starter",
+                icon: "🌟",
+                title: "سر الكينونة (Verb To Be)",
+                desc: "كيف تعرف عن نفسك وتصف الأشياء",
+                voiceText: "فعل الكينونة هو الجسر الذي نستخدمه للوصف. آي تأخذ آم، والمفرد يأخذ إز، والجمع يأخذ آر. أنت الآن تبني أساساً قوياً جداً.",
                 content: `
-                    <h3 class="text-2xl font-black mb-6 text-indigo-900">استخدام Verb To Be</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                            <span class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center font-bold">I</span>
-                            <span class="text-xl">➔ <b>am</b> <small>(I am a student)</small></span>
-                        </li>
-                        <li class="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                            <span class="w-12 h-12 bg-pink-600 text-white rounded-full flex items-center justify-center font-bold">He</span>
-                            <span class="text-xl">➔ <b>is</b> <small>(He is happy)</small></span>
-                        </li>
-                        <li class="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                            <span class="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">We</span>
-                            <span class="text-xl">➔ <b>are</b> <small>(We are friends)</small></span>
-                        </li>
-                    </ul>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <div class="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold">I</div>
+                            <div class="flex-1">
+                                <h5 class="font-bold text-slate-800">أنا أكون ➔ <span class="text-indigo-600">am</span></h5>
+                                <p class="text-slate-500 text-sm italic">I am a student</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <div class="w-12 h-12 bg-pink-100 text-pink-600 rounded-full flex items-center justify-center font-bold">He</div>
+                            <div class="flex-1">
+                                <h5 class="font-bold text-slate-800">هو/هي للمفرد ➔ <span class="text-pink-600">is</span></h5>
+                                <p class="text-slate-500 text-sm italic">She is beautiful</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+                            <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center font-bold">You</div>
+                            <div class="flex-1">
+                                <h5 class="font-bold text-slate-800">الجمع والمخاطب ➔ <span class="text-emerald-600">are</span></h5>
+                                <p class="text-slate-500 text-sm italic">They are friends</p>
+                            </div>
+                        </div>
+                    </div>
                 `,
                 quiz: [
-                    { words: ["I", "am", "happy"], correct: "I am happy", hint: "بعد I نضع دائماً am للوصف." },
-                    { words: ["He", "is", "a doctor"], correct: "He is a doctor", hint: "المفرد المذكر يأخذ is." }
+                    { words: ["I", "am", "smart"], correct: "I am smart", hint: "بعد I نستخدم am دائماً.", expl: "في الإنجليزية لا يمكنك قول 'I smart'، يجب وجود فعل كينونة." },
+                    { words: ["They", "are", "happy"], correct: "They are happy", hint: "للجمع نستخدم are.", expl: "They تعني هم، وهي جمع لذا تأخذ are." }
                 ]
             }
         ];
@@ -265,21 +406,28 @@
             document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
             document.getElementById('page-' + id).classList.remove('hidden');
             if (id === 'lessons') renderLessons();
-            window.scrollTo(0,0);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function renderLessons() {
             const grid = document.getElementById('lessons-grid');
             grid.innerHTML = lessonsDB.map(l => `
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm lesson-card border border-slate-100" onclick="loadLesson(${l.id})">
-                    <div class="flex justify-between items-start mb-6">
-                        <span class="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">${l.level}</span>
-                        <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center shadow-lg">📖</div>
+                <div class="glass-card p-8 rounded-[3rem] lesson-node group cursor-pointer" onclick="loadLesson(${l.id})">
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-2xl group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-500">
+                            ${l.icon}
+                        </div>
+                        <span class="px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black tracking-widest uppercase">${l.level}</span>
                     </div>
-                    <h3 class="text-xl font-black mb-2 text-slate-800">${l.title}</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed">${l.desc}</p>
-                    <div class="mt-8 flex items-center gap-2 text-indigo-600 font-black text-sm">
-                        دخول الدرس ➔
+                    <h3 class="text-xl font-black text-slate-900 mb-3">${l.title}</h3>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-8">${l.desc}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex -space-x-2">
+                            <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-200"></div>
+                            <div class="w-8 h-8 rounded-full border-2 border-white bg-slate-300"></div>
+                            <div class="w-8 h-8 rounded-full border-2 border-white bg-indigo-100 flex items-center justify-center text-[8px] font-bold">+2k</div>
+                        </div>
+                        <span class="text-indigo-600 font-black text-sm group-hover:translate-x-[-5px] transition-transform">دخول الدرس <i class="fas fa-arrow-left mr-2"></i></span>
                     </div>
                 </div>
             `).join('');
@@ -290,7 +438,6 @@
             document.getElementById('detail-title').innerText = activeLesson.title;
             document.getElementById('detail-desc').innerText = activeLesson.desc;
             document.getElementById('detail-content').innerHTML = activeLesson.content;
-            document.getElementById('detail-level-tag').innerText = `Level ${activeLesson.level}`;
             stopAudio();
             showPage('lesson-detail');
         }
@@ -299,21 +446,23 @@
             if (!activeLesson) return;
             const btn = document.getElementById('tts-btn');
             const txt = document.getElementById('tts-text');
+            const wave = document.getElementById('audio-wave');
 
             if (ttsPlayer && !ttsPlayer.paused) {
                 stopAudio();
                 return;
             }
 
-            btn.classList.add('audio-playing', 'scale-95');
-            txt.innerText = "المعلمة تحضر الدرس...";
+            btn.classList.add('bg-indigo-600');
+            txt.innerText = "المعلمة تتحدث...";
+            wave.classList.remove('hidden');
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: `Say in a calm, supportive, professional female Arabic teacher voice: ${activeLesson.voiceText}` }] }],
+                        contents: [{ parts: [{ text: `Speak in a very friendly, encouraging, and clear female Arabic teacher voice: ${activeLesson.voiceText}` }] }],
                         generationConfig: {
                             responseModalities: ["AUDIO"],
                             speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } } }
@@ -326,17 +475,12 @@
                 const blob = pcmToWav(pcm, 24000);
                 
                 ttsPlayer = new Audio(URL.createObjectURL(blob));
-                ttsPlayer.onplay = () => {
-                    txt.innerText = "جاري الشرح الآن...";
-                    btn.querySelector('#tts-icon').innerText = "⏸️";
-                };
                 ttsPlayer.onended = () => stopAudio();
                 ttsPlayer.play();
 
             } catch (err) {
-                txt.innerText = "حدث خطأ في الصوت";
-                btn.classList.remove('audio-playing');
-                setTimeout(() => { txt.innerText = "استمع للشرح بالعربي"; }, 2000);
+                stopAudio();
+                txt.innerText = "خطأ في الاتصال الصوتي";
             }
         }
 
@@ -345,13 +489,12 @@
                 ttsPlayer.pause();
                 ttsPlayer = null;
             }
-            const btn = document.getElementById('tts-btn');
-            btn.classList.remove('audio-playing', 'scale-95');
-            document.getElementById('tts-text').innerText = "استمع للشرح بالعربي";
-            document.getElementById('tts-icon').innerText = "🔊";
+            document.getElementById('tts-btn').classList.remove('bg-indigo-600');
+            document.getElementById('tts-text').innerText = "تشغيل الشرح الصوتي";
+            document.getElementById('audio-wave').classList.add('hidden');
         }
 
-        // --- Quiz Logic ---
+        // --- Quiz Engine ---
         function startLessonQuiz() {
             qIdx = 0;
             userScore = 0;
@@ -359,6 +502,16 @@
             document.getElementById('quiz-final-result').classList.add('hidden');
             loadQuizStep();
             showPage('quiz');
+        }
+
+        function updateQuizProgress() {
+            const total = activeLesson.quiz.length;
+            const current = qIdx + 1;
+            const percentage = (current / total) * 100;
+            const circle = document.getElementById('quiz-progress-circle');
+            const offset = 175.9 - (175.9 * percentage / 100);
+            circle.style.strokeDashoffset = offset;
+            document.getElementById('quiz-count-text').innerText = `${current}/${total}`;
         }
 
         function loadQuizStep() {
@@ -372,17 +525,16 @@
             feedback.classList.add('hidden');
             document.getElementById('btn-check-answer').classList.remove('hidden');
             document.getElementById('btn-next-question').classList.add('hidden');
+            document.getElementById('quiz-prompt').innerText = "رتب الجملة بالترتيب الصحيح:";
             
-            document.getElementById('quiz-step-info').innerText = `السؤال ${qIdx + 1} / ${activeLesson.quiz.length}`;
-            document.getElementById('quiz-progress-bar').style.width = `${(qIdx / activeLesson.quiz.length) * 100}%`;
+            updateQuizProgress();
 
-            // Shuffle words
             const shuffled = [...question.words].sort(() => Math.random() - 0.5);
             options.innerHTML = '';
             
             shuffled.forEach(word => {
                 const btn = document.createElement('button');
-                btn.className = "word-btn px-6 py-4 bg-white border-2 border-slate-200 rounded-2xl font-bold shadow-sm hover:border-indigo-500 hover:text-indigo-600 transition-all";
+                btn.className = "word-chip px-8 py-5 bg-white border-2 border-slate-100 rounded-[1.5rem] font-bold shadow-sm hover:border-indigo-400 hover:text-indigo-600 transition-all text-lg";
                 btn.innerText = word;
                 btn.onclick = () => selectWord(word, btn);
                 options.appendChild(btn);
@@ -391,15 +543,17 @@
 
         function selectWord(word, originalBtn) {
             currentSelections.push(word);
-            originalBtn.classList.add('opacity-0', 'pointer-events-none');
+            originalBtn.style.opacity = '0.2';
+            originalBtn.style.pointerEvents = 'none';
             
             const slotItem = document.createElement('div');
-            slotItem.className = "px-6 py-4 bg-indigo-600 text-white rounded-2xl font-black shadow-lg cursor-pointer animate-scale";
+            slotItem.className = "px-8 py-5 bg-indigo-600 text-white rounded-[1.5rem] font-black shadow-xl cursor-pointer transform hover:scale-105 transition active:scale-95";
             slotItem.innerText = word;
             slotItem.onclick = () => {
                 currentSelections = currentSelections.filter(w => w !== word);
                 slotItem.remove();
-                originalBtn.classList.remove('opacity-0', 'pointer-events-none');
+                originalBtn.style.opacity = '1';
+                originalBtn.style.pointerEvents = 'auto';
             };
             document.getElementById('quiz-slots').appendChild(slotItem);
         }
@@ -408,21 +562,30 @@
             const question = activeLesson.quiz[qIdx];
             const feedback = document.getElementById('quiz-feedback-box');
             const userAnswer = currentSelections.join(' ');
-            const box = document.getElementById('page-quiz').querySelector('.bg-white');
+            const card = document.querySelector('#page-quiz .glass-card');
 
             feedback.classList.remove('hidden');
             
             if (userAnswer === question.correct) {
                 userScore++;
-                feedback.innerText = "✨ مذهل! إجابة صحيحة تماماً.";
-                feedback.className = "p-6 rounded-3xl mb-8 text-center font-bold bg-green-50 text-green-700 border border-green-200";
+                feedback.className = "p-8 rounded-[2rem] mb-10 text-center bg-emerald-50 text-emerald-700 border border-emerald-100";
+                document.getElementById('feedback-icon').className = "fas fa-check-circle text-3xl";
+                document.getElementById('feedback-title').innerText = "رائع جداً!";
+                document.getElementById('feedback-desc').innerText = question.expl;
                 document.getElementById('btn-check-answer').classList.add('hidden');
                 document.getElementById('btn-next-question').classList.remove('hidden');
+                card.classList.add('correct-flash');
+                setTimeout(() => card.classList.remove('correct-flash'), 500);
             } else {
-                box.classList.add('shake');
-                setTimeout(() => box.classList.remove('shake'), 600);
-                feedback.innerHTML = `❌ هناك خطأ في الترتيب. <br> <span class="text-sm opacity-80">تلميح: ${question.hint}</span>`;
-                feedback.className = "p-6 rounded-3xl mb-8 text-center font-bold bg-red-50 text-red-700 border border-red-200";
+                feedback.className = "p-8 rounded-[2rem] mb-10 text-center bg-rose-50 text-rose-700 border border-rose-100";
+                document.getElementById('feedback-icon').className = "fas fa-lightbulb text-3xl";
+                document.getElementById('feedback-title').innerText = "حاول مرة أخرى";
+                document.getElementById('feedback-desc').innerText = question.hint;
+                
+                // Shake effect
+                card.style.animation = 'none';
+                card.offsetHeight; /* trigger reflow */
+                card.style.animation = 'shake 0.5s';
             }
         }
 
@@ -438,28 +601,9 @@
         function finishQuiz() {
             document.getElementById('quiz-active-zone').classList.add('hidden');
             document.getElementById('quiz-final-result').classList.remove('hidden');
-            document.getElementById('quiz-progress-bar').style.width = `100%`;
-            
-            const ratio = userScore / activeLesson.quiz.length;
-            document.getElementById('result-score-text').innerText = `${userScore} / ${activeLesson.quiz.length}`;
-            
-            if (ratio === 1) {
-                document.getElementById('result-medal').innerText = "👑";
-                document.getElementById('result-summary').innerText = "أنت ملك القواعد! لقد أتممت الاختبار بنجاح باهر.";
-            } else if (ratio >= 0.5) {
-                document.getElementById('result-medal').innerText = "🥈";
-                document.getElementById('result-summary').innerText = "عمل رائع، قاربت على الكمال. راجع الأخطاء لتكون الأفضل.";
-            } else {
-                document.getElementById('result-medal').innerText = "📚";
-                document.getElementById('result-summary').innerText = "لا بأس، التعلم يحتاج لبعض الصبر. أعد قراءة الدرس وحاول مجدداً.";
-            }
         }
 
-        function clearCurrentQuizAnswer() {
-            loadQuizStep();
-        }
-
-        // --- Audio Utils ---
+        // --- Audio PCM to WAV ---
         function pcmToWav(base64, sampleRate) {
             const buffer = Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer;
             const wavHeader = new ArrayBuffer(44);
@@ -480,7 +624,16 @@
             return new Blob([wavHeader, buffer], { type: 'audio/wav' });
         }
 
+        // Init App
         window.onload = () => showPage('home');
     </script>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+    </style>
 </body>
 </html>
