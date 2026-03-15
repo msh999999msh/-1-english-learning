@@ -26,7 +26,8 @@ max-width:900px;
 margin:auto;
 }
 
-input,textarea{
+input,textarea,select{
+
 width:100%;
 padding:10px;
 margin-top:5px;
@@ -35,9 +36,11 @@ background:#0f172a;
 border:1px solid #333;
 color:white;
 border-radius:6px;
+
 }
 
 button{
+
 padding:10px 15px;
 border:none;
 border-radius:6px;
@@ -45,10 +48,23 @@ background:#6366f1;
 color:white;
 cursor:pointer;
 margin:5px;
+
 }
 
 button:hover{
 opacity:.8;
+}
+
+.lesson{
+border:1px solid #333;
+padding:12px;
+margin-top:10px;
+border-radius:6px;
+}
+
+audio{
+margin-top:10px;
+width:100%;
 }
 
 </style>
@@ -70,10 +86,26 @@ opacity:.8;
 <label>شرح الدرس</label>
 <textarea id="explain"></textarea>
 
-<label>رابط الصوت</label>
-<input id="audio">
+<label>طريقة عرض الدرس</label>
+<select id="mode">
+
+<option value="text">نص فقط</option>
+<option value="audio">صوت فقط</option>
+<option value="both">نص + صوت</option>
+
+</select>
+
+<label>رفع مقطع صوتي</label>
+<input type="file" id="audioFile" accept="audio/*">
+
+<audio id="audioPreview" controls style="display:none"></audio>
+
+<label>أمثلة (كل سطر: English | عربي)</label>
+<textarea id="examples"></textarea>
 
 <button onclick="saveLesson()">حفظ الدرس</button>
+
+<button onclick="clearForm()">درس جديد</button>
 
 <button onclick="showLessons()">عرض الدروس</button>
 
@@ -83,27 +115,105 @@ opacity:.8;
 
 <script>
 
-let data = JSON.parse(localStorage.getItem("lessons")) || []
+const STORAGE="english_lessons"
 
-function saveLesson(){
+let lessons=JSON.parse(localStorage.getItem(STORAGE)) || []
 
-let lesson = {
+let editingId=null
 
-title:document.getElementById("title").value,
+let audioBase64=""
 
-desc:document.getElementById("desc").value,
+document.getElementById("audioFile").addEventListener("change",function(){
 
-explain:document.getElementById("explain").value,
+const file=this.files[0]
 
-audio:document.getElementById("audio").value
+if(!file) return
+
+const reader=new FileReader()
+
+reader.onload=function(e){
+
+audioBase64=e.target.result
+
+const preview=document.getElementById("audioPreview")
+
+preview.src=audioBase64
+
+preview.style.display="block"
 
 }
 
-data.push(lesson)
+reader.readAsDataURL(file)
 
-localStorage.setItem("lessons",JSON.stringify(data))
+})
 
-alert("تم حفظ الدرس")
+function saveLesson(){
+
+const title=document.getElementById("title").value.trim()
+
+const desc=document.getElementById("desc").value.trim()
+
+const explain=document.getElementById("explain").value.trim()
+
+const mode=document.getElementById("mode").value
+
+const examples=document.getElementById("examples").value
+
+if(!title){
+
+alert("أدخل عنوان الدرس")
+
+return
+
+}
+
+const lesson={
+
+id:editingId || Date.now(),
+
+title,
+
+desc,
+
+explain,
+
+mode,
+
+audio:audioBase64,
+
+examples:examples.split("\n").map(x=>{
+
+const p=x.split("|")
+
+return {en:(p[0]||"").trim(),ar:(p[1]||"").trim()}
+
+})
+
+}
+
+if(editingId){
+
+lessons=lessons.map(l=>l.id===editingId?lesson:l)
+
+}else{
+
+lessons.push(lesson)
+
+}
+
+editingId=null
+
+saveData()
+
+showLessons()
+
+clearForm()
+
+}
+
+function saveData(){
+
+localStorage.setItem(STORAGE,JSON.stringify(lessons))
 
 }
 
@@ -111,18 +221,85 @@ function showLessons(){
 
 let html=""
 
-data.forEach(l=>{
+lessons.forEach(l=>{
 
 html+=`
-<div style="border:1px solid #333;padding:10px;margin:10px">
+
+<div class="lesson">
+
 <h3>${l.title}</h3>
+
 <p>${l.desc}</p>
+
+<p>${l.explain}</p>
+
+${l.audio?`<audio controls src="${l.audio}"></audio>`:""}
+
+<button onclick="editLesson(${l.id})">تعديل</button>
+
+<button onclick="deleteLesson(${l.id})">حذف</button>
+
 </div>
+
 `
 
 })
 
 document.getElementById("output").innerHTML=html
+
+}
+
+function editLesson(id){
+
+const l=lessons.find(x=>x.id===id)
+
+editingId=id
+
+title.value=l.title
+
+desc.value=l.desc
+
+explain.value=l.explain
+
+mode.value=l.mode
+
+examples.value=l.examples.map(e=>e.en+" | "+e.ar).join("\n")
+
+audioBase64=l.audio || ""
+
+window.scrollTo(0,0)
+
+}
+
+function deleteLesson(id){
+
+if(!confirm("حذف الدرس؟")) return
+
+lessons=lessons.filter(l=>l.id!==id)
+
+saveData()
+
+showLessons()
+
+}
+
+function clearForm(){
+
+editingId=null
+
+title.value=""
+
+desc.value=""
+
+explain.value=""
+
+examples.value=""
+
+audioFile.value=""
+
+audioPreview.style.display="none"
+
+audioBase64=""
 
 }
 
