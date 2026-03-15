@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>لوحة المطور</title>
+
+<style>
+
+body{
+font-family:Tahoma;
+background:#0b1120;
+color:white;
+margin:0;
+padding:40px;
+}
+
+.panel{
+background:#111827;
+padding:25px;
+border-radius:12px;
+max-width:900px;
+margin:auto;
+}
+
+input,textarea{
+width:100%;
+padding:10px;
+margin-top:5px;
+margin-bottom:15px;
+background:#0f172a;
+border:1px solid #333;
+color:white;
+border-radius:6px;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:6px;
+background:#6366f1;
+color:white;
+cursor:pointer;
+margin:5px;
+}
+
+button:hover{
+opacity:.8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="panel">
+
+<h2>لوحة إدارة الدروس</h2>
+
+<label>عنوان الدرس</label>
+<input id="title">
+
+<label>وصف الدرس</label>
+<input id="desc">
+
+<label>شرح الدرس</label>
+<textarea id="explain"></textarea>
+
+<label>رابط الصوت</label>
+<input id="audio">
+
+<button onclick="saveLesson()">حفظ الدرس</button>
+
+<button onclick="showLessons()">عرض الدروس</button>
+
+<div id="output"></div>
+
+</div>
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("lessons")) || []
+
+function saveLesson(){
+
+let lesson = {
+
+title:document.getElementById("title").value,
+
+desc:document.getElementById("desc").value,
+
+explain:document.getElementById("explain").value,
+
+audio:document.getElementById("audio").value
+
+}
+
+data.push(lesson)
+
+localStorage.setItem("lessons",JSON.stringify(data))
+
+alert("تم حفظ الدرس")
+
+}
+
+function showLessons(){
+
+let html=""
+
+data.forEach(l=>{
+
+html+=`
+<div style="border:1px solid #333;padding:10px;margin:10px">
+<h3>${l.title}</h3>
+<p>${l.desc}</p>
+</div>
+`
+
+})
+
+document.getElementById("output").innerHTML=html
+
+}
+
+</script>
+
+</body>
+</html>
