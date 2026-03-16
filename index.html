@@ -548,12 +548,6 @@
       border-color:rgba(99,102,241,.36);
     }
 
-    .divider{
-      height:1px;
-      background:var(--line);
-      margin:14px 0;
-    }
-
     .audio-player{
       width:100%;
       margin-top:10px;
@@ -654,7 +648,7 @@
             <button class="btn btn-soft" onclick="scrollToSection('reviewSection')">افتح المراجعة الذكية</button>
           </div>
 
-          <p class="tiny">هذه النسخة تعمل محليًا داخل المتصفح. النطق يعتمد على أصوات المتصفح المتاحة. ويمكن إضافة API خارجي لاحقًا إذا رغبت.</p>
+          <p class="tiny">هذه النسخة تعمل محليًا داخل المتصفح. الصوت يعتمد على أصوات الجهاز والمتصفح، مع تفضيل صوت أنثوي إن كان متاحًا.</p>
         </div>
       </div>
     </section>
@@ -947,9 +941,9 @@
   </div>
 
   <script>
-    const STORAGE_KEY = "elite_english_pro_v6_data";
-    const PROGRESS_KEY = "elite_english_pro_v6_progress";
-    const REVIEW_KEY = "elite_english_pro_v6_review";
+    const STORAGE_KEY = "elite_english_pro_v7_data";
+    const PROGRESS_KEY = "elite_english_pro_v7_progress";
+    const REVIEW_KEY = "elite_english_pro_v7_review";
     const ADMIN_USERNAME = "msh999";
     const ADMIN_PASSWORD = "123456";
 
@@ -964,6 +958,74 @@
     let selectedLessonId = null;
     let editingLevelId = null;
     let editingLessonId = null;
+    let speechVoices = [];
+
+    function loadVoices() {
+      speechVoices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+    }
+
+    if ("speechSynthesis" in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function findPreferredVoice(lang = "en") {
+      if (!speechVoices.length) loadVoices();
+      const voices = speechVoices || [];
+      const langPrefix = lang.toLowerCase().startsWith("ar") ? "ar" : "en";
+
+      const femaleHintsEn = [
+        "female", "zira", "samantha", "victoria", "karen", "moira", "tessa",
+        "ava", "aria", "jenny", "emma", "linda", "hazel", "susan"
+      ];
+
+      const femaleHintsAr = [
+        "female", "hoda", "leila", "laila", "amira", "sana", "zeina"
+      ];
+
+      const hints = langPrefix === "ar" ? femaleHintsAr : femaleHintsEn;
+      const exactLangVoices = voices.filter(v => (v.lang || "").toLowerCase().startsWith(langPrefix));
+
+      return (
+        exactLangVoices.find(v => hints.some(h => (v.name || "").toLowerCase().includes(h))) ||
+        exactLangVoices.find(v => (v.name || "").toLowerCase().includes("google")) ||
+        exactLangVoices.find(v => (v.name || "").toLowerCase().includes("microsoft")) ||
+        exactLangVoices[0] ||
+        voices[0] ||
+        null
+      );
+    }
+
+    function speakText(text, lang = "en-US", rate = 0.92) {
+      if (!("speechSynthesis" in window)) {
+        alert("المتصفح لا يدعم النطق.");
+        return;
+      }
+
+      const cleanText = String(text || "").trim();
+      if (!cleanText) return;
+
+      window.speechSynthesis.cancel();
+
+      const utter = new SpeechSynthesisUtterance(cleanText);
+      utter.lang = lang;
+      utter.rate = rate;
+      utter.pitch = 1.08;
+      utter.volume = 1;
+
+      const preferredVoice = findPreferredVoice(lang);
+      if (preferredVoice) utter.voice = preferredVoice;
+
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakArabic(text) {
+      speakText(text, "ar-SA", 0.95);
+    }
+
+    function speakEnglish(text) {
+      speakText(text, "en-US", 0.9);
+    }
 
     function uid(prefix="id"){
       return prefix + "_" + Math.random().toString(36).slice(2,10);
@@ -990,6 +1052,14 @@
         .replace(/'/g,"&#039;");
     }
 
+    function escapeForJs(str=""){
+      return String(str)
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'")
+        .replace(/\n/g," ")
+        .replace(/\r/g," ");
+    }
+
     function scrollToSection(id){
       const el = document.getElementById(id);
       if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
@@ -1005,103 +1075,152 @@
       if(modal) modal.classList.remove("show");
     }
 
-    function speakText(text, lang="en-US"){
-      if(!("speechSynthesis" in window)){
-        alert("المتصفح لا يدعم النطق.");
-        return;
-      }
-      window.speechSynthesis.cancel();
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = lang;
-      utter.rate = .95;
-      utter.pitch = 1;
-      window.speechSynthesis.speak(utter);
-    }
-
-    function speakArabic(text){
-      speakText(text, "ar-SA");
-    }
-
     function getDefaultAppData(){
       return {
         levels: [
-          { id:"beginner", title:"المبتدئ", description:"ابدأ من الصفر: الحروف، الأرقام، التحيات، الكلمات الأساسية والجمل البسيطة." },
-          { id:"intermediate", title:"المتوسط", description:"توسع في القواعد، المحادثات اليومية، السفر، العمل، والطلبات." },
-          { id:"advanced", title:"المتقدم", description:"الطلاقة، العروض، الإيميلات المهنية، الاجتماعات، والتعبير الطبيعي." }
+          {
+            id: "beginner",
+            title: "المبتدئ",
+            description: "ابدأ من الصفر: التحيات، تقديم النفس، الأرقام، الحروف، العائلة، الألوان، الروتين اليومي والجمل الأساسية."
+          },
+          {
+            id: "intermediate",
+            title: "المتوسط",
+            description: "طوّر لغتك في القواعد، المحادثة اليومية، السفر، التسوق، الوقت، والمواقف العملية."
+          },
+          {
+            id: "advanced",
+            title: "المتقدم",
+            description: "احتراف المحادثة، العمل، الاجتماعات، كتابة الإيميلات، النقاش، والعروض التقديمية."
+          }
         ],
+
         lessons: [
           {
-            id:"l1",
-            levelId:"beginner",
-            type:"vocabulary",
-            title:"Greetings",
-            shortDescription:"تعلم التحيات الأساسية المستخدمة يوميًا.",
-            explanation:"في هذا الدرس ستتعلم أهم التحيات الإنجليزية وكيف تبدأ محادثة بسيطة وترد على الآخرين بطريقة طبيعية.",
-            xp:25,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"Hello", meaning:"مرحباً", type:"expression", example:"Hello, my friend.", exampleAr:"مرحبًا يا صديقي."},
-              {word:"Hi", meaning:"أهلاً", type:"expression", example:"Hi, how are you?", exampleAr:"أهلًا، كيف حالك؟"},
+            id: "b1",
+            levelId: "beginner",
+            type: "vocabulary",
+            title: "Greetings and Introductions",
+            shortDescription: "التحيات والتعارف الأساسي بطريقة عملية.",
+            explanation: "في هذا الدرس ستتعلم كيف تبدأ أي محادثة بسيطة باللغة الإنجليزية. ستتعلم التحيات الرسمية وغير الرسمية، وكيف تسأل عن حال الشخص، وكيف تعرّف بنفسك وترد بطريقة طبيعية. ركّز على تكرار الجمل بصوت واضح حتى تكتسب الطلاقة تدريجيًا.",
+            xp: 30,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Hello", meaning:"مرحبًا", type:"expression", example:"Hello, how are you?", exampleAr:"مرحبًا، كيف حالك؟"},
+              {word:"Hi", meaning:"أهلًا", type:"expression", example:"Hi, my name is Ali.", exampleAr:"أهلًا، اسمي علي."},
               {word:"Good morning", meaning:"صباح الخير", type:"expression", example:"Good morning, teacher.", exampleAr:"صباح الخير يا معلم."},
-              {word:"Nice to meet you", meaning:"تشرفت بمعرفتك", type:"expression", example:"Nice to meet you, Ali.", exampleAr:"تشرفت بمعرفتك يا علي."}
+              {word:"Good evening", meaning:"مساء الخير", type:"expression", example:"Good evening, everyone.", exampleAr:"مساء الخير جميعًا."},
+              {word:"How are you?", meaning:"كيف حالك؟", type:"question", example:"How are you today?", exampleAr:"كيف حالك اليوم؟"},
+              {word:"I am fine", meaning:"أنا بخير", type:"sentence", example:"I am fine, thank you.", exampleAr:"أنا بخير، شكرًا لك."},
+              {word:"Nice to meet you", meaning:"تشرفت بمعرفتك", type:"expression", example:"Nice to meet you, Sara.", exampleAr:"تشرفت بمعرفتك يا سارة."},
+              {word:"See you later", meaning:"أراك لاحقًا", type:"expression", example:"See you later at school.", exampleAr:"أراك لاحقًا في المدرسة."}
             ],
-            examples:[
-              {en:"Hello!", ar:"مرحباً!"},
-              {en:"How are you?", ar:"كيف حالك؟"},
-              {en:"I am fine, thank you.", ar:"أنا بخير، شكرًا لك."}
+            examples: [
+              {en:"Hello! My name is Omar.", ar:"مرحبًا! اسمي عمر."},
+              {en:"Hi, nice to meet you.", ar:"أهلًا، تشرفت بمعرفتك."},
+              {en:"How are you? I am fine.", ar:"كيف حالك؟ أنا بخير."},
+              {en:"Good evening, everyone.", ar:"مساء الخير جميعًا."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"كلمة Hello معناها؟", choices:["شكراً","مرحباً","وداعاً"], answer:1},
-              {question:"الرد المناسب على How are you؟", choices:["Blue","I am fine","Table"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"What does 'Hello' mean?", choices:["وداعًا","مرحبًا","شكرًا"], answer:1},
+              {question:"A suitable response to 'How are you?' is:", choices:["I am fine","Good night","Blue"], answer:0},
+              {question:"'Nice to meet you' means:", choices:["أنا متعب","تشرفت بمعرفتك","أنا في البيت"], answer:1}
             ]
           },
+
           {
-            id:"l2",
-            levelId:"beginner",
-            type:"conversation",
-            title:"Self Introduction",
-            shortDescription:"تقديم النفس بطريقة بسيطة وواضحة.",
-            explanation:"ستتعلم كيف تعرف بنفسك: اسمك، بلدك، عمرك، ودراستك أو عملك.",
-            xp:30,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"My name is", meaning:"اسمي هو", type:"sentence", example:"My name is Omar.", exampleAr:"اسمي عمر."},
+            id: "b2",
+            levelId: "beginner",
+            type: "conversation",
+            title: "Talking About Yourself",
+            shortDescription: "تقديم النفس: الاسم، البلد، العمر، الدراسة والعمل.",
+            explanation: "هذا الدرس يساعدك على بناء جمل صحيحة للتعريف بنفسك. ستتعلم كيف تقول اسمك، عمرك، بلدك، مهنتك، وما الذي تحبه. هذا النوع من الجمل مهم جدًا في بداية أي محادثة أو مقابلة تعارف.",
+            xp: 35,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"My name is", meaning:"اسمي هو", type:"sentence", example:"My name is Ahmed.", exampleAr:"اسمي أحمد."},
               {word:"I am from", meaning:"أنا من", type:"sentence", example:"I am from Iraq.", exampleAr:"أنا من العراق."},
-              {word:"I live in", meaning:"أعيش في", type:"sentence", example:"I live in Basra.", exampleAr:"أعيش في البصرة."},
-              {word:"I study", meaning:"أنا أدرس", type:"verb", example:"I study English.", exampleAr:"أنا أدرس الإنجليزية."}
+              {word:"I live in", meaning:"أعيش في", type:"sentence", example:"I live in Baghdad.", exampleAr:"أعيش في بغداد."},
+              {word:"I am", meaning:"أنا", type:"sentence", example:"I am twenty years old.", exampleAr:"عمري عشرون سنة."},
+              {word:"I study", meaning:"أنا أدرس", type:"verb", example:"I study English every day.", exampleAr:"أنا أدرس الإنجليزية كل يوم."},
+              {word:"I work as", meaning:"أعمل كـ", type:"sentence", example:"I work as a teacher.", exampleAr:"أعمل كمعلم."},
+              {word:"I like", meaning:"أنا أحب", type:"verb", example:"I like reading books.", exampleAr:"أنا أحب قراءة الكتب."},
+              {word:"My hobby is", meaning:"هوايتي هي", type:"sentence", example:"My hobby is football.", exampleAr:"هوايتي هي كرة القدم."}
             ],
-            examples:[
-              {en:"My name is Sara.", ar:"اسمي سارة."},
+            examples: [
+              {en:"My name is Noor.", ar:"اسمي نور."},
               {en:"I am from Egypt.", ar:"أنا من مصر."},
-              {en:"I study English every day.", ar:"أنا أدرس الإنجليزية كل يوم."}
+              {en:"I live in Basra.", ar:"أعيش في البصرة."},
+              {en:"I study English and I like reading.", ar:"أنا أدرس الإنجليزية وأحب القراءة."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"الجملة المناسبة لتقول اسمك:", choices:["I am from","My name is","How old are you"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which sentence is used to say your name?", choices:["I am from","My name is","I like"], answer:1},
+              {question:"'I live in' means:", choices:["أنا أحب","أنا من","أعيش في"], answer:2},
+              {question:"A good self-introduction is:", choices:["Blue big table","My name is Ali. I am from Iraq.","Good night book"], answer:1}
             ]
           },
+
           {
-            id:"l3",
-            levelId:"beginner",
-            type:"numbers",
-            title:"Numbers 1-10",
-            shortDescription:"تعلم الأرقام من 1 إلى 10.",
-            explanation:"في هذا الدرس ستتعلم الأرقام الأساسية نطقًا وكتابةً ومعناها بالعربية.",
-            xp:20,
-            audio:"",
-            video:"",
-            vocabulary:[],
-            examples:[
-              {en:"I have two books.", ar:"لدي كتابان."},
-              {en:"She is ten years old.", ar:"عمرها عشر سنوات."}
+            id: "b3",
+            levelId: "beginner",
+            type: "letters",
+            title: "Alphabet and Basic Pronunciation",
+            shortDescription: "تعلم الحروف الإنجليزية ونطقها الأساسي.",
+            explanation: "في هذا الدرس ستتعرّف على الحروف الإنجليزية وطريقة نطقها. الحروف أساس القراءة والتهجئة، لذلك حاول تكرار كل حرف عدة مرات والاستماع إليه جيدًا. لا تحفظه فقط، بل انطقه بنفسك.",
+            xp: 25,
+            audio: "",
+            video: "",
+            vocabulary: [],
+            examples: [
+              {en:"A for Apple", ar:"A ترمز إلى Apple"},
+              {en:"B for Book", ar:"B ترمز إلى Book"},
+              {en:"C for Cat", ar:"C ترمز إلى Cat"},
+              {en:"D for Door", ar:"D ترمز إلى Door"}
             ],
-            letters:[],
-            numbers:[
+            letters: [
+              {letter:"A", sound:"إي"},
+              {letter:"B", sound:"بي"},
+              {letter:"C", sound:"سي"},
+              {letter:"D", sound:"دي"},
+              {letter:"E", sound:"إي"},
+              {letter:"F", sound:"إف"},
+              {letter:"G", sound:"جي"},
+              {letter:"H", sound:"إيتش"},
+              {letter:"I", sound:"آي"},
+              {letter:"J", sound:"جاي"}
+            ],
+            numbers: [],
+            quiz: [
+              {question:"The sound of B is:", choices:["بي","سي","دي"], answer:0},
+              {question:"Which letter says 'آي'?", choices:["I","E","H"], answer:0}
+            ]
+          },
+
+          {
+            id: "b4",
+            levelId: "beginner",
+            type: "numbers",
+            title: "Numbers and Counting",
+            shortDescription: "الأرقام الأساسية واستخدامها في الحياة اليومية.",
+            explanation: "ستتعلم الأرقام من واحد إلى عشرين مع نطقها واستخدامها في جمل سهلة. الأرقام مهمة جدًا في العمر، السعر، الوقت، عدد الأشياء، وأرقام الهاتف.",
+            xp: 25,
+            audio: "",
+            video: "",
+            vocabulary: [],
+            examples: [
+              {en:"I have three books.", ar:"لدي ثلاثة كتب."},
+              {en:"She is ten years old.", ar:"عمرها عشر سنوات."},
+              {en:"We need five chairs.", ar:"نحتاج خمسة كراسٍ."},
+              {en:"The price is twenty dollars.", ar:"السعر عشرون دولارًا."}
+            ],
+            letters: [],
+            numbers: [
               {n:1, word:"one", meaning:"واحد"},
               {n:2, word:"two", meaning:"اثنان"},
               {n:3, word:"three", meaning:"ثلاثة"},
@@ -1111,137 +1230,350 @@
               {n:7, word:"seven", meaning:"سبعة"},
               {n:8, word:"eight", meaning:"ثمانية"},
               {n:9, word:"nine", meaning:"تسعة"},
-              {n:10, word:"ten", meaning:"عشرة"}
+              {n:10, word:"ten", meaning:"عشرة"},
+              {n:11, word:"eleven", meaning:"أحد عشر"},
+              {n:12, word:"twelve", meaning:"اثنا عشر"},
+              {n:13, word:"thirteen", meaning:"ثلاثة عشر"},
+              {n:14, word:"fourteen", meaning:"أربعة عشر"},
+              {n:15, word:"fifteen", meaning:"خمسة عشر"},
+              {n:16, word:"sixteen", meaning:"ستة عشر"},
+              {n:17, word:"seventeen", meaning:"سبعة عشر"},
+              {n:18, word:"eighteen", meaning:"ثمانية عشر"},
+              {n:19, word:"nineteen", meaning:"تسعة عشر"},
+              {n:20, word:"twenty", meaning:"عشرون"}
             ],
-            quiz:[
-              {question:"What is 3 in English?", choices:["five","three","eight"], answer:1}
+            quiz: [
+              {question:"What is 7 in English?", choices:["five","seven","nine"], answer:1},
+              {question:"What does 'twenty' mean?", choices:["عشرة","خمسة","عشرون"], answer:2}
             ]
           },
+
           {
-            id:"l4",
-            levelId:"beginner",
-            type:"letters",
-            title:"Alphabet Basics",
-            shortDescription:"تعلم الحروف الإنجليزية الأساسية.",
-            explanation:"ستتعلم الحروف الإنجليزية وطريقة نطقها بشكل واضح مع أمثلة بسيطة.",
-            xp:20,
-            audio:"",
-            video:"",
-            vocabulary:[],
-            examples:[
-              {en:"A for Apple", ar:"A ترمز إلى Apple"},
-              {en:"B for Book", ar:"B ترمز إلى Book"}
+            id: "b5",
+            levelId: "beginner",
+            type: "vocabulary",
+            title: "Family, Colors, and Daily Objects",
+            shortDescription: "مفردات أساسية للعائلة والألوان والأشياء اليومية.",
+            explanation: "هذا الدرس يجمع مفردات مهمة جدًا تستخدمها في حياتك اليومية. ستتعلم كيف تتحدث عن العائلة، الألوان، وبعض الأشياء الموجودة في المنزل أو المدرسة.",
+            xp: 35,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Father", meaning:"أب", type:"noun", example:"My father is a doctor.", exampleAr:"أبي طبيب."},
+              {word:"Mother", meaning:"أم", type:"noun", example:"My mother is kind.", exampleAr:"أمي لطيفة."},
+              {word:"Brother", meaning:"أخ", type:"noun", example:"My brother is tall.", exampleAr:"أخي طويل."},
+              {word:"Sister", meaning:"أخت", type:"noun", example:"My sister studies English.", exampleAr:"أختي تدرس الإنجليزية."},
+              {word:"Red", meaning:"أحمر", type:"adjective", example:"The car is red.", exampleAr:"السيارة حمراء."},
+              {word:"Blue", meaning:"أزرق", type:"adjective", example:"My bag is blue.", exampleAr:"حقيبتي زرقاء."},
+              {word:"Book", meaning:"كتاب", type:"noun", example:"This is my book.", exampleAr:"هذا كتابي."},
+              {word:"Chair", meaning:"كرسي", type:"noun", example:"The chair is near the table.", exampleAr:"الكرسي قرب الطاولة."}
             ],
-            letters:[
-              {letter:"A", sound:"إي"},
-              {letter:"B", sound:"بي"},
-              {letter:"C", sound:"سي"},
-              {letter:"D", sound:"دي"},
-              {letter:"E", sound:"إي"}
+            examples: [
+              {en:"My mother is at home.", ar:"أمي في المنزل."},
+              {en:"The book is blue.", ar:"الكتاب أزرق."},
+              {en:"My brother has a red bag.", ar:"أخي لديه حقيبة حمراء."},
+              {en:"The chair is in the room.", ar:"الكرسي في الغرفة."}
             ],
-            numbers:[],
-            quiz:[
-              {question:"نطق الحرف B هو:", choices:["بي","إي","دي"], answer:0}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"'Father' means:", choices:["أب","أخ","ابن"], answer:0},
+              {question:"'Blue' means:", choices:["أزرق","أخضر","أسود"], answer:0},
+              {question:"'Book' means:", choices:["باب","كتاب","قلم"], answer:1}
             ]
           },
+
           {
-            id:"l5",
-            levelId:"intermediate",
-            type:"grammar",
-            title:"Present Simple",
-            shortDescription:"استخدام المضارع البسيط.",
-            explanation:"ستتعلم المضارع البسيط للتعبير عن العادات والحقائق والروتين اليومي.",
-            xp:35,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"Always", meaning:"دائمًا", type:"adverb", example:"I always wake up early.", exampleAr:"أنا أستيقظ مبكرًا دائمًا."},
-              {word:"Usually", meaning:"عادةً", type:"adverb", example:"She usually drinks tea.", exampleAr:"هي عادة تشرب الشاي."},
-              {word:"Sometimes", meaning:"أحيانًا", type:"adverb", example:"We sometimes play football.", exampleAr:"نحن أحيانًا نلعب كرة القدم."}
+            id: "i1",
+            levelId: "intermediate",
+            type: "grammar",
+            title: "Present Simple vs Present Continuous",
+            shortDescription: "الفرق بين المضارع البسيط والمضارع المستمر.",
+            explanation: "المضارع البسيط نستخدمه للعادات والحقائق والأشياء المتكررة، مثل: I go to school every day. أما المضارع المستمر فنستخدمه للأشياء التي تحدث الآن، مثل: I am studying now. فهم هذا الفرق مهم جدًا لبناء جمل صحيحة في المحادثة اليومية.",
+            xp: 45,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Always", meaning:"دائمًا", type:"adverb", example:"She always wakes up early.", exampleAr:"هي تستيقظ مبكرًا دائمًا."},
+              {word:"Usually", meaning:"عادةً", type:"adverb", example:"I usually drink tea.", exampleAr:"أنا عادة أشرب الشاي."},
+              {word:"Now", meaning:"الآن", type:"adverb", example:"He is working now.", exampleAr:"هو يعمل الآن."},
+              {word:"At the moment", meaning:"في هذه اللحظة", type:"expression", example:"They are studying at the moment.", exampleAr:"هم يدرسون في هذه اللحظة."},
+              {word:"Routine", meaning:"روتين", type:"noun", example:"My daily routine is simple.", exampleAr:"روتيني اليومي بسيط."},
+              {word:"Habit", meaning:"عادة", type:"noun", example:"Reading is a good habit.", exampleAr:"القراءة عادة جيدة."}
             ],
-            examples:[
-              {en:"I go to school every day.", ar:"أنا أذهب إلى المدرسة كل يوم."},
-              {en:"He works in a company.", ar:"هو يعمل في شركة."}
+            examples: [
+              {en:"I go to work every day.", ar:"أنا أذهب إلى العمل كل يوم."},
+              {en:"I am going to work now.", ar:"أنا ذاهب إلى العمل الآن."},
+              {en:"She plays football on Fridays.", ar:"هي تلعب كرة القدم أيام الجمعة."},
+              {en:"She is playing football now.", ar:"هي تلعب كرة القدم الآن."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"أي جملة في المضارع البسيط؟", choices:["I am eating now","She plays tennis","They were home"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which sentence shows a habit?", choices:["He is sleeping now.","He sleeps early every day.","He is reading at the moment."], answer:1},
+              {question:"Which sentence is present continuous?", choices:["I study English every day.","They are watching TV now.","She likes coffee."], answer:1}
             ]
           },
+
           {
-            id:"l6",
-            levelId:"intermediate",
-            type:"conversation",
-            title:"Travel English",
-            shortDescription:"الإنجليزية في السفر.",
-            explanation:"ستتعلم مفردات وجمل تستخدم في المطار والفندق والسؤال عن الاتجاهات.",
-            xp:40,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"Airport", meaning:"مطار", type:"noun", example:"The airport is far.", exampleAr:"المطار بعيد."},
-              {word:"Ticket", meaning:"تذكرة", type:"noun", example:"I need a ticket.", exampleAr:"أحتاج تذكرة."},
-              {word:"Passport", meaning:"جواز سفر", type:"noun", example:"Where is my passport?", exampleAr:"أين جواز سفري؟"}
+            id: "i2",
+            levelId: "intermediate",
+            type: "grammar",
+            title: "Past Simple and Future with Will",
+            shortDescription: "التحدث عن الماضي والمستقبل بطريقة واضحة.",
+            explanation: "نستخدم الماضي البسيط لوصف أحداث انتهت في الماضي، مثل yesterday و last week. ونستخدم will للحديث عن المستقبل أو التوقعات والقرارات السريعة. هذا الدرس مهم جدًا حتى تتمكن من وصف ما حدث وما سيحدث.",
+            xp: 45,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Yesterday", meaning:"أمس", type:"noun", example:"I met him yesterday.", exampleAr:"قابلته أمس."},
+              {word:"Last week", meaning:"الأسبوع الماضي", type:"expression", example:"We traveled last week.", exampleAr:"سافرنا الأسبوع الماضي."},
+              {word:"Went", meaning:"ذهب", type:"verb", example:"I went to school yesterday.", exampleAr:"ذهبت إلى المدرسة أمس."},
+              {word:"Visited", meaning:"زار", type:"verb", example:"She visited her aunt.", exampleAr:"هي زارت خالتها."},
+              {word:"Tomorrow", meaning:"غدًا", type:"noun", example:"I will call you tomorrow.", exampleAr:"سأتصل بك غدًا."},
+              {word:"Will", meaning:"سـ / سوف", type:"grammar", example:"I will study tonight.", exampleAr:"سأدرس الليلة."}
             ],
-            examples:[
+            examples: [
+              {en:"I watched a movie yesterday.", ar:"شاهدت فيلمًا أمس."},
+              {en:"He went to the market last week.", ar:"ذهب إلى السوق الأسبوع الماضي."},
+              {en:"I will help you tomorrow.", ar:"سأساعدك غدًا."},
+              {en:"We will travel next month.", ar:"سنسافر الشهر القادم."}
+            ],
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which sentence is in the past?", choices:["I will go tomorrow.","She visited her friend.","They are eating now."], answer:1},
+              {question:"Which sentence talks about the future?", choices:["I went home.","We will study later.","He slept early."], answer:1}
+            ]
+          },
+
+          {
+            id: "i3",
+            levelId: "intermediate",
+            type: "conversation",
+            title: "Shopping and Restaurant English",
+            shortDescription: "التعامل في التسوق والمطعم بجمل طبيعية.",
+            explanation: "في هذا الدرس ستتعلم كيف تسأل عن السعر، المقاس، الطلب، الفاتورة، وطريقة الدفع. هذه الجمل عملية جدًا في الحياة اليومية والسفر. حاول حفظها كنماذج جاهزة ثم استخدمها في مواقف مشابهة.",
+            xp: 40,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Price", meaning:"سعر", type:"noun", example:"What is the price?", exampleAr:"ما السعر؟"},
+              {word:"How much is this?", meaning:"كم سعر هذا؟", type:"question", example:"How much is this bag?", exampleAr:"كم سعر هذه الحقيبة؟"},
+              {word:"Cheap", meaning:"رخيص", type:"adjective", example:"This shirt is cheap.", exampleAr:"هذا القميص رخيص."},
+              {word:"Expensive", meaning:"غالي", type:"adjective", example:"The phone is expensive.", exampleAr:"الهاتف غالٍ."},
+              {word:"Menu", meaning:"قائمة الطعام", type:"noun", example:"Can I see the menu?", exampleAr:"هل يمكنني رؤية قائمة الطعام؟"},
+              {word:"Order", meaning:"يطلب / طلب", type:"verb", example:"I want to order lunch.", exampleAr:"أريد طلب الغداء."},
+              {word:"Bill", meaning:"فاتورة", type:"noun", example:"Could I have the bill, please?", exampleAr:"هل يمكنني الحصول على الفاتورة من فضلك؟"},
+              {word:"Cash", meaning:"نقد", type:"noun", example:"I will pay in cash.", exampleAr:"سأدفع نقدًا."}
+            ],
+            examples: [
+              {en:"How much is this shirt?", ar:"كم سعر هذا القميص؟"},
+              {en:"Do you have a larger size?", ar:"هل لديكم مقاس أكبر؟"},
+              {en:"I would like to order chicken and rice.", ar:"أود طلب الدجاج مع الأرز."},
+              {en:"Could I have the bill, please?", ar:"هل يمكنني الحصول على الفاتورة من فضلك؟"}
+            ],
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"'How much is this?' is used for:", choices:["asking about time","asking about price","asking about age"], answer:1},
+              {question:"'Bill' means:", choices:["فاتورة","مطعم","خصم"], answer:0}
+            ]
+          },
+
+          {
+            id: "i4",
+            levelId: "intermediate",
+            type: "grammar",
+            title: "Prepositions and Describing Place",
+            shortDescription: "حروف الجر والمكان: in, on, at, under, between.",
+            explanation: "حروف الجر تساعدك على وصف مكان الأشياء والأشخاص. مثلًا: in تعني داخل، on تعني على، under تعني تحت. هذا الدرس أساسي جدًا لبناء جمل وصف المكان والاتجاهات.",
+            xp: 35,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"In", meaning:"في / داخل", type:"preposition", example:"The keys are in the bag.", exampleAr:"المفاتيح داخل الحقيبة."},
+              {word:"On", meaning:"على", type:"preposition", example:"The book is on the table.", exampleAr:"الكتاب على الطاولة."},
+              {word:"Under", meaning:"تحت", type:"preposition", example:"The cat is under the chair.", exampleAr:"القطة تحت الكرسي."},
+              {word:"Between", meaning:"بين", type:"preposition", example:"The bank is between the shop and the café.", exampleAr:"البنك بين المتجر والمقهى."},
+              {word:"Next to", meaning:"بجانب", type:"preposition", example:"My house is next to the school.", exampleAr:"منزلي بجانب المدرسة."},
+              {word:"Behind", meaning:"خلف", type:"preposition", example:"The car is behind the building.", exampleAr:"السيارة خلف المبنى."}
+            ],
+            examples: [
+              {en:"The phone is on the desk.", ar:"الهاتف على المكتب."},
+              {en:"The shoes are under the bed.", ar:"الحذاء تحت السرير."},
+              {en:"The library is next to the mosque.", ar:"المكتبة بجانب المسجد."},
+              {en:"The park is between the school and the hospital.", ar:"الحديقة بين المدرسة والمستشفى."}
+            ],
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which word means 'تحت'?", choices:["on","under","between"], answer:1},
+              {question:"'The book is ___ the table.'", choices:["on","behind","between"], answer:0}
+            ]
+          },
+
+          {
+            id: "i5",
+            levelId: "intermediate",
+            type: "conversation",
+            title: "Travel, Hotel, and Asking for Help",
+            shortDescription: "جمل مهمة في السفر والمطار والفندق وطلب المساعدة.",
+            explanation: "هذا الدرس يجمع أهم الجمل المستخدمة أثناء السفر. ستتعلم كيف تسأل عن المكان، الحجز، المطار، السيارة، والغرفة. هذه الجمل مفيدة جدًا في المواقف العملية الحقيقية.",
+            xp: 45,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Airport", meaning:"مطار", type:"noun", example:"The airport is far from here.", exampleAr:"المطار بعيد من هنا."},
+              {word:"Passport", meaning:"جواز سفر", type:"noun", example:"I need my passport.", exampleAr:"أحتاج جواز سفري."},
+              {word:"Reservation", meaning:"حجز", type:"noun", example:"I have a hotel reservation.", exampleAr:"لدي حجز فندقي."},
+              {word:"Room", meaning:"غرفة", type:"noun", example:"My room is on the second floor.", exampleAr:"غرفتي في الطابق الثاني."},
+              {word:"Help", meaning:"مساعدة", type:"noun", example:"Can you help me?", exampleAr:"هل يمكنك مساعدتي؟"},
+              {word:"Where is...?", meaning:"أين...؟", type:"question", example:"Where is the station?", exampleAr:"أين المحطة؟"},
+              {word:"Left", meaning:"يسار", type:"direction", example:"Turn left at the corner.", exampleAr:"انعطف يسارًا عند الزاوية."},
+              {word:"Right", meaning:"يمين", type:"direction", example:"Turn right after the bank.", exampleAr:"انعطف يمينًا بعد البنك."}
+            ],
+            examples: [
               {en:"Where is the airport?", ar:"أين المطار؟"},
-              {en:"I have a hotel reservation.", ar:"لدي حجز فندقي."}
+              {en:"I have a reservation under the name Ali.", ar:"لدي حجز باسم علي."},
+              {en:"Can you help me with my luggage?", ar:"هل يمكنك مساعدتي في أمتعتي؟"},
+              {en:"Turn left, then go straight.", ar:"انعطف يسارًا ثم سر مباشرة."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"Passport معناها:", choices:["تذكرة","جواز سفر","حقيبة"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"'Reservation' means:", choices:["حجز","مفتاح","مطار"], answer:0},
+              {question:"Which word means 'يمين'?", choices:["Left","Right","Room"], answer:1}
             ]
           },
+
           {
-            id:"l7",
-            levelId:"advanced",
-            type:"sentences",
-            title:"Professional Emails",
-            shortDescription:"البريد الإلكتروني المهني.",
-            explanation:"ستتعلم كتابة رسائل بريد إلكتروني مهنية واضحة ومهذبة ومختصرة.",
-            xp:50,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"Best regards", meaning:"أطيب التحيات", type:"expression", example:"Best regards, Ahmed", exampleAr:"أطيب التحيات، أحمد"},
-              {word:"Please find attached", meaning:"يرجى الاطلاع على المرفق", type:"sentence", example:"Please find attached the report.", exampleAr:"يرجى الاطلاع على التقرير المرفق."},
-              {word:"Looking forward to", meaning:"أتطلع إلى", type:"expression", example:"Looking forward to your reply.", exampleAr:"أتطلع إلى ردك."}
+            id: "a1",
+            levelId: "advanced",
+            type: "conversation",
+            title: "Advanced Conversation and Expressing Opinions",
+            shortDescription: "التعبير عن الرأي والموافقة والاعتراض بلغة طبيعية.",
+            explanation: "في المستوى المتقدم تحتاج إلى أكثر من جمل بسيطة. تحتاج إلى عبارات تعبّر عن رأيك وتوضح موقفك وتربط أفكارك بشكل طبيعي. هذا الدرس يركز على اللغة المستخدمة في النقاشات اليومية والعملية.",
+            xp: 55,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"In my opinion", meaning:"في رأيي", type:"expression", example:"In my opinion, practice is essential.", exampleAr:"في رأيي، التدريب أساسي."},
+              {word:"I agree", meaning:"أنا أتفق", type:"expression", example:"I agree with your point.", exampleAr:"أنا أتفق مع وجهة نظرك."},
+              {word:"I disagree", meaning:"أنا لا أتفق", type:"expression", example:"I disagree for two reasons.", exampleAr:"أنا لا أتفق لسببين."},
+              {word:"However", meaning:"مع ذلك", type:"connector", example:"However, we need more time.", exampleAr:"مع ذلك، نحن بحاجة إلى وقت أكبر."},
+              {word:"On the other hand", meaning:"من ناحية أخرى", type:"connector", example:"On the other hand, the cost is high.", exampleAr:"من ناحية أخرى، التكلفة مرتفعة."},
+              {word:"From my perspective", meaning:"من وجهة نظري", type:"expression", example:"From my perspective, this is the best option.", exampleAr:"من وجهة نظري، هذا هو الخيار الأفضل."}
             ],
-            examples:[
-              {en:"Dear Team, please find attached the updated file.", ar:"عزيزي الفريق، يرجى الاطلاع على الملف المحدّث المرفق."},
-              {en:"Thank you for your time.", ar:"شكرًا لوقتك."}
+            examples: [
+              {en:"In my opinion, learning daily is better than studying once a week.", ar:"في رأيي، التعلّم اليومي أفضل من الدراسة مرة في الأسبوع."},
+              {en:"I agree, but we should improve the plan.", ar:"أنا أتفق، لكن ينبغي أن نحسّن الخطة."},
+              {en:"However, the deadline is very close.", ar:"مع ذلك، الموعد النهائي قريب جدًا."},
+              {en:"From my perspective, speaking practice is the key.", ar:"من وجهة نظري، تدريب المحادثة هو المفتاح."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"الختام المهني المناسب:", choices:["See ya","Best regards","What's up"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which phrase means 'في رأيي'?", choices:["I agree","In my opinion","At the airport"], answer:1},
+              {question:"'However' means:", choices:["بالأمس","لذلك","مع ذلك"], answer:2}
             ]
           },
+
           {
-            id:"l8",
-            levelId:"advanced",
-            type:"conversation",
-            title:"Advanced Conversation",
-            shortDescription:"المحادثة المتقدمة الطبيعية.",
-            explanation:"ستتعلم التعبير عن رأيك والموافقة والاعتراض بطريقة أكثر طبيعية.",
-            xp:55,
-            audio:"",
-            video:"",
-            vocabulary:[
-              {word:"In my opinion", meaning:"في رأيي", type:"expression", example:"In my opinion, this is useful.", exampleAr:"في رأيي، هذا مفيد."},
-              {word:"I agree", meaning:"أنا أتفق", type:"expression", example:"I agree with you.", exampleAr:"أنا أتفق معك."},
-              {word:"However", meaning:"مع ذلك", type:"connector", example:"However, we need more time.", exampleAr:"مع ذلك، نحن بحاجة إلى وقت أكثر."}
+            id: "a2",
+            levelId: "advanced",
+            type: "sentences",
+            title: "Professional Emails and Formal Writing",
+            shortDescription: "كتابة الإيميلات المهنية بأسلوب رسمي وواضح.",
+            explanation: "الإيميل المهني يحتاج إلى افتتاحية محترمة، ومحتوى واضح، وخاتمة مناسبة. في هذا الدرس ستتعلم عبارات قوية تستخدم في مراسلات العمل، طلبات المتابعة، وإرسال الملفات والتقارير.",
+            xp: 60,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Dear Team", meaning:"عزيزي الفريق", type:"expression", example:"Dear Team, I hope you are well.", exampleAr:"عزيزي الفريق، آمل أن تكونوا بخير."},
+              {word:"Please find attached", meaning:"يرجى الاطلاع على المرفق", type:"sentence", example:"Please find attached the updated report.", exampleAr:"يرجى الاطلاع على التقرير المحدّث المرفق."},
+              {word:"I would like to", meaning:"أود أن", type:"sentence", example:"I would like to request a meeting.", exampleAr:"أود طلب اجتماع."},
+              {word:"Looking forward to", meaning:"أتطلع إلى", type:"expression", example:"Looking forward to your reply.", exampleAr:"أتطلع إلى ردك."},
+              {word:"Best regards", meaning:"أطيب التحيات", type:"expression", example:"Best regards, Ahmed", exampleAr:"أطيب التحيات، أحمد."},
+              {word:"Confirmation", meaning:"تأكيد", type:"noun", example:"Thank you for your confirmation.", exampleAr:"شكرًا لتأكيدك."}
             ],
-            examples:[
-              {en:"In my opinion, practice is the key.", ar:"في رأيي، التدريب هو المفتاح."},
-              {en:"I agree, but we should improve the plan.", ar:"أنا أتفق، لكن ينبغي أن نحسّن الخطة."}
+            examples: [
+              {en:"Dear Team, please find attached the updated file.", ar:"عزيزي الفريق، يرجى الاطلاع على الملف المحدث المرفق."},
+              {en:"I would like to request a short meeting tomorrow.", ar:"أود طلب اجتماع قصير غدًا."},
+              {en:"Looking forward to your response.", ar:"أتطلع إلى ردكم."},
+              {en:"Best regards, Noor.", ar:"أطيب التحيات، نور."}
             ],
-            letters:[],
-            numbers:[],
-            quiz:[
-              {question:"However معناها:", choices:["لذلك","مع ذلك","بالتأكيد"], answer:1}
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"Which phrase is suitable in a formal email?", choices:["What's up?","Best regards","See ya"], answer:1},
+              {question:"'Please find attached' is used when:", choices:["sending a file","asking about food","describing weather"], answer:0}
+            ]
+          },
+
+          {
+            id: "a3",
+            levelId: "advanced",
+            type: "conversation",
+            title: "Meetings, Presentations, and Business English",
+            shortDescription: "لغة الاجتماعات والعروض والنقاش المهني.",
+            explanation: "هذا الدرس مهم لأي شخص يريد استخدام الإنجليزية في العمل. ستتعلم كيف تبدأ الاجتماع، تعرض فكرة، تنتقل بين النقاط، وتختم بشكل مهني. هذه العبارات تجعلك تبدو أكثر احترافًا وثقة.",
+            xp: 60,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Agenda", meaning:"جدول أعمال", type:"noun", example:"Let's review the agenda first.", exampleAr:"دعونا نراجع جدول الأعمال أولًا."},
+              {word:"Main point", meaning:"النقطة الرئيسية", type:"noun", example:"The main point is customer satisfaction.", exampleAr:"النقطة الرئيسية هي رضا العملاء."},
+              {word:"Let's begin", meaning:"لنبدأ", type:"sentence", example:"Let's begin the meeting.", exampleAr:"لنبدأ الاجتماع."},
+              {word:"Let's move on", meaning:"لننتقل", type:"sentence", example:"Let's move on to the next topic.", exampleAr:"لننتقل إلى الموضوع التالي."},
+              {word:"Summary", meaning:"ملخص", type:"noun", example:"Here is a quick summary.", exampleAr:"إليك ملخصًا سريعًا."},
+              {word:"Any questions?", meaning:"أي أسئلة؟", type:"question", example:"That is all. Any questions?", exampleAr:"هذا كل شيء. هل لديكم أي أسئلة؟"}
+            ],
+            examples: [
+              {en:"Let's begin with the first point on the agenda.", ar:"لنبدأ بالنقطة الأولى في جدول الأعمال."},
+              {en:"The main point of this presentation is growth.", ar:"النقطة الرئيسية في هذا العرض هي النمو."},
+              {en:"Let's move on to the budget discussion.", ar:"لننتقل إلى مناقشة الميزانية."},
+              {en:"Before we finish, here is a short summary.", ar:"قبل أن ننهي، إليكم ملخصًا قصيرًا."}
+            ],
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"'Agenda' means:", choices:["مكتب","جدول أعمال","سفر"], answer:1},
+              {question:"A phrase to continue the presentation is:", choices:["Let's move on","Good night","How old are you?"], answer:0}
+            ]
+          },
+
+          {
+            id: "a4",
+            levelId: "advanced",
+            type: "vocabulary",
+            title: "Problem Solving, Negotiation, and Natural English",
+            shortDescription: "لغة حل المشكلات والتفاوض والتعبيرات الطبيعية.",
+            explanation: "في هذا الدرس ستتعلم كلمات وعبارات تستخدم في حل المشكلات واتخاذ القرار والتفاوض المهني. كما ستتعلم بعض التعبيرات الطبيعية التي تجعل لغتك أقرب إلى الاستخدام الحقيقي وليس مجرد ترجمة حرفية.",
+            xp: 65,
+            audio: "",
+            video: "",
+            vocabulary: [
+              {word:"Problem", meaning:"مشكلة", type:"noun", example:"We need to solve this problem quickly.", exampleAr:"نحتاج إلى حل هذه المشكلة بسرعة."},
+              {word:"Solution", meaning:"حل", type:"noun", example:"This solution is practical.", exampleAr:"هذا الحل عملي."},
+              {word:"Risk", meaning:"مخاطرة", type:"noun", example:"There is a risk of delay.", exampleAr:"هناك مخاطرة بتأخير."},
+              {word:"Offer", meaning:"عرض", type:"noun", example:"That is a fair offer.", exampleAr:"هذا عرض عادل."},
+              {word:"Compromise", meaning:"حل وسط", type:"noun", example:"We need a compromise.", exampleAr:"نحتاج إلى حل وسط."},
+              {word:"Sounds good", meaning:"يبدو جيدًا", type:"expression", example:"That plan sounds good to me.", exampleAr:"تلك الخطة تبدو جيدة بالنسبة لي."},
+              {word:"Take your time", meaning:"خذ وقتك", type:"expression", example:"Take your time before deciding.", exampleAr:"خذ وقتك قبل أن تقرر."},
+              {word:"Exactly", meaning:"بالضبط", type:"adverb", example:"Exactly, that is what I mean.", exampleAr:"بالضبط، هذا ما أعنيه."}
+            ],
+            examples: [
+              {en:"We have a problem, but I think there is a simple solution.", ar:"لدينا مشكلة، لكن أعتقد أن هناك حلًا بسيطًا."},
+              {en:"This offer is good, but we need a better deadline.", ar:"هذا العرض جيد، لكننا نحتاج موعدًا نهائيًا أفضل."},
+              {en:"Take your time and review the details.", ar:"خذ وقتك وراجع التفاصيل."},
+              {en:"Exactly, that is the main issue.", ar:"بالضبط، هذه هي المشكلة الرئيسية."}
+            ],
+            letters: [],
+            numbers: [],
+            quiz: [
+              {question:"'Compromise' means:", choices:["حل وسط","اجتماع","رسالة"], answer:0},
+              {question:"'Sounds good' means:", choices:["هذا سيئ","يبدو جيدًا","لست متأكدًا"], answer:1}
             ]
           }
         ]
@@ -1598,7 +1930,7 @@
         <div class="block">
           <div class="mini-row">
             <h5>📚 المفردات</h5>
-            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.vocabulary.map(v=>v.word).join(". "))}','en-US')">نطق الكلمات</button>
+            <button class="btn btn-mini btn-info" onclick="speakEnglish('${escapeForJs(lesson.vocabulary.map(v=>v.word).join('. '))}')">نطق الكلمات</button>
           </div>
           <div class="vocab-grid">
             ${(lesson.vocabulary || []).map(v=>`
@@ -1613,8 +1945,8 @@
                 ${v.example ? `<p><strong>Example:</strong> ${esc(v.example)}</p>` : ""}
                 ${v.exampleAr ? `<p class="muted"><strong>المعنى:</strong> ${esc(v.exampleAr)}</p>` : ""}
                 <div class="vocab-meta">
-                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.word)}','en-US')">نطق الكلمة</button>
-                  ${v.example ? `<button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.example)}','en-US')">نطق المثال</button>` : ""}
+                  <button class="btn btn-mini btn-soft" onclick="speakEnglish('${escapeForJs(v.word)}')">نطق الكلمة</button>
+                  ${v.example ? `<button class="btn btn-mini btn-soft" onclick="speakEnglish('${escapeForJs(v.example)}')">نطق المثال</button>` : ""}
                 </div>
               </div>
             `).join("")}
@@ -1626,7 +1958,7 @@
         <div class="block">
           <div class="mini-row">
             <h5>🔤 الحروف</h5>
-            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.letters.map(v=>v.letter).join(" "))}','en-US')">نطق الحروف</button>
+            <button class="btn btn-mini btn-info" onclick="speakEnglish('${escapeForJs(lesson.letters.map(v=>v.letter).join(' '))}')">نطق الحروف</button>
           </div>
           <div class="vocab-grid">
             ${(lesson.letters || []).map(v=>`
@@ -1634,7 +1966,7 @@
                 <strong>${esc(v.letter)}</strong>
                 <div class="muted">${esc(v.sound)}</div>
                 <div class="vocab-meta">
-                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.letter)}','en-US')">استماع</button>
+                  <button class="btn btn-mini btn-soft" onclick="speakEnglish('${escapeForJs(v.letter)}')">استماع</button>
                 </div>
               </div>
             `).join("")}
@@ -1646,7 +1978,7 @@
         <div class="block">
           <div class="mini-row">
             <h5>🔢 الأرقام</h5>
-            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.numbers.map(v=>v.word).join(". "))}','en-US')">نطق الأرقام</button>
+            <button class="btn btn-mini btn-info" onclick="speakEnglish('${escapeForJs(lesson.numbers.map(v=>v.word).join('. '))}')">نطق الأرقام</button>
           </div>
           <div class="vocab-grid">
             ${(lesson.numbers || []).map(v=>`
@@ -1654,7 +1986,7 @@
                 <strong>${esc(v.n)} — ${esc(v.word)}</strong>
                 <div class="muted">${esc(v.meaning)}</div>
                 <div class="vocab-meta">
-                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.word)}','en-US')">استماع</button>
+                  <button class="btn btn-mini btn-soft" onclick="speakEnglish('${escapeForJs(v.word)}')">استماع</button>
                 </div>
               </div>
             `).join("")}
@@ -1666,7 +1998,7 @@
         <div class="block">
           <div class="mini-row">
             <h5>🧩 أمثلة</h5>
-            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.examples.map(e=>e.en).join(". "))}','en-US')">نطق الأمثلة</button>
+            <button class="btn btn-mini btn-info" onclick="speakEnglish('${escapeForJs(lesson.examples.map(e=>e.en).join('. '))}')">نطق الأمثلة</button>
           </div>
           <div class="examples">
             ${(lesson.examples || []).map(e=>`
@@ -1674,7 +2006,7 @@
                 <strong>${esc(e.en)}</strong>
                 <div class="muted">${esc(e.ar)}</div>
                 <div class="vocab-meta">
-                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(e.en)}','en-US')">استماع</button>
+                  <button class="btn btn-mini btn-soft" onclick="speakEnglish('${escapeForJs(e.en)}')">استماع</button>
                 </div>
               </div>
             `).join("")}
@@ -1765,14 +2097,6 @@
           </div>
         </div>
       `;
-    }
-
-    function escapeForJs(str=""){
-      return String(str)
-        .replace(/\\/g,"\\\\")
-        .replace(/'/g,"\\'")
-        .replace(/\n/g," ")
-        .replace(/\r/g," ");
     }
 
     function completeLessonOnly(lessonId){
@@ -1909,7 +2233,7 @@
           <div class="admin-actions">
             <button class="btn btn-success btn-mini" onclick="reviewAnswer('${escapeForJs(item.key)}', true)">تذكرتها</button>
             <button class="btn btn-danger btn-mini" onclick="reviewAnswer('${escapeForJs(item.key)}', false)">نسيتها</button>
-            <button class="btn btn-soft btn-mini" onclick="speakText('${escapeForJs(item.front)}','en-US')">استماع</button>
+            <button class="btn btn-soft btn-mini" onclick="speakEnglish('${escapeForJs(item.front)}')">استماع</button>
           </div>
         </div>
       `).join("");
@@ -1957,39 +2281,6 @@
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    function generateLocalCoachReply(input){
-      const text = input.trim();
-      const lower = text.toLowerCase();
-
-      if(!text) return "اكتب جملة أولًا وسأساعدك.";
-
-      if(/[اأإء-ي]/.test(text) && !/[a-z]/i.test(text)){
-        return `ترجمة تدريبية مقترحة:\n\n${simpleArabicToEnglishHint(text)}\n\nاكتبها أنت بالإنجليزية وسأصححها لك.`;
-      }
-
-      if(lower.includes("i am go")){
-        return "الصحيح: I go to school every day.\nأو: I am going to school now.\nالفرق أن go للعادة و am going لما يحدث الآن.";
-      }
-
-      if(lower.includes("my name")){
-        return "جملتك جيدة كبداية. حاول الإضافة:\nMy name is Ali. I am from Iraq. I study English every day.";
-      }
-
-      if(lower.includes("hello")){
-        return "ممتاز. يمكنك التوسيع هكذا:\nHello! How are you?\nأو:\nHello, nice to meet you.";
-      }
-
-      if(lower.includes("yesterday")){
-        return "بما أنك استخدمت yesterday، انتبه غالبًا للماضي البسيط. مثال:\nI went to the market yesterday.";
-      }
-
-      if(lower.includes("i am")) {
-        return "بداية جيدة. جرّب إكمال الجملة بمعلومة إضافية عن نفسك، مثل:\nI am a student.\nI am from Baghdad.\nI am learning English.";
-      }
-
-      return "جملتك جيدة كبداية. لتحسينها:\n1) تأكد من ترتيب الجملة.\n2) أضف فاعل + فعل + مفعول أو مكمل.\n3) جرّب كتابة جملة أطول.\n\nنسخة مقترحة أكثر طبيعية:\n" + capitalizeSentence(text);
-    }
-
     function simpleArabicToEnglishHint(text){
       const hints = [
         ["اسمي", "My name is ..."],
@@ -2014,6 +2305,32 @@
       const t = text.trim();
       if(!t) return "";
       return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+
+    function generateLocalCoachReply(input){
+      const text = input.trim();
+      const lower = text.toLowerCase();
+
+      if(!text) return "اكتب جملة أولًا وسأساعدك.";
+      if(/[اأإء-ي]/.test(text) && !/[a-z]/i.test(text)){
+        return `ترجمة تدريبية مقترحة:\n\n${simpleArabicToEnglishHint(text)}\n\nاكتبها أنت بالإنجليزية وسأصححها لك.`;
+      }
+      if(lower.includes("i am go")){
+        return "الصحيح: I go to school every day.\nأو: I am going to school now.\nالفرق أن go للعادة و am going لما يحدث الآن.";
+      }
+      if(lower.includes("my name")){
+        return "جملتك جيدة كبداية. حاول الإضافة:\nMy name is Ali. I am from Iraq. I study English every day.";
+      }
+      if(lower.includes("hello")){
+        return "ممتاز. يمكنك التوسيع هكذا:\nHello! How are you?\nأو:\nHello, nice to meet you.";
+      }
+      if(lower.includes("yesterday")){
+        return "بما أنك استخدمت yesterday، انتبه غالبًا للماضي البسيط. مثال:\nI went to the market yesterday.";
+      }
+      if(lower.includes("i am")) {
+        return "بداية جيدة. جرّب إكمال الجملة بمعلومة إضافية عن نفسك، مثل:\nI am a student.\nI am from Baghdad.\nI am learning English.";
+      }
+      return "جملتك جيدة كبداية. لتحسينها:\n1) تأكد من ترتيب الجملة.\n2) أضف فاعل + فعل + مفعول أو مكمل.\n3) جرّب كتابة جملة أطول.\n\nنسخة مقترحة أكثر طبيعية:\n" + capitalizeSentence(text);
     }
 
     async function sendCoachMessage(){
