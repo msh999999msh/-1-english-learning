@@ -1,40 +1,10 @@
-هذا الملف الكامل كنسخة HTML واحدة قابلة للنسخ.
-يحافظ على نفس الهوية البصرية الحالية ونفس الألوان والترتيب العام، مع تطوير داخلي يشمل:
-
-بنية درس مطورة
-
-كلمات كثيرة داخل الدروس
-
-نطق للكلمة والمثال والحروف والأرقام
-
-مراجعة ذكية Spaced Repetition
-
-بنك كلمات يصل إلى 1000 عنصر
-
-تمارين سريعة
-
-مدرب محادثة محلي
-
-لوحة مطور موسعة
-
-
-ملاحظة مهمة داخلية في الكود:
-الذكاء الاصطناعي الحقيقي السحابي وTTS السحابي الاحترافي يحتاجان API خارجي، لذلك وضعت لك:
-
-وضع محادثة محلي جاهز
-
-دعم اختياري لـ OpenAI API إذا أردت تفعيله لاحقًا
-
-أفضل صوت متاح من المتصفح للنطق الآن
-
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Elite English Academy Pro+</title>
-  <meta name="description" content="منصة تعليم اللغة الإنجليزية - نسخة احترافية مطورة" />
+  <title>Elite English Academy Pro</title>
+  <meta name="description" content="منصة تعليم الإنجليزية - نسخة مطورة مع مراجعة ذكية ونطق ولوحة مطور" />
   <style>
     :root{
       --bg:#0b1120;
@@ -213,6 +183,7 @@
       position:relative;
       overflow:hidden;
       padding:22px;
+      cursor:pointer;
     }
 
     .level-card::after{
@@ -569,6 +540,7 @@
       border-radius:14px;
       border:1px solid var(--line);
       background:rgba(255,255,255,.03);
+      white-space:pre-wrap;
     }
 
     .chat-msg.user{
@@ -580,6 +552,12 @@
       height:1px;
       background:var(--line);
       margin:14px 0;
+    }
+
+    .audio-player{
+      width:100%;
+      margin-top:10px;
+      border-radius:12px;
     }
 
     @media (max-width:980px){
@@ -676,7 +654,7 @@
             <button class="btn btn-soft" onclick="scrollToSection('reviewSection')">افتح المراجعة الذكية</button>
           </div>
 
-          <p class="tiny">هذه النسخة تعمل محليًا داخل المتصفح. يوجد وضع محادثة محلي، ويمكن تفعيل OpenAI API اختياريًا من الإعدادات داخل الكود.</p>
+          <p class="tiny">هذه النسخة تعمل محليًا داخل المتصفح. النطق يعتمد على أصوات المتصفح المتاحة. ويمكن إضافة API خارجي لاحقًا إذا رغبت.</p>
         </div>
       </div>
     </section>
@@ -739,7 +717,7 @@
           <div id="viewerEmpty" class="viewer-empty">
             <div>
               <h4>ابدأ باختيار مستوى ثم درس</h4>
-              <p>سيظهر هنا الشرح، الكلمات، الأمثلة، الصوت، الفيديو، التمارين، الاختبار، والتنقل بين الدروس.</p>
+              <p>سيظهر هنا الشرح، الكلمات، الأمثلة، الصوت، الفيديو، الاختبار، والتنقل بين الدروس.</p>
             </div>
           </div>
           <div class="lesson-view" id="lessonView"></div>
@@ -850,7 +828,7 @@
 
           <div class="field">
             <label>اختر مستوى للتعديل</label>
-            <select id="adminLevelSelect"></select>
+            <select id="adminLevelSelect" onchange="loadLevelIntoForm()"></select>
           </div>
 
           <div class="field">
@@ -875,7 +853,7 @@
 
           <div class="field">
             <label>اختر درسًا للتعديل</label>
-            <select id="adminLessonSelect"></select>
+            <select id="adminLessonSelect" onchange="loadLessonIntoForm()"></select>
           </div>
 
           <div class="field">
@@ -975,7 +953,6 @@
     const ADMIN_USERNAME = "msh999";
     const ADMIN_PASSWORD = "123456";
 
-    // اختياري: ضع مفتاح OpenAI إذا رغبت.
     const OPENAI_API_KEY = "";
     const OPENAI_MODEL = "gpt-4o-mini";
 
@@ -987,333 +964,1488 @@
     let selectedLessonId = null;
     let editingLevelId = null;
     let editingLessonId = null;
-    let lastUtterancePayload = null;
 
-    const beginnerLessonsSeed = [
-      ["Greetings", "تعلم التحيات الأساسية المستخدمة يوميًا.", "ستتعلم التحيات الأساسية والردود الشائعة وكيف تبدأ أي محادثة بسيطة.", "vocabulary"],
-      ["Self Introduction", "تقديم النفس بطريقة بسيطة وواضحة.", "ستتعلم كيف تقول اسمك وبلدك ومهنتك واهتماماتك بطريقة مناسبة للمبتدئين.", "conversation"],
-      ["Numbers 1-15", "تعلم الأرقام من 1 إلى 15.", "في هذا الدرس ستتعلم الأرقام الأساسية وكيف تستخدمها في العد والسؤال عن الكمية.", "numbers"],
-      ["Alphabet Basics", "تعلم الحروف الإنجليزية الأساسية.", "ستتعلم الحروف الإنجليزية وطريقة نطقها بشكل واضح مع أمثلة بسيطة.", "letters"],
-      ["Colors", "تعلم أسماء الألوان الأساسية.", "ستتعرف على الألوان الشائعة وتستخدمها في وصف الأشياء والحياة اليومية.", "vocabulary"],
-      ["Family Members", "تعلم أفراد العائلة.", "ستتعلم كلمات العائلة الأساسية وكيف تتحدث عن أقاربك بجمل سهلة.", "vocabulary"],
-      ["Days of the Week", "تعلم أيام الأسبوع.", "ستتعلم أيام الأسبوع وكيف تستخدمها في المواعيد والخطط اليومية.", "vocabulary"],
-      ["Months", "تعلم أشهر السنة.", "ستتعلم أشهر السنة وكيف تستخدمها عند الحديث عن التاريخ والمناسبات.", "vocabulary"],
-      ["Common Verbs", "أفعال يومية أساسية.", "ستتعلم أفعالًا شائعة مثل go و eat و sleep و study مع أمثلة متعددة.", "vocabulary"],
-      ["At School", "مفردات المدرسة.", "ستتعرف على الكلمات الأساسية داخل المدرسة وكيف تصف الفصل والأدوات.", "vocabulary"],
-      ["At Home", "مفردات المنزل.", "ستتعلم كلمات تستخدم داخل البيت مثل room و kitchen و window.", "vocabulary"],
-      ["Food and Drink", "الطعام والشراب.", "ستتعلم كلمات أساسية تستخدم عند الحديث عن الطعام والمشروبات والطلبات.", "vocabulary"],
-      ["Questions Basics", "أساسيات الأسئلة.", "ستتعلم What و Where و Who و How وكيف تستخدمها داخل أسئلة بسيطة.", "grammar"],
-      ["Simple Sentences", "بناء الجمل البسيطة.", "ستتعلم تكوين جمل قصيرة صحيحة باستخدام الضمائر والفعل be.", "sentences"],
-      ["Daily Routine", "الروتين اليومي.", "ستتعلم وصف يومك باستخدام جمل سهلة وواضحة من الاستيقاظ حتى النوم.", "conversation"]
-    ];
+    function uid(prefix="id"){
+      return prefix + "_" + Math.random().toString(36).slice(2,10);
+    }
 
-    const intermediateLessonsSeed = [
-      ["Present Simple", "استخدام المضارع البسيط.", "ستتعلم التعبير عن العادات والحقائق والأشياء المتكررة في الحياة اليومية.", "grammar"],
-      ["Present Continuous", "استخدام المضارع المستمر.", "ستتعلم كيف تصف ما يحدث الآن مثل I am studying now.", "grammar"],
-      ["Past Simple", "استخدام الماضي البسيط.", "ستتعلم وصف أحداث وقعت في الماضي مع كلمات زمنية واضحة.", "grammar"],
-      ["Future Will", "التعبير عن المستقبل باستخدام will.", "ستتعلم كيف تعبّر عن خطط أو توقعات مستقبلية.", "grammar"],
-      ["Prepositions", "حروف الجر الأساسية.", "ستتعلم in و on و at و under و between مع أمثلة واضحة.", "grammar"],
-      ["Comparatives", "المقارنة بين الأشياء.", "ستتعلم bigger و smaller و faster وكيف تستخدمها بشكل صحيح.", "grammar"],
-      ["Superlatives", "صيغة التفضيل.", "ستتعلم best و biggest و most important مع جمل تطبيقية.", "grammar"],
-      ["Countable and Uncountable", "المعدود وغير المعدود.", "ستتعلم الفرق بين much و many و some و any.", "grammar"],
-      ["Shopping English", "الإنجليزية في التسوق.", "ستتعلم السؤال عن السعر والمقاس والشراء والدفع.", "conversation"],
-      ["Travel English", "الإنجليزية في السفر.", "ستتعلم مفردات وجمل تستخدم في المطار والفندق والسؤال عن الاتجاهات.", "conversation"],
-      ["Restaurant English", "الإنجليزية في المطاعم.", "ستتعلم كيف تطلب الطعام وتفهم القائمة وتسأل عن المكونات.", "conversation"],
-      ["Health and Body", "الصحة والجسم.", "ستتعلم كلمات أساسية تتعلق بالجسم والصحة والمراجعة الطبية.", "vocabulary"],
-      ["Work and Jobs", "العمل والمهن.", "ستتعلم كلمات خاصة بالوظائف والعمل المكتبي والتواصل المهني.", "vocabulary"],
-      ["Making Requests", "طلب الأشياء بأدب.", "ستتعلم Can you و Could you و Would you mind واستخدامها بأدب.", "conversation"],
-      ["Phone Conversations", "المحادثات الهاتفية.", "ستتعلم عبارات الرد والاتصال والاستفسار عبر الهاتف.", "conversation"]
-    ];
+    function nowTs(){
+      return Date.now();
+    }
 
-    const advancedLessonsSeed = [
-      ["Advanced Conversation", "المحادثة المتقدمة الطبيعية.", "ستتعلم التعبير عن رأيك والموافقة والاعتراض بطريقة أكثر طبيعية.", "conversation"],
-      ["Professional Emails", "البريد الإلكتروني المهني.", "ستتعلم كتابة رسائل مهنية واضحة ومختصرة ومنظمة.", "sentences"],
-      ["Meetings English", "الإنجليزية في الاجتماعات.", "ستتعلم عبارات مهمة للاجتماعات والمناقشات المهنية.", "conversation"],
-      ["Opinion and Debate", "التعبير عن الرأي والنقاش.", "ستتعلم كيف تطرح رأيك وتدعمه بأسباب منطقية.", "conversation"],
-      ["Problem Solving", "حل المشكلات باللغة الإنجليزية.", "ستتعلم مفردات وعبارات خاصة بتحليل المشكلات والحلول.", "vocabulary"],
-      ["Negotiation Skills", "مهارات التفاوض.", "ستتعلم عبارات تفاوض مهني ولغة مرنة للإقناع.", "conversation"],
-      ["Presentation Skills", "مهارات العروض التقديمية.", "ستتعلم كيف تبدأ العرض وتنتقل بين النقاط وتختم بثقة.", "conversation"],
-      ["Academic English", "اللغة الإنجليزية الأكاديمية.", "ستتعلم عبارات مناسبة للكتابة والقراءة الأكاديمية.", "vocabulary"],
-      ["Fluency Practice", "تمارين الطلاقة.", "ستتعلم استراتيجيات لتحسين الانسيابية والسرعة في التحدث.", "conversation"],
-      ["Idioms and Natural English", "تعبيرات طبيعية واصطلاحية.", "ستتعلم مجموعة من التعابير المستخدمة بكثرة في الإنجليزية الطبيعية.", "vocabulary"]
-    ];
-
-    const LESSON_BANK = {
-      "Greetings": {
-        vocabulary: [
-          ["Hello","مرحباً","expression"],["Hi","أهلاً","expression"],["Good morning","صباح الخير","expression"],["Good afternoon","مساء الخير","expression"],["Good evening","مساء الخير","expression"],
-          ["How are you?","كيف حالك؟","question"],["I am fine","أنا بخير","sentence"],["Nice to meet you","تشرفت بمعرفتك","expression"],["Welcome","أهلاً وسهلاً","expression"],["See you later","أراك لاحقًا","expression"],
-          ["Take care","اعتنِ بنفسك","expression"],["Have a nice day","أتمنى لك يومًا جميلًا","expression"],["How have you been?","كيف كنت؟","question"],["Long time no see","لم أرك منذ مدة","expression"],["Good to see you","سعيد برؤيتك","expression"]
-        ]
-      },
-      "Self Introduction": {
-        vocabulary: [
-          ["My name is","اسمي هو","sentence"],["I am","أنا","sentence"],["I live in","أعيش في","sentence"],["I am from","أنا من","sentence"],["I work as","أعمل كـ","sentence"],
-          ["I study","أنا أدرس","verb"],["I like","أنا أحب","verb"],["My hobby is","هوايتي هي","sentence"],["I am interested in","أنا مهتم بـ","sentence"],["I speak","أنا أتحدث","verb"],
-          ["I am single","أنا أعزب","sentence"],["I am married","أنا متزوج","sentence"],["I am twenty years old","عمري عشرون سنة","sentence"],["Nice to meet you","تشرفت بمعرفتك","expression"],["Let me introduce myself","دعني أعرّف بنفسي","sentence"]
-        ]
-      },
-      "Numbers 1-15": {
-        numbers: Array.from({length:15}, (_,i)=>({n:i+1, word:["one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen"][i], meaning:["واحد","اثنان","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة","أحد عشر","اثنا عشر","ثلاثة عشر","أربعة عشر","خمسة عشر"][i]}))
-      },
-      "Alphabet Basics": {
-        letters: [
-          ["A","إي"],["B","بي"],["C","سي"],["D","دي"],["E","إي"],["F","إف"],["G","جي"],["H","إيتش"],["I","آي"],["J","جاي"],["K","كاي"],["L","إل"],["M","إم"],["N","إن"],["O","أو"]
-        ]
-      },
-      "Colors": {
-        vocabulary: [
-          ["Red","أحمر","adjective"],["Blue","أزرق","adjective"],["Green","أخضر","adjective"],["Yellow","أصفر","adjective"],["Black","أسود","adjective"],
-          ["White","أبيض","adjective"],["Orange","برتقالي","adjective"],["Purple","بنفسجي","adjective"],["Brown","بني","adjective"],["Pink","وردي","adjective"],
-          ["Gray","رمادي","adjective"],["Light blue","أزرق فاتح","adjective"],["Dark green","أخضر داكن","adjective"],["Golden","ذهبي","adjective"],["Silver","فضي","adjective"]
-        ]
-      },
-      "Family Members": {
-        vocabulary: [
-          ["Father","أب","noun"],["Mother","أم","noun"],["Brother","أخ","noun"],["Sister","أخت","noun"],["Son","ابن","noun"],
-          ["Daughter","ابنة","noun"],["Grandfather","جد","noun"],["Grandmother","جدة","noun"],["Uncle","عم / خال","noun"],["Aunt","عمة / خالة","noun"],
-          ["Cousin","ابن العم / الخال","noun"],["Parents","الوالدان","noun"],["Family","عائلة","noun"],["Relative","قريب","noun"],["Child","طفل","noun"]
-        ]
-      },
-      "Days of the Week": {
-        vocabulary: [
-          ["Monday","الاثنين","noun"],["Tuesday","الثلاثاء","noun"],["Wednesday","الأربعاء","noun"],["Thursday","الخميس","noun"],["Friday","الجمعة","noun"],
-          ["Saturday","السبت","noun"],["Sunday","الأحد","noun"],["Week","أسبوع","noun"],["Weekend","عطلة نهاية الأسبوع","noun"],["Today","اليوم","noun"],
-          ["Tomorrow","غدًا","noun"],["Yesterday","أمس","noun"],["Every day","كل يوم","expression"],["This week","هذا الأسبوع","expression"],["Next week","الأسبوع القادم","expression"]
-        ]
-      },
-      "Months": {
-        vocabulary: [
-          ["January","يناير","noun"],["February","فبراير","noun"],["March","مارس","noun"],["April","أبريل","noun"],["May","مايو","noun"],
-          ["June","يونيو","noun"],["July","يوليو","noun"],["August","أغسطس","noun"],["September","سبتمبر","noun"],["October","أكتوبر","noun"],
-          ["November","نوفمبر","noun"],["December","ديسمبر","noun"],["Month","شهر","noun"],["Year","سنة","noun"],["Date","تاريخ","noun"]
-        ]
-      },
-      "Common Verbs": {
-        vocabulary: [
-          ["Go","يذهب","verb"],["Come","يأتي","verb"],["Eat","يأكل","verb"],["Drink","يشرب","verb"],["Sleep","ينام","verb"],
-          ["Study","يدرس","verb"],["Read","يقرأ","verb"],["Write","يكتب","verb"],["Speak","يتحدث","verb"],["Listen","يستمع","verb"],
-          ["Work","يعمل","verb"],["Play","يلعب","verb"],["Walk","يمشي","verb"],["Open","يفتح","verb"],["Close","يغلق","verb"]
-        ]
-      },
-      "At School": {
-        vocabulary: [
-          ["School","مدرسة","noun"],["Classroom","فصل دراسي","noun"],["Teacher","معلم","noun"],["Student","طالب","noun"],["Book","كتاب","noun"],
-          ["Pen","قلم","noun"],["Notebook","دفتر","noun"],["Board","سبورة","noun"],["Desk","مكتب","noun"],["Chair","كرسي","noun"],
-          ["Homework","واجب منزلي","noun"],["Exam","اختبار","noun"],["Lesson","درس","noun"],["Question","سؤال","noun"],["Answer","إجابة","noun"]
-        ]
-      },
-      "At Home": {
-        vocabulary: [
-          ["House","منزل","noun"],["Room","غرفة","noun"],["Kitchen","مطبخ","noun"],["Bathroom","حمام","noun"],["Door","باب","noun"],
-          ["Window","نافذة","noun"],["Bed","سرير","noun"],["Table","طاولة","noun"],["Sofa","أريكة","noun"],["Lamp","مصباح","noun"],
-          ["Television","تلفاز","noun"],["Refrigerator","ثلاجة","noun"],["Floor","أرضية","noun"],["Wall","جدار","noun"],["Key","مفتاح","noun"]
-        ]
-      },
-      "Food and Drink": {
-        vocabulary: [
-          ["Food","طعام","noun"],["Water","ماء","noun"],["Juice","عصير","noun"],["Tea","شاي","noun"],["Coffee","قهوة","noun"],
-          ["Bread","خبز","noun"],["Rice","أرز","noun"],["Chicken","دجاج","noun"],["Meat","لحم","noun"],["Fruit","فاكهة","noun"],
-          ["Vegetables","خضروات","noun"],["Breakfast","فطور","noun"],["Lunch","غداء","noun"],["Dinner","عشاء","noun"],["Hungry","جائع","adjective"]
-        ]
-      },
-      "Questions Basics": {
-        vocabulary: [
-          ["What","ماذا / ما","question"],["Where","أين","question"],["Who","من","question"],["When","متى","question"],["Why","لماذا","question"],
-          ["How","كيف","question"],["Which","أي","question"],["Whose","لمن","question"],["How much","كم السعر / الكمية","question"],["How many","كم عدد","question"],
-          ["Question","سؤال","noun"],["Answer","إجابة","noun"],["Ask","يسأل","verb"],["Explain","يشرح","verb"],["Repeat","يكرر","verb"]
-        ]
-      },
-      "Simple Sentences": {
-        vocabulary: [
-          ["I am","أنا","sentence"],["You are","أنت","sentence"],["He is","هو","sentence"],["She is","هي","sentence"],["We are","نحن","sentence"],
-          ["They are","هم","sentence"],["Happy","سعيد","adjective"],["Tall","طويل","adjective"],["Busy","مشغول","adjective"],["Ready","جاهز","adjective"],
-          ["At home","في المنزل","expression"],["At school","في المدرسة","expression"],["In the car","في السيارة","expression"],["Very well","جيد جدًا","expression"],["Today","اليوم","noun"]
-        ]
-      },
-      "Daily Routine": {
-        vocabulary: [
-          ["Wake up","يستيقظ","verb"],["Brush my teeth","أنظف أسناني","verb"],["Take a shower","أستحم","verb"],["Get dressed","أرتدي ملابسي","verb"],["Have breakfast","أتناول الفطور","verb"],
-          ["Go to work","أذهب إلى العمل","verb"],["Go to school","أذهب إلى المدرسة","verb"],["Come back home","أعود إلى المنزل","verb"],["Have lunch","أتناول الغداء","verb"],["Study","أدرس","verb"],
-          ["Relax","أسترخي","verb"],["Exercise","أتمرن","verb"],["Have dinner","أتناول العشاء","verb"],["Sleep early","أنام مبكرًا","verb"],["Every day","كل يوم","expression"]
-        ]
-      },
-      "Present Simple": {
-        vocabulary: [
-          ["Always","دائمًا","adverb"],["Usually","عادةً","adverb"],["Often","غالبًا","adverb"],["Sometimes","أحيانًا","adverb"],["Never","أبدًا","adverb"],
-          ["Every day","كل يوم","expression"],["Every week","كل أسبوع","expression"],["Habit","عادة","noun"],["Fact","حقيقة","noun"],["Routine","روتين","noun"],
-          ["Play","يلعب","verb"],["Works","يعمل","verb"],["Lives","يعيش","verb"],["Studies","يدرس","verb"],["Drinks","يشرب","verb"]
-        ]
-      },
-      "Present Continuous": {
-        vocabulary: [
-          ["Now","الآن","adverb"],["At the moment","في هذه اللحظة","expression"],["Currently","حاليًا","adverb"],["Listening","يستمع","verb"],["Studying","يدرس","verb"],
-          ["Working","يعمل","verb"],["Cooking","يطبخ","verb"],["Reading","يقرأ","verb"],["Writing","يكتب","verb"],["Playing","يلعب","verb"],
-          ["Going","ذاهب","verb"],["Coming","آتٍ","verb"],["Watching","يشاهد","verb"],["Sitting","يجلس","verb"],["Standing","واقف","verb"]
-        ]
-      },
-      "Past Simple": {
-        vocabulary: [
-          ["Yesterday","أمس","noun"],["Last week","الأسبوع الماضي","expression"],["Last year","السنة الماضية","expression"],["Visited","زار","verb"],["Watched","شاهد","verb"],
-          ["Studied","درس","verb"],["Worked","عمل","verb"],["Played","لعب","verb"],["Finished","أنهى","verb"],["Started","بدأ","verb"],
-          ["Went","ذهب","verb"],["Came","أتى","verb"],["Ate","أكل","verb"],["Drank","شرب","verb"],["Slept","نام","verb"]
-        ]
-      },
-      "Future Will": {
-        vocabulary: [
-          ["Tomorrow","غدًا","noun"],["Next week","الأسبوع القادم","expression"],["Soon","قريبًا","adverb"],["Will go","سيذهب","verb"],["Will come","سيأتي","verb"],
-          ["Will study","سيدرس","verb"],["Will work","سيعمل","verb"],["Plan","خطة","noun"],["Promise","وعد","noun"],["Maybe","ربما","adverb"],
-          ["Probably","على الأرجح","adverb"],["I think","أعتقد","expression"],["I hope","آمل","expression"],["Later","لاحقًا","adverb"],["Future","مستقبل","noun"]
-        ]
-      },
-      "Prepositions": {
-        vocabulary: [
-          ["In","في","preposition"],["On","على","preposition"],["At","عند","preposition"],["Under","تحت","preposition"],["Between","بين","preposition"],
-          ["Behind","خلف","preposition"],["In front of","أمام","preposition"],["Near","قريب من","preposition"],["Next to","بجانب","preposition"],["Above","فوق","preposition"],
-          ["Below","أسفل","preposition"],["Inside","داخل","preposition"],["Outside","خارج","preposition"],["Around","حول","preposition"],["Across","عبر","preposition"]
-        ]
-      },
-      "Comparatives": {
-        vocabulary: [
-          ["Bigger","أكبر","adjective"],["Smaller","أصغر","adjective"],["Faster","أسرع","adjective"],["Slower","أبطأ","adjective"],["Taller","أطول","adjective"],
-          ["Shorter","أقصر","adjective"],["Better","أفضل","adjective"],["Worse","أسوأ","adjective"],["Cheaper","أرخص","adjective"],["More expensive","أغلى","adjective"],
-          ["Easier","أسهل","adjective"],["Harder","أصعب","adjective"],["Older","أكبر سنًا","adjective"],["Younger","أصغر سنًا","adjective"],["Than","من","grammar"]
-        ]
-      },
-      "Superlatives": {
-        vocabulary: [
-          ["The biggest","الأكبر","adjective"],["The smallest","الأصغر","adjective"],["The fastest","الأسرع","adjective"],["The slowest","الأبطأ","adjective"],["The tallest","الأطول","adjective"],
-          ["The shortest","الأقصر","adjective"],["The best","الأفضل","adjective"],["The worst","الأسوأ","adjective"],["The cheapest","الأرخص","adjective"],["The most expensive","الأغلى","adjective"],
-          ["The easiest","الأسهل","adjective"],["The hardest","الأصعب","adjective"],["The oldest","الأكبر سنًا","adjective"],["The youngest","الأصغر سنًا","adjective"],["In the group","في المجموعة","expression"]
-        ]
-      },
-      "Countable and Uncountable": {
-        vocabulary: [
-          ["Much","الكثير من (غير المعدود)","grammar"],["Many","الكثير من (المعدود)","grammar"],["Some","بعض","grammar"],["Any","أي / بعض","grammar"],["A bottle of","زجاجة من","expression"],
-          ["A piece of","قطعة من","expression"],["Water","ماء","noun"],["Rice","أرز","noun"],["Milk","حليب","noun"],["Sugar","سكر","noun"],
-          ["Apple","تفاحة","noun"],["Chair","كرسي","noun"],["Book","كتاب","noun"],["Question","سؤال","noun"],["Information","معلومات","noun"]
-        ]
-      },
-      "Shopping English": {
-        vocabulary: [
-          ["Price","سعر","noun"],["Cheap","رخيص","adjective"],["Expensive","غالي","adjective"],["Size","مقاس","noun"],["Color","لون","noun"],
-          ["Cash","نقد","noun"],["Card","بطاقة","noun"],["Buy","يشتري","verb"],["Pay","يدفع","verb"],["Discount","خصم","noun"],
-          ["Receipt","إيصال","noun"],["Customer","عميل","noun"],["Store","متجر","noun"],["How much is this?","كم سعر هذا؟","question"],["I want to buy","أريد أن أشتري","sentence"]
-        ]
-      },
-      "Travel English": {
-        vocabulary: [
-          ["Airport","مطار","noun"],["Passport","جواز سفر","noun"],["Ticket","تذكرة","noun"],["Flight","رحلة طيران","noun"],["Hotel","فندق","noun"],
-          ["Reservation","حجز","noun"],["Taxi","تاكسي","noun"],["Map","خريطة","noun"],["Left","يسار","noun"],["Right","يمين","noun"],
-          ["Straight","مباشرة","adverb"],["Gate","بوابة","noun"],["Luggage","أمتعة","noun"],["Check in","إنهاء إجراءات السفر","verb"],["Boarding pass","بطاقة صعود","noun"]
-        ]
-      },
-      "Restaurant English": {
-        vocabulary: [
-          ["Menu","قائمة الطعام","noun"],["Order","يطلب","verb"],["Waiter","نادل","noun"],["Table","طاولة","noun"],["Soup","حساء","noun"],
-          ["Salad","سلطة","noun"],["Main course","الطبق الرئيسي","noun"],["Dessert","حلوى","noun"],["Bill","فاتورة","noun"],["Fork","شوكة","noun"],
-          ["Knife","سكين","noun"],["Spoon","ملعقة","noun"],["Delicious","لذيذ","adjective"],["Spicy","حار","adjective"],["Could I have...?","هل يمكنني الحصول على...؟","sentence"]
-        ]
-      },
-      "Health and Body": {
-        vocabulary: [
-          ["Head","رأس","noun"],["Eye","عين","noun"],["Ear","أذن","noun"],["Nose","أنف","noun"],["Mouth","فم","noun"],
-          ["Hand","يد","noun"],["Leg","ساق","noun"],["Stomach","معدة","noun"],["Doctor","طبيب","noun"],["Medicine","دواء","noun"],
-          ["Pain","ألم","noun"],["Healthy","صحي","adjective"],["Sick","مريض","adjective"],["Hospital","مستشفى","noun"],["Appointment","موعد","noun"]
-        ]
-      },
-      "Work and Jobs": {
-        vocabulary: [
-          ["Job","وظيفة","noun"],["Work","عمل","noun"],["Office","مكتب","noun"],["Manager","مدير","noun"],["Employee","موظف","noun"],
-          ["Meeting","اجتماع","noun"],["Salary","راتب","noun"],["Company","شركة","noun"],["Project","مشروع","noun"],["Deadline","موعد نهائي","noun"],
-          ["Task","مهمة","noun"],["Email","بريد إلكتروني","noun"],["Report","تقرير","noun"],["Engineer","مهندس","noun"],["Teacher","معلم","noun"]
-        ]
-      },
-      "Making Requests": {
-        vocabulary: [
-          ["Can you...?","هل يمكنك...؟","sentence"],["Could you...?","هل يمكنك...؟","sentence"],["Would you mind...?","هل تمانع...؟","sentence"],["Please","من فضلك","expression"],["Help","يساعد","verb"],
-          ["Open","يفتح","verb"],["Close","يغلق","verb"],["Send","يرسل","verb"],["Bring","يحضر","verb"],["Show","يُظهر","verb"],
-          ["Repeat","يكرر","verb"],["Wait","ينتظر","verb"],["Later","لاحقًا","adverb"],["Sure","بالتأكيد","expression"],["Of course","طبعًا","expression"]
-        ]
-      },
-      "Phone Conversations": {
-        vocabulary: [
-          ["Hello, this is...","مرحبًا، معك...","sentence"],["Can I speak to...?","هل يمكنني التحدث إلى...؟","sentence"],["Who is calling?","من المتصل؟","question"],["Hold on","انتظر قليلًا","expression"],["Line","خط","noun"],
-          ["Call back","يتصل مرة أخرى","verb"],["Busy","مشغول","adjective"],["Available","متاح","adjective"],["Message","رسالة","noun"],["Voicemail","بريد صوتي","noun"],
-          ["Connection","اتصال","noun"],["Signal","إشارة","noun"],["Repeat please","أعد من فضلك","sentence"],["I can hear you","أستطيع سماعك","sentence"],["The line is bad","الخط سيئ","sentence"]
-        ]
-      },
-      "Advanced Conversation": {
-        vocabulary: [
-          ["In my opinion","في رأيي","expression"],["I agree","أنا أتفق","expression"],["I disagree","أنا لا أتفق","expression"],["It depends","يعتمد على ذلك","expression"],["Actually","في الواقع","adverb"],
-          ["Basically","بشكل أساسي","adverb"],["Probably","على الأرجح","adverb"],["However","مع ذلك","connector"],["Therefore","لذلك","connector"],["On the other hand","من ناحية أخرى","connector"],
-          ["Absolutely","بالتأكيد","adverb"],["Exactly","تمامًا","adverb"],["Fair point","نقطة جيدة","expression"],["To be honest","بصراحة","expression"],["From my perspective","من وجهة نظري","expression"]
-        ]
-      },
-      "Professional Emails": {
-        vocabulary: [
-          ["Subject","عنوان الرسالة","noun"],["Regards","مع التحية","expression"],["Sincerely","بإخلاص","expression"],["Dear Sir","عزيزي السيد","expression"],["Dear Team","عزيزي الفريق","expression"],
-          ["Please find attached","يرجى الاطلاع على المرفق","sentence"],["I would like to","أود أن","sentence"],["Thank you for","شكرًا لك على","sentence"],["Looking forward to","أتطلع إلى","sentence"],["Best regards","أطيب التحيات","expression"],
-          ["Attachment","مرفق","noun"],["Request","طلب","noun"],["Update","تحديث","noun"],["Deadline","موعد نهائي","noun"],["Confirmation","تأكيد","noun"]
-        ]
-      },
-      "Meetings English": {
-        vocabulary: [
-          ["Agenda","جدول أعمال","noun"],["Point","نقطة","noun"],["Discuss","يناقش","verb"],["Share","يشارك","verb"],["Opinion","رأي","noun"],
-          ["Decision","قرار","noun"],["Suggestion","اقتراح","noun"],["Action item","مهمة تنفيذية","noun"],["Summary","ملخص","noun"],["Attendee","حاضر","noun"],
-          ["Chairperson","رئيس الاجتماع","noun"],["Take notes","يأخذ ملاحظات","verb"],["Let's begin","لنبدأ","sentence"],["Any questions?","أي أسئلة؟","question"],["Let's move on","لننتقل","sentence"]
-        ]
-      },
-      "Opinion and Debate": {
-        vocabulary: [
-          ["Argument","حجة","noun"],["Reason","سبب","noun"],["Evidence","دليل","noun"],["Support","يدعم","verb"],["Claim","ادعاء","noun"],
-          ["Counterargument","حجة مضادة","noun"],["Agree","يوافق","verb"],["Disagree","يخالف","verb"],["Strongly","بشدة","adverb"],["Clearly","بوضوح","adverb"],
-          ["Personally","شخصيًا","adverb"],["Because","لأن","connector"],["Although","على الرغم من","connector"],["In conclusion","في الختام","expression"],["For example","على سبيل المثال","expression"]
-        ]
-      },
-      "Problem Solving": {
-        vocabulary: [
-          ["Problem","مشكلة","noun"],["Solution","حل","noun"],["Issue","إشكال","noun"],["Cause","سبب","noun"],["Effect","أثر","noun"],
-          ["Fix","يصلح","verb"],["Improve","يحسن","verb"],["Plan","خطة","noun"],["Option","خيار","noun"],["Risk","مخاطرة","noun"],
-          ["Result","نتيجة","noun"],["Step","خطوة","noun"],["Analyze","يحلل","verb"],["Decide","يقرر","verb"],["Outcome","مآل / نتيجة نهائية","noun"]
-        ]
-      },
-      "Negotiation Skills": {
-        vocabulary: [
-          ["Offer","عرض","noun"],["Deal","صفقة","noun"],["Price","سعر","noun"],["Budget","ميزانية","noun"],["Discount","خصم","noun"],
-          ["Condition","شرط","noun"],["Accept","يقبل","verb"],["Reject","يرفض","verb"],["Consider","يدرس","verb"],["Agreement","اتفاق","noun"],
-          ["Flexible","مرن","adjective"],["Fair","عادل","adjective"],["Counteroffer","عرض مقابل","noun"],["Deadline","موعد نهائي","noun"],["Compromise","حل وسط","noun"]
-        ]
-      },
-      "Presentation Skills": {
-        vocabulary: [
-          ["Introduction","مقدمة","noun"],["Topic","موضوع","noun"],["Slide","شريحة","noun"],["Audience","جمهور","noun"],["Main point","نقطة رئيسية","noun"],
-          ["Example","مثال","noun"],["Explain","يشرح","verb"],["Highlight","يبرز","verb"],["Conclusion","خاتمة","noun"],["Question","سؤال","noun"],
-          ["Confident","واثق","adjective"],["Clearly","بوضوح","adverb"],["Firstly","أولًا","connector"],["Finally","أخيرًا","connector"],["Thank you for listening","شكرًا لاستماعكم","sentence"]
-        ]
-      },
-      "Academic English": {
-        vocabulary: [
-          ["Research","بحث","noun"],["Source","مصدر","noun"],["Article","مقال","noun"],["Reference","مرجع","noun"],["Theory","نظرية","noun"],
-          ["Analysis","تحليل","noun"],["Conclusion","استنتاج","noun"],["Evidence","دليل","noun"],["Paragraph","فقرة","noun"],["Argument","حجة","noun"],
-          ["Academic","أكاديمي","adjective"],["Formal","رسمي","adjective"],["Cite","يقتبس / يوثق","verb"],["Summarize","يلخص","verb"],["Interpret","يفسر","verb"]
-        ]
-      },
-      "Fluency Practice": {
-        vocabulary: [
-          ["Fluent","طليق","adjective"],["Natural","طبيعي","adjective"],["Pause","توقف قصير","noun"],["Shadowing","الترديد خلف المتحدث","noun"],["Pronunciation","نطق","noun"],
-          ["Speed","سرعة","noun"],["Confidence","ثقة","noun"],["Repeat","يكرر","verb"],["Listen carefully","استمع جيدًا","sentence"],["Speak loudly","تحدث بصوت واضح","sentence"],
-          ["Keep going","استمر","sentence"],["Practice daily","تدرّب يوميًا","sentence"],["Common phrase","عبارة شائعة","noun"],["Smoothly","بانسيابية","adverb"],["Clearly","بوضوح","adverb"]
-        ]
-      },
-      "Idioms and Natural English": {
-        vocabulary: [
-          ["Break the ice","يكسر الجمود","expression"],["Piece of cake","سهل جدًا","expression"],["Hit the road","ينطلق","expression"],["Call it a day","يُنهي العمل","expression"],["Under the weather","متوعك","expression"],
-          ["Once in a blue moon","نادرًا جدًا","expression"],["By the way","بالمناسبة","expression"],["No worries","لا تقلق","expression"],["I'm all ears","أنا منصت","expression"],["Hang on","انتظر","expression"],
-          ["Take your time","خذ وقتك","expression"],["Sounds good","يبدو جيدًا","expression"],["Exactly","بالضبط","adverb"],["Seriously","بجدية","adverb"],["Honestly","بصراحة","adverb"]
-        ]
+    function safeJSONParse(text, fallback){
+      try{
+        return JSON.parse(text);
+      }catch{
+        return fallback;
       }
-    };
+    }
 
-    const EXTRA_EN = ("ability able about above accept account across act action activity actually add address administration admit adult affect after again against age agency agent ago agree agreement ahead air all allow almost alone along already also although always American among amount analysis animal another answer any anyone anything appear apply approach area argue arm around arrive art article artist ask assume attention attorney audience author authority available avoid away baby back bad bag ball bank bar base be beat beautiful because become bed before begin behavior behind believe benefit best better between beyond big bill bit black blood board body book born both box boy break bring brother budget build building business buy call camera campaign can cancer candidate capital car card care career carry case catch cause cell center central century certain certainly chair challenge chance change character charge check child choice choose church citizen city civil claim class clear clearly close coach cold collection college color come commercial common community company compare computer concern condition conference Congress consider consumer contain continue control cost could country couple course court cover create crime cultural culture cup current customer cut dark data daughter day dead deal death debate decade decide decision deep defense degree Democrat democratic describe design despite detail determine develop development die difference different difficult dinner direction director discover discuss discussion disease do doctor dog door down draw dream drive drop drug during each early east easy eat economic economy edge education effect effort eight either election else employee end energy enjoy enough enter entire environment especially establish even evening event ever every everybody everyone everything evidence exactly example executive exist expect experience expert explain eye face fact factor fail fall family far fast father fear federal feel feeling few field fight figure fill film final finally financial find fine finger finish fire firm first fish five floor fly focus follow food foot for force foreign forget form former forward four free friend from front full fund future game garden gas general generation get girl give glass go goal good government great green ground group grow growth guess gun guy hair half hand hang happen happy hard have he head health hear heart heat heavy help her here herself high him himself his history hit hold home hope hospital hot hotel hour house how however huge human hundred husband idea identify if image imagine impact important improve in include including increase indeed indicate individual industry information inside instead institution interest interesting international interview into investment involve issue it item its itself job join just keep key kid kind kitchen know knowledge land language large last late later laugh law lawyer lay lead leader learn least leave left leg legal less let letter level life light like likely line list listen little live local long look lose loss lot love low machine magazine main maintain major majority make man manage management manager many market marriage material matter may maybe me mean measure media medical meet meeting member memory mention message method middle might military million mind minute miss mission model modern moment money month more morning most mother mouth move movement movie Mr Mrs much music must my myself name nation national natural nature near nearly necessary need network never new news newspaper next nice night no none nor north not note nothing notice now number occur of off offer office officer official often oh oil ok old on once one only onto open operation opportunity option or order organization other others our out outside over own owner page pain painting paper parent part participant particular particularly partner party pass past patient pattern pay peace people per perform performance perhaps period person personal phone physical pick picture piece place plan plant play player PM point police policy political politics poor popular population position positive possible power practice prepare present president pressure pretty prevent price private probably problem process produce product production professional professor program project property protect prove provide public pull purpose push put quality question quickly quite race radio raise range rate rather reach read ready real reality realize really reason receive recent recently recognize record reduce reflect region relate relationship religious remain remember remove report represent Republican require research resource respond response responsibility rest result return reveal rich right rise risk road rock role room rule run safe same save say scene school science scientist score sea season seat second section security see seek seem sell send senior sense series serious serve service set seven several shake share she shoot short shot should shoulder show side sign significant similar simple simply since sing single sister sit site situation six size skill skin small smile so social society soldier some somebody someone something sometimes son song soon sort sound source south southern space speak special specific speech spend sport spring staff stage stand standard star start state statement station stay step still stock stop store story strategy street strong structure student study stuff style subject success successful such suddenly suffer suggest summer support sure surface system table take talk task tax teach teacher team technology television tell ten tend term test than thank that the their them themselves then theory there these they thing think third this those though thought thousand threat three through throughout throw thus time to today together tonight too top total tough toward town trade traditional training travel treat treatment tree trial trip trouble true truth try turn TV two type under understand unit until up upon us use usually value various very victim view violence visit voice vote wait walk wall want war watch water way we weapon wear week weight well west western what whatever when where whether which while white who whole whom whose why wide wife will win wind window wish with within without woman wonder word work worker world worry would write writer wrong yard yeah year yes yet you young your yourself").split(" ");
-    const EXTRA_AR = ("قدرة قادر عن فوق يقبل حساب عبر فعل حركة نشاط فعليا يضيف عنوان إدارة يعترف بالغ يؤثر بعد مرة ضد عمر وكالة وكيل منذ يوافق اتفاق أمام هواء كل يسمح تقريبا وحيد على طول بالفعل رغم دائما أمريكي بين مقدار تحليل حيوان آخر إجابة أي أي شخص أي شيء يظهر يطبق أسلوب يجادل ذراع حول يصل فن مقال فنان يسأل يفترض اهتمام محام جمهور مؤلف سلطة متاح يتجنب بعيد طفل خلف سيئ حقيبة كرة بنك شريط قاعدة يكون يهزم جميل لأن يصبح سرير قبل يبدأ سلوك خلف يعتقد فائدة أفضل أحسن بين أبعد كبير فاتورة قليل أسود دم مجلس جسم كتاب مولود كلاهما صندوق ولد يكسر يجلب أخ ميزانية يبني مبنى تجارة يشتري ينادي كاميرا حملة يستطيع سرطان مرشح عاصمة سيارة بطاقة رعاية مهنة يحمل حالة يلتقط سبب خلية مركز مركزي قرن معين بالتأكيد كرسي تحدي فرصة يغير شخصية مسؤولية يتحقق طفل اختيار يختار كنيسة مواطن مدينة مدني مطالبة فصل واضح بوضوح يغلق مدرب بارد مجموعة كلية لون يأتي تجاري مشترك شركة يقارن حاسوب قلق شرط مؤتمر يعتبر مستهلك يحتوي يستمر تحكم تكلفة يمكن دولة زوجان دورة محكمة غطاء يخلق جريمة ثقافي ثقافة كوب حالي عميل يقطع داكن بيانات ابنة يوم ميت صفقة موت نقاش عقد يقرر قرار عميق دفاع درجة ديمقراطي ديمقراطية يصف تصميم رغم تفصيل يحدد يطور تطور يموت فرق مختلف صعب عشاء اتجاه مدير يكتشف يناقش نقاش مرض يفعل طبيب كلب باب أسفل يرسم حلم يقود يسقط مخدر أثناء كل مبكر شرق سهل يأكل اقتصادي اقتصاد حافة تعليم أثر جهد ثمانية إما انتخابات آخر موظف نهاية طاقة يستمتع كاف يدخل كامل بيئة خصوصا ينشئ حتى مساء حدث من قبل كل الجميع كل واحد كل شيء دليل بالضبط مثال تنفيذي يوجد يتوقع تجربة خبير يشرح عين وجه حقيقة عامل يفشل يسقط عائلة بعيد سريع أب خوف اتحادي يشعر إحساس قليل حقل يقاتل شكل يملأ فيلم نهائي مالي يجد جيد إصبع ينهي نار شركة أول سمكة خمسة أرضية يطير تركيز يتبع طعام قدم لأجل قوة أجنبي ينسى شكل سابق إلى الأمام أربعة حر صديق من أمام كامل صندوق مستقبل لعبة حديقة غاز عام جيل يحصل فتاة يعطي زجاج يذهب هدف جيد حكومة عظيم أخضر أرض ينمو نمو يخمن سلاح رجل شعر نصف يد يعلق يحدث سعيد صعب يملك هو رأس صحة يسمع قلب حرارة ثقيل مساعدة هي هنا نفسها عال هو نفسه تاريخه يضرب يمسك منزل أمل مستشفى حار فندق ساعة بيت كيف مع ذلك ضخم بشري مئة زوج فكرة يحدد إذا صورة يتخيل أثر مهم يحسن في يشمل متضمنا زيادة بالفعل يشير فرد صناعة معلومات داخل بدلا مؤسسة مصلحة مثير دولي مقابلة إلى استثمار يشمل قضية هو عنصر نفسه وظيفة ينضم فقط يبقي مفتاح طفل نوع مطبخ يعرف معرفة أرض لغة كبير أخير متأخر لاحقا يضحك قانون محام يضع يقود قائد يتعلم على الأقل يترك يسار ساق قانوني أقل دع حرف مستوى حياة ضوء يحب على الأرجح خط قائمة يستمع قليل يعيش محلي طويل ينظر يخسر خسارة كثير حب منخفض آلة مجلة رئيسي يحافظ كبير أغلبية يصنع رجل يدير إدارة مدير كثير سوق زواج مادة مسألة قد ربما أنا يعني يقيس إعلام طبي يلتقي اجتماع عضو ذاكرة يذكر رسالة طريقة وسط ربما عسكري مليون عقل دقيقة يفتقد مهمة نموذج حديث لحظة مال شهر أكثر صباح معظم أم فم يتحرك حركة فيلم سيد سيدة كثير موسيقى يجب لي نفسي اسم أمة وطني طبيعي طبيعة قريب تقريبا ضروري حاجة شبكة أبدا جديد أخبار صحيفة التالي لطيف ليلة لا لا أحد ولا شمال ليس ملاحظة لا شيء يلاحظ
+    function esc(str=""){
+      return String(str)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+    }
+
+    function scrollToSection(id){
+      const el = document.getElementById(id);
+      if(el) el.scrollIntoView({behavior:"smooth", block:"start"});
+    }
+
+    function openModal(id){
+      const modal = document.getElementById(id);
+      if(modal) modal.classList.add("show");
+    }
+
+    function closeModal(id){
+      const modal = document.getElementById(id);
+      if(modal) modal.classList.remove("show");
+    }
+
+    function speakText(text, lang="en-US"){
+      if(!("speechSynthesis" in window)){
+        alert("المتصفح لا يدعم النطق.");
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = lang;
+      utter.rate = .95;
+      utter.pitch = 1;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function speakArabic(text){
+      speakText(text, "ar-SA");
+    }
+
+    function getDefaultAppData(){
+      return {
+        levels: [
+          { id:"beginner", title:"المبتدئ", description:"ابدأ من الصفر: الحروف، الأرقام، التحيات، الكلمات الأساسية والجمل البسيطة." },
+          { id:"intermediate", title:"المتوسط", description:"توسع في القواعد، المحادثات اليومية، السفر، العمل، والطلبات." },
+          { id:"advanced", title:"المتقدم", description:"الطلاقة، العروض، الإيميلات المهنية، الاجتماعات، والتعبير الطبيعي." }
+        ],
+        lessons: [
+          {
+            id:"l1",
+            levelId:"beginner",
+            type:"vocabulary",
+            title:"Greetings",
+            shortDescription:"تعلم التحيات الأساسية المستخدمة يوميًا.",
+            explanation:"في هذا الدرس ستتعلم أهم التحيات الإنجليزية وكيف تبدأ محادثة بسيطة وترد على الآخرين بطريقة طبيعية.",
+            xp:25,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"Hello", meaning:"مرحباً", type:"expression", example:"Hello, my friend.", exampleAr:"مرحبًا يا صديقي."},
+              {word:"Hi", meaning:"أهلاً", type:"expression", example:"Hi, how are you?", exampleAr:"أهلًا، كيف حالك؟"},
+              {word:"Good morning", meaning:"صباح الخير", type:"expression", example:"Good morning, teacher.", exampleAr:"صباح الخير يا معلم."},
+              {word:"Nice to meet you", meaning:"تشرفت بمعرفتك", type:"expression", example:"Nice to meet you, Ali.", exampleAr:"تشرفت بمعرفتك يا علي."}
+            ],
+            examples:[
+              {en:"Hello!", ar:"مرحباً!"},
+              {en:"How are you?", ar:"كيف حالك؟"},
+              {en:"I am fine, thank you.", ar:"أنا بخير، شكرًا لك."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"كلمة Hello معناها؟", choices:["شكراً","مرحباً","وداعاً"], answer:1},
+              {question:"الرد المناسب على How are you؟", choices:["Blue","I am fine","Table"], answer:1}
+            ]
+          },
+          {
+            id:"l2",
+            levelId:"beginner",
+            type:"conversation",
+            title:"Self Introduction",
+            shortDescription:"تقديم النفس بطريقة بسيطة وواضحة.",
+            explanation:"ستتعلم كيف تعرف بنفسك: اسمك، بلدك، عمرك، ودراستك أو عملك.",
+            xp:30,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"My name is", meaning:"اسمي هو", type:"sentence", example:"My name is Omar.", exampleAr:"اسمي عمر."},
+              {word:"I am from", meaning:"أنا من", type:"sentence", example:"I am from Iraq.", exampleAr:"أنا من العراق."},
+              {word:"I live in", meaning:"أعيش في", type:"sentence", example:"I live in Basra.", exampleAr:"أعيش في البصرة."},
+              {word:"I study", meaning:"أنا أدرس", type:"verb", example:"I study English.", exampleAr:"أنا أدرس الإنجليزية."}
+            ],
+            examples:[
+              {en:"My name is Sara.", ar:"اسمي سارة."},
+              {en:"I am from Egypt.", ar:"أنا من مصر."},
+              {en:"I study English every day.", ar:"أنا أدرس الإنجليزية كل يوم."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"الجملة المناسبة لتقول اسمك:", choices:["I am from","My name is","How old are you"], answer:1}
+            ]
+          },
+          {
+            id:"l3",
+            levelId:"beginner",
+            type:"numbers",
+            title:"Numbers 1-10",
+            shortDescription:"تعلم الأرقام من 1 إلى 10.",
+            explanation:"في هذا الدرس ستتعلم الأرقام الأساسية نطقًا وكتابةً ومعناها بالعربية.",
+            xp:20,
+            audio:"",
+            video:"",
+            vocabulary:[],
+            examples:[
+              {en:"I have two books.", ar:"لدي كتابان."},
+              {en:"She is ten years old.", ar:"عمرها عشر سنوات."}
+            ],
+            letters:[],
+            numbers:[
+              {n:1, word:"one", meaning:"واحد"},
+              {n:2, word:"two", meaning:"اثنان"},
+              {n:3, word:"three", meaning:"ثلاثة"},
+              {n:4, word:"four", meaning:"أربعة"},
+              {n:5, word:"five", meaning:"خمسة"},
+              {n:6, word:"six", meaning:"ستة"},
+              {n:7, word:"seven", meaning:"سبعة"},
+              {n:8, word:"eight", meaning:"ثمانية"},
+              {n:9, word:"nine", meaning:"تسعة"},
+              {n:10, word:"ten", meaning:"عشرة"}
+            ],
+            quiz:[
+              {question:"What is 3 in English?", choices:["five","three","eight"], answer:1}
+            ]
+          },
+          {
+            id:"l4",
+            levelId:"beginner",
+            type:"letters",
+            title:"Alphabet Basics",
+            shortDescription:"تعلم الحروف الإنجليزية الأساسية.",
+            explanation:"ستتعلم الحروف الإنجليزية وطريقة نطقها بشكل واضح مع أمثلة بسيطة.",
+            xp:20,
+            audio:"",
+            video:"",
+            vocabulary:[],
+            examples:[
+              {en:"A for Apple", ar:"A ترمز إلى Apple"},
+              {en:"B for Book", ar:"B ترمز إلى Book"}
+            ],
+            letters:[
+              {letter:"A", sound:"إي"},
+              {letter:"B", sound:"بي"},
+              {letter:"C", sound:"سي"},
+              {letter:"D", sound:"دي"},
+              {letter:"E", sound:"إي"}
+            ],
+            numbers:[],
+            quiz:[
+              {question:"نطق الحرف B هو:", choices:["بي","إي","دي"], answer:0}
+            ]
+          },
+          {
+            id:"l5",
+            levelId:"intermediate",
+            type:"grammar",
+            title:"Present Simple",
+            shortDescription:"استخدام المضارع البسيط.",
+            explanation:"ستتعلم المضارع البسيط للتعبير عن العادات والحقائق والروتين اليومي.",
+            xp:35,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"Always", meaning:"دائمًا", type:"adverb", example:"I always wake up early.", exampleAr:"أنا أستيقظ مبكرًا دائمًا."},
+              {word:"Usually", meaning:"عادةً", type:"adverb", example:"She usually drinks tea.", exampleAr:"هي عادة تشرب الشاي."},
+              {word:"Sometimes", meaning:"أحيانًا", type:"adverb", example:"We sometimes play football.", exampleAr:"نحن أحيانًا نلعب كرة القدم."}
+            ],
+            examples:[
+              {en:"I go to school every day.", ar:"أنا أذهب إلى المدرسة كل يوم."},
+              {en:"He works in a company.", ar:"هو يعمل في شركة."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"أي جملة في المضارع البسيط؟", choices:["I am eating now","She plays tennis","They were home"], answer:1}
+            ]
+          },
+          {
+            id:"l6",
+            levelId:"intermediate",
+            type:"conversation",
+            title:"Travel English",
+            shortDescription:"الإنجليزية في السفر.",
+            explanation:"ستتعلم مفردات وجمل تستخدم في المطار والفندق والسؤال عن الاتجاهات.",
+            xp:40,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"Airport", meaning:"مطار", type:"noun", example:"The airport is far.", exampleAr:"المطار بعيد."},
+              {word:"Ticket", meaning:"تذكرة", type:"noun", example:"I need a ticket.", exampleAr:"أحتاج تذكرة."},
+              {word:"Passport", meaning:"جواز سفر", type:"noun", example:"Where is my passport?", exampleAr:"أين جواز سفري؟"}
+            ],
+            examples:[
+              {en:"Where is the airport?", ar:"أين المطار؟"},
+              {en:"I have a hotel reservation.", ar:"لدي حجز فندقي."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"Passport معناها:", choices:["تذكرة","جواز سفر","حقيبة"], answer:1}
+            ]
+          },
+          {
+            id:"l7",
+            levelId:"advanced",
+            type:"sentences",
+            title:"Professional Emails",
+            shortDescription:"البريد الإلكتروني المهني.",
+            explanation:"ستتعلم كتابة رسائل بريد إلكتروني مهنية واضحة ومهذبة ومختصرة.",
+            xp:50,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"Best regards", meaning:"أطيب التحيات", type:"expression", example:"Best regards, Ahmed", exampleAr:"أطيب التحيات، أحمد"},
+              {word:"Please find attached", meaning:"يرجى الاطلاع على المرفق", type:"sentence", example:"Please find attached the report.", exampleAr:"يرجى الاطلاع على التقرير المرفق."},
+              {word:"Looking forward to", meaning:"أتطلع إلى", type:"expression", example:"Looking forward to your reply.", exampleAr:"أتطلع إلى ردك."}
+            ],
+            examples:[
+              {en:"Dear Team, please find attached the updated file.", ar:"عزيزي الفريق، يرجى الاطلاع على الملف المحدّث المرفق."},
+              {en:"Thank you for your time.", ar:"شكرًا لوقتك."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"الختام المهني المناسب:", choices:["See ya","Best regards","What's up"], answer:1}
+            ]
+          },
+          {
+            id:"l8",
+            levelId:"advanced",
+            type:"conversation",
+            title:"Advanced Conversation",
+            shortDescription:"المحادثة المتقدمة الطبيعية.",
+            explanation:"ستتعلم التعبير عن رأيك والموافقة والاعتراض بطريقة أكثر طبيعية.",
+            xp:55,
+            audio:"",
+            video:"",
+            vocabulary:[
+              {word:"In my opinion", meaning:"في رأيي", type:"expression", example:"In my opinion, this is useful.", exampleAr:"في رأيي، هذا مفيد."},
+              {word:"I agree", meaning:"أنا أتفق", type:"expression", example:"I agree with you.", exampleAr:"أنا أتفق معك."},
+              {word:"However", meaning:"مع ذلك", type:"connector", example:"However, we need more time.", exampleAr:"مع ذلك، نحن بحاجة إلى وقت أكثر."}
+            ],
+            examples:[
+              {en:"In my opinion, practice is the key.", ar:"في رأيي، التدريب هو المفتاح."},
+              {en:"I agree, but we should improve the plan.", ar:"أنا أتفق، لكن ينبغي أن نحسّن الخطة."}
+            ],
+            letters:[],
+            numbers:[],
+            quiz:[
+              {question:"However معناها:", choices:["لذلك","مع ذلك","بالتأكيد"], answer:1}
+            ]
+          }
+        ]
+      };
+    }
+
+    function getDefaultProgressData(){
+      return {
+        completedLessons:{},
+        quizScores:{},
+        xp:0,
+        streak:0,
+        lastLessonId:null,
+        startedLessons:{}
+      };
+    }
+
+    function getDefaultReviewData(){
+      return {
+        items:{}
+      };
+    }
+
+    function loadAllData(){
+      appData = safeJSONParse(localStorage.getItem(STORAGE_KEY), null);
+      progressData = safeJSONParse(localStorage.getItem(PROGRESS_KEY), null);
+      reviewData = safeJSONParse(localStorage.getItem(REVIEW_KEY), null);
+
+      if(!appData || !Array.isArray(appData.levels) || !Array.isArray(appData.lessons)){
+        appData = getDefaultAppData();
+        saveAppData();
+      }
+
+      if(!progressData || typeof progressData !== "object"){
+        progressData = getDefaultProgressData();
+        saveProgressData();
+      }
+
+      if(!reviewData || typeof reviewData !== "object"){
+        reviewData = getDefaultReviewData();
+        saveReviewData();
+      }
+
+      rebuildWordBank();
+    }
+
+    function saveAppData(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+    }
+
+    function saveProgressData(){
+      localStorage.setItem(PROGRESS_KEY, JSON.stringify(progressData));
+    }
+
+    function saveReviewData(){
+      localStorage.setItem(REVIEW_KEY, JSON.stringify(reviewData));
+    }
+
+    function rebuildWordBank(){
+      masterWordBank = [];
+      appData.lessons.forEach(lesson=>{
+        (lesson.vocabulary || []).forEach(v=>{
+          masterWordBank.push({
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            word: v.word || "",
+            meaning: v.meaning || "",
+            type: v.type || "",
+            example: v.example || "",
+            exampleAr: v.exampleAr || ""
+          });
+        });
+        (lesson.letters || []).forEach(l=>{
+          masterWordBank.push({
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            word: l.letter || "",
+            meaning: l.sound || "",
+            type: "letter",
+            example: "",
+            exampleAr: ""
+          });
+        });
+        (lesson.numbers || []).forEach(n=>{
+          masterWordBank.push({
+            lessonId: lesson.id,
+            lessonTitle: lesson.title,
+            word: String(n.n ?? ""),
+            meaning: `${n.word || ""} - ${n.meaning || ""}`,
+            type: "number",
+            example: n.word || "",
+            exampleAr: n.meaning || ""
+          });
+        });
+      });
+    }
+
+    function getLessonsByLevel(levelId){
+      return appData.lessons.filter(l=>l.levelId === levelId);
+    }
+
+    function getLessonById(id){
+      return appData.lessons.find(l=>l.id === id);
+    }
+
+    function getLevelById(id){
+      return appData.levels.find(l=>l.id === id);
+    }
+
+    function isLessonCompleted(id){
+      return !!progressData.completedLessons[id];
+    }
+
+    function getLessonScore(id){
+      return Number(progressData.quizScores[id] || 0);
+    }
+
+    function calculateCompletionPercent(){
+      if(!appData.lessons.length) return 0;
+      const done = Object.keys(progressData.completedLessons).length;
+      return Math.round((done / appData.lessons.length) * 100);
+    }
+
+    function calculateLevelProgress(levelId){
+      const lessons = getLessonsByLevel(levelId);
+      if(!lessons.length) return 0;
+      const done = lessons.filter(l=>isLessonCompleted(l.id)).length;
+      return Math.round((done / lessons.length) * 100);
+    }
+
+    function updateStats(){
+      document.getElementById("statLevels").textContent = appData.levels.length;
+      document.getElementById("statLessons").textContent = appData.lessons.length;
+      document.getElementById("statCompletion").textContent = calculateCompletionPercent() + "%";
+      document.getElementById("statXP").textContent = progressData.xp || 0;
+
+      const doneLessons = Object.keys(progressData.completedLessons).length;
+      const solvedQuizzes = Object.keys(progressData.quizScores).length;
+      const bestScore = Math.max(0, ...Object.values(progressData.quizScores).map(Number));
+
+      document.getElementById("doneLessons").textContent = doneLessons;
+      document.getElementById("solvedQuizzes").textContent = solvedQuizzes;
+      document.getElementById("bestScore").textContent = bestScore + "%";
+      document.getElementById("xpPoints").textContent = progressData.xp || 0;
+      document.getElementById("streakCount").textContent = progressData.streak || 0;
+      document.getElementById("wordBankCount").textContent = masterWordBank.length;
+
+      if(progressData.lastLessonId){
+        const lesson = getLessonById(progressData.lastLessonId);
+        if(lesson){
+          document.getElementById("progressSummary").textContent = `آخر درس عملت عليه: ${lesson.title}`;
+        }else{
+          document.getElementById("progressSummary").textContent = "لم تبدأ أي درس بعد.";
+        }
+      }else{
+        document.getElementById("progressSummary").textContent = "لم تبدأ أي درس بعد.";
+      }
+    }
+
+    function renderLevels(){
+      const levelsGrid = document.getElementById("levelsGrid");
+      levelsGrid.innerHTML = "";
+
+      appData.levels.forEach(level=>{
+        const lessons = getLessonsByLevel(level.id);
+        const done = lessons.filter(l=>isLessonCompleted(l.id)).length;
+        const progress = calculateLevelProgress(level.id);
+
+        const div = document.createElement("div");
+        div.className = "card level-card";
+        div.innerHTML = `
+          <div class="badge">📘 ${esc(level.title)}</div>
+          <h4>${esc(level.title)}</h4>
+          <p>${esc(level.description || "")}</p>
+
+          <div class="meta-row">
+            <div class="meta">الدروس: ${lessons.length}</div>
+            <div class="meta">المنجز: ${done}</div>
+            <div class="meta">التقدم: ${progress}%</div>
+          </div>
+
+          <div class="progress-line">
+            <div class="progress-fill" style="width:${progress}%"></div>
+          </div>
+
+          <button class="btn btn-primary btn-block">فتح المستوى</button>
+        `;
+        div.onclick = ()=>selectLevel(level.id);
+        levelsGrid.appendChild(div);
+      });
+    }
+
+    function selectLevel(levelId){
+      selectedLevelId = levelId;
+      const level = getLevelById(levelId);
+      const progress = calculateLevelProgress(levelId);
+
+      document.getElementById("selectedLevelLabel").textContent = "المستوى الحالي: " + (level ? level.title : "غير محدد");
+      document.getElementById("selectedLevelProgress").textContent = "التقدم: " + progress + "%";
+
+      renderLessonsList(levelId);
+      scrollToSection("dashboardSection");
+    }
+
+    function renderLessonsList(levelId){
+      const lessonsList = document.getElementById("lessonsList");
+      lessonsList.innerHTML = "";
+
+      if(!levelId){
+        lessonsList.innerHTML = `<div class="viewer-empty" style="min-height:220px"><div><h4>اختر مستوى أولًا</h4><p>ثم ستظهر قائمة الدروس هنا.</p></div></div>`;
+        return;
+      }
+
+      let lessons = getLessonsByLevel(levelId).slice();
+
+      const search = document.getElementById("lessonSearchInput").value.trim().toLowerCase();
+      const filter = document.getElementById("lessonFilterSelect").value;
+      const sort = document.getElementById("lessonSortSelect").value;
+
+      if(search){
+        lessons = lessons.filter(l=>{
+          return (l.title || "").toLowerCase().includes(search) ||
+                 (l.shortDescription || "").toLowerCase().includes(search) ||
+                 (l.explanation || "").toLowerCase().includes(search);
+        });
+      }
+
+      if(filter === "completed"){
+        lessons = lessons.filter(l=>isLessonCompleted(l.id));
+      }else if(filter === "notCompleted"){
+        lessons = lessons.filter(l=>!isLessonCompleted(l.id));
+      }
+
+      if(sort === "score"){
+        lessons.sort((a,b)=>getLessonScore(b.id)-getLessonScore(a.id));
+      }else if(sort === "title"){
+        lessons.sort((a,b)=>(a.title||"").localeCompare(b.title||""));
+      }
+
+      if(!lessons.length){
+        lessonsList.innerHTML = `<div class="viewer-empty" style="min-height:220px"><div><h4>لا توجد نتائج</h4><p>جرّب تغيير البحث أو الفلتر.</p></div></div>`;
+        return;
+      }
+
+      lessons.forEach(lesson=>{
+        const item = document.createElement("div");
+        item.className = "lesson-item" + (selectedLessonId === lesson.id ? " active" : "");
+        item.innerHTML = `
+          <div class="lesson-item-top">
+            <div>
+              <h5>${esc(lesson.title)}</h5>
+              <p>${esc(lesson.shortDescription || "")}</p>
+            </div>
+            <div class="score-tag">${getLessonScore(lesson.id)}%</div>
+          </div>
+          <div class="meta-row" style="margin:0">
+            <div class="meta">XP: ${lesson.xp || 0}</div>
+            <div class="meta">النوع: ${esc(lesson.type || "-")}</div>
+            <div class="meta">${isLessonCompleted(lesson.id) ? "✅ منجز" : "🕓 غير منجز"}</div>
+          </div>
+        `;
+        item.onclick = ()=>openLesson(lesson.id);
+        lessonsList.appendChild(item);
+      });
+    }
+
+    function markLessonStarted(lessonId){
+      if(!progressData.startedLessons[lessonId]){
+        progressData.startedLessons[lessonId] = nowTs();
+      }
+      progressData.lastLessonId = lessonId;
+      saveProgressData();
+      updateStats();
+    }
+
+    function markLessonCompleted(lessonId, addXP=true){
+      if(!progressData.completedLessons[lessonId]){
+        progressData.completedLessons[lessonId] = nowTs();
+        if(addXP){
+          const lesson = getLessonById(lessonId);
+          progressData.xp += Number(lesson?.xp || 0);
+        }
+        progressData.streak += 1;
+      }
+      progressData.lastLessonId = lessonId;
+      saveProgressData();
+    }
+
+    function scheduleReviewForLesson(lesson){
+      const terms = [];
+      (lesson.vocabulary || []).forEach(v=>{
+        if(v.word){
+          terms.push({
+            key:`${lesson.id}::word::${v.word}`,
+            front:v.word,
+            back:v.meaning || "",
+            type:v.type || "word",
+            lessonId:lesson.id,
+            lessonTitle:lesson.title
+          });
+        }
+      });
+      (lesson.letters || []).forEach(v=>{
+        if(v.letter){
+          terms.push({
+            key:`${lesson.id}::letter::${v.letter}`,
+            front:v.letter,
+            back:v.sound || "",
+            type:"letter",
+            lessonId:lesson.id,
+            lessonTitle:lesson.title
+          });
+        }
+      });
+      (lesson.numbers || []).forEach(v=>{
+        terms.push({
+          key:`${lesson.id}::number::${v.n}`,
+          front:String(v.n),
+          back:`${v.word || ""} - ${v.meaning || ""}`,
+          type:"number",
+          lessonId:lesson.id,
+          lessonTitle:lesson.title
+        });
+      });
+
+      const ts = nowTs();
+      terms.forEach(t=>{
+        if(!reviewData.items[t.key]){
+          reviewData.items[t.key] = {
+            ...t,
+            ease:2.5,
+            interval:1,
+            repetition:0,
+            dueAt:ts
+          };
+        }
+      });
+      saveReviewData();
+    }
+
+    function openLesson(lessonId){
+      const lesson = getLessonById(lessonId);
+      if(!lesson) return;
+
+      selectedLessonId = lessonId;
+      markLessonStarted(lessonId);
+
+      document.getElementById("viewerEmpty").style.display = "none";
+      const lessonView = document.getElementById("lessonView");
+      lessonView.classList.add("active");
+      renderLessonsList(selectedLevelId);
+
+      const vocabHtml = (lesson.vocabulary || []).length ? `
+        <div class="block">
+          <div class="mini-row">
+            <h5>📚 المفردات</h5>
+            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.vocabulary.map(v=>v.word).join(". "))}','en-US')">نطق الكلمات</button>
+          </div>
+          <div class="vocab-grid">
+            ${(lesson.vocabulary || []).map(v=>`
+              <div class="vocab-card">
+                <div class="vocab-top">
+                  <div>
+                    <strong>${esc(v.word)}</strong>
+                    <div class="muted">${esc(v.meaning)}</div>
+                  </div>
+                  <div class="chip">${esc(v.type || "word")}</div>
+                </div>
+                ${v.example ? `<p><strong>Example:</strong> ${esc(v.example)}</p>` : ""}
+                ${v.exampleAr ? `<p class="muted"><strong>المعنى:</strong> ${esc(v.exampleAr)}</p>` : ""}
+                <div class="vocab-meta">
+                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.word)}','en-US')">نطق الكلمة</button>
+                  ${v.example ? `<button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.example)}','en-US')">نطق المثال</button>` : ""}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      const lettersHtml = (lesson.letters || []).length ? `
+        <div class="block">
+          <div class="mini-row">
+            <h5>🔤 الحروف</h5>
+            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.letters.map(v=>v.letter).join(" "))}','en-US')">نطق الحروف</button>
+          </div>
+          <div class="vocab-grid">
+            ${(lesson.letters || []).map(v=>`
+              <div class="vocab-card">
+                <strong>${esc(v.letter)}</strong>
+                <div class="muted">${esc(v.sound)}</div>
+                <div class="vocab-meta">
+                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.letter)}','en-US')">استماع</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      const numbersHtml = (lesson.numbers || []).length ? `
+        <div class="block">
+          <div class="mini-row">
+            <h5>🔢 الأرقام</h5>
+            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.numbers.map(v=>v.word).join(". "))}','en-US')">نطق الأرقام</button>
+          </div>
+          <div class="vocab-grid">
+            ${(lesson.numbers || []).map(v=>`
+              <div class="vocab-card">
+                <strong>${esc(v.n)} — ${esc(v.word)}</strong>
+                <div class="muted">${esc(v.meaning)}</div>
+                <div class="vocab-meta">
+                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(v.word)}','en-US')">استماع</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      const examplesHtml = (lesson.examples || []).length ? `
+        <div class="block">
+          <div class="mini-row">
+            <h5>🧩 أمثلة</h5>
+            <button class="btn btn-mini btn-info" onclick="speakText('${escapeForJs(lesson.examples.map(e=>e.en).join(". "))}','en-US')">نطق الأمثلة</button>
+          </div>
+          <div class="examples">
+            ${(lesson.examples || []).map(e=>`
+              <div class="example">
+                <strong>${esc(e.en)}</strong>
+                <div class="muted">${esc(e.ar)}</div>
+                <div class="vocab-meta">
+                  <button class="btn btn-mini btn-soft" onclick="speakText('${escapeForJs(e.en)}','en-US')">استماع</button>
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      ` : "";
+
+      const lessonAudioHtml = lesson.audio ? `
+        <div class="block">
+          <h5>🔊 صوت الدرس</h5>
+          <audio class="audio-player" controls src="${esc(lesson.audio)}"></audio>
+        </div>
+      ` : "";
+
+      const videoHtml = lesson.video ? `
+        <div class="block">
+          <h5>🎥 فيديو الدرس</h5>
+          <iframe class="embed-video" src="${esc(lesson.video)}" allowfullscreen></iframe>
+        </div>
+      ` : "";
+
+      const quizHtml = (lesson.quiz || []).length ? `
+        <div class="block">
+          <h5>📝 اختبار سريع</h5>
+          <div class="quiz-wrap">
+            ${lesson.quiz.map((q,qi)=>`
+              <div class="question">
+                <h6>${qi+1}. ${esc(q.question)}</h6>
+                <div class="choices">
+                  ${(q.choices || []).map((choice,ci)=>`
+                    <label class="choice">
+                      <input type="radio" name="quiz_${lesson.id}_${qi}" value="${ci}">
+                      <span>${esc(choice)}</span>
+                    </label>
+                  `).join("")}
+                </div>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-success" onclick="submitQuiz('${lesson.id}')">تصحيح الاختبار</button>
+          </div>
+          <div id="quizResult_${lesson.id}" class="result-box"></div>
+        </div>
+      ` : "";
+
+      const lessonIndex = getLessonsByLevel(lesson.levelId).findIndex(l=>l.id===lesson.id);
+      const levelLessons = getLessonsByLevel(lesson.levelId);
+      const prevLesson = levelLessons[lessonIndex - 1];
+      const nextLesson = levelLessons[lessonIndex + 1];
+
+      lessonView.innerHTML = `
+        <div class="lesson-header">
+          <div>
+            <h4>${esc(lesson.title)}</h4>
+            <p>${esc(lesson.shortDescription || "")}</p>
+          </div>
+          <div class="meta-row" style="margin:0">
+            <div class="meta">النوع: ${esc(lesson.type || "-")}</div>
+            <div class="meta">XP: ${lesson.xp || 0}</div>
+            <div class="meta">${isLessonCompleted(lesson.id) ? "✅ منجز" : "📘 مفتوح"}</div>
+          </div>
+        </div>
+
+        <div class="block">
+          <div class="mini-row">
+            <h5>📖 شرح الدرس</h5>
+            <button class="btn btn-mini btn-info" onclick="speakArabic('${escapeForJs(lesson.explanation || '')}')">نطق الشرح</button>
+          </div>
+          <p>${esc(lesson.explanation || "")}</p>
+        </div>
+
+        ${lessonAudioHtml}
+        ${videoHtml}
+        ${vocabHtml}
+        ${lettersHtml}
+        ${numbersHtml}
+        ${examplesHtml}
+        ${quizHtml}
+
+        <div class="block">
+          <h5>⚡ إجراءات سريعة</h5>
+          <div class="lesson-nav">
+            <button class="btn btn-success" onclick="completeLessonOnly('${lesson.id}')">إنهاء الدرس وإضافته للمراجعة</button>
+            ${prevLesson ? `<button class="btn btn-soft" onclick="openLesson('${prevLesson.id}')">الدرس السابق</button>` : ""}
+            ${nextLesson ? `<button class="btn btn-primary" onclick="openLesson('${nextLesson.id}')">الدرس التالي</button>` : ""}
+          </div>
+        </div>
+      `;
+    }
+
+    function escapeForJs(str=""){
+      return String(str)
+        .replace(/\\/g,"\\\\")
+        .replace(/'/g,"\\'")
+        .replace(/\n/g," ")
+        .replace(/\r/g," ");
+    }
+
+    function completeLessonOnly(lessonId){
+      const lesson = getLessonById(lessonId);
+      if(!lesson) return;
+      markLessonCompleted(lessonId, true);
+      scheduleReviewForLesson(lesson);
+      saveProgressData();
+      saveReviewData();
+      updateStats();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      renderReview();
+      alert("تم إنهاء الدرس وإضافته إلى المراجعة الذكية.");
+    }
+
+    function submitQuiz(lessonId){
+      const lesson = getLessonById(lessonId);
+      if(!lesson || !(lesson.quiz || []).length) return;
+
+      let correct = 0;
+      let total = lesson.quiz.length;
+
+      lesson.quiz.forEach((q, qi)=>{
+        const picked = document.querySelector(`input[name="quiz_${lesson.id}_${qi}"]:checked`);
+        if(picked && Number(picked.value) === Number(q.answer)) correct++;
+      });
+
+      const percent = Math.round((correct / total) * 100);
+      progressData.quizScores[lessonId] = percent;
+      progressData.lastLessonId = lessonId;
+
+      if(percent >= 60){
+        markLessonCompleted(lessonId, !isLessonCompleted(lessonId));
+        scheduleReviewForLesson(lesson);
+      }else{
+        saveProgressData();
+      }
+
+      const result = document.getElementById(`quizResult_${lesson.id}`);
+      result.style.display = "block";
+
+      let statusClass = "status-low";
+      let text = "يحتاج مراجعة أكثر";
+      if(percent >= 80){
+        statusClass = "status-good";
+        text = "ممتاز جدًا";
+      }else if(percent >= 60){
+        statusClass = "status-mid";
+        text = "جيد، استمر";
+      }
+
+      result.innerHTML = `
+        <strong>نتيجتك: ${percent}%</strong>
+        <div class="${statusClass}">${text}</div>
+        <p class="muted">الإجابات الصحيحة: ${correct} من ${total}</p>
+      `;
+
+      saveProgressData();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      updateStats();
+      renderReview();
+    }
+
+    function getDueReviewItems(){
+      const ts = nowTs();
+      return Object.values(reviewData.items)
+        .filter(item => Number(item.dueAt || 0) <= ts)
+        .sort((a,b)=>(a.dueAt||0)-(b.dueAt||0));
+    }
+
+    function getNextReviewTimeText(){
+      const items = Object.values(reviewData.items).sort((a,b)=>(a.dueAt||0)-(b.dueAt||0));
+      if(!items.length) return "لا يوجد";
+      const next = items.find(i=>i.dueAt > nowTs());
+      if(!next) return "الآن";
+      const diff = Math.max(0, next.dueAt - nowTs());
+      const mins = Math.round(diff / 60000);
+      if(mins < 60) return `بعد ${mins} دقيقة`;
+      const hrs = Math.round(mins / 60);
+      if(hrs < 24) return `بعد ${hrs} ساعة`;
+      const days = Math.round(hrs / 24);
+      return `بعد ${days} يوم`;
+    }
+
+    function reviewAnswer(key, remembered){
+      const item = reviewData.items[key];
+      if(!item) return;
+
+      if(remembered){
+        item.repetition = Number(item.repetition || 0) + 1;
+        item.ease = Math.max(1.3, Number(item.ease || 2.5) + 0.1);
+        if(item.repetition === 1){
+          item.interval = 1;
+        }else if(item.repetition === 2){
+          item.interval = 3;
+        }else{
+          item.interval = Math.round((item.interval || 1) * item.ease);
+        }
+      }else{
+        item.repetition = 0;
+        item.interval = 1;
+        item.ease = Math.max(1.3, Number(item.ease || 2.5) - 0.2);
+      }
+
+      item.dueAt = nowTs() + (item.interval * 24 * 60 * 60 * 1000);
+      saveReviewData();
+      renderReview();
+    }
+
+    function renderReview(){
+      const dueReviewList = document.getElementById("dueReviewList");
+      const dueItems = getDueReviewItems();
+
+      document.getElementById("dueReviewCount").textContent = dueItems.length;
+      document.getElementById("nextReviewInfo").textContent = getNextReviewTimeText();
+
+      if(!dueItems.length){
+        dueReviewList.innerHTML = `
+          <div class="review-card">
+            <strong>ممتاز 🎉</strong>
+            <div class="muted">لا توجد عناصر مستحقة الآن. أكمل الدروس أو عد لاحقًا.</div>
+          </div>
+        `;
+        return;
+      }
+
+      dueReviewList.innerHTML = dueItems.slice(0,20).map(item=>`
+        <div class="review-card">
+          <strong>${esc(item.front)}</strong>
+          <div class="muted">${esc(item.back)}</div>
+          <div class="tiny">الدرس: ${esc(item.lessonTitle || "-")} — النوع: ${esc(item.type || "-")}</div>
+          <div class="admin-actions">
+            <button class="btn btn-success btn-mini" onclick="reviewAnswer('${escapeForJs(item.key)}', true)">تذكرتها</button>
+            <button class="btn btn-danger btn-mini" onclick="reviewAnswer('${escapeForJs(item.key)}', false)">نسيتها</button>
+            <button class="btn btn-soft btn-mini" onclick="speakText('${escapeForJs(item.front)}','en-US')">استماع</button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    function startLearning(){
+      if(appData.levels.length){
+        selectLevel(appData.levels[0].id);
+      }
+    }
+
+    function continueLearning(){
+      if(progressData.lastLessonId){
+        const lesson = getLessonById(progressData.lastLessonId);
+        if(lesson){
+          selectLevel(lesson.levelId);
+          openLesson(lesson.id);
+          return;
+        }
+      }
+      startLearning();
+    }
+
+    function resetProgress(){
+      if(!confirm("هل تريد تصفير التقدم والمراجعة؟")) return;
+      progressData = getDefaultProgressData();
+      reviewData = getDefaultReviewData();
+      saveProgressData();
+      saveReviewData();
+      updateStats();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      document.getElementById("lessonView").innerHTML = "";
+      document.getElementById("lessonView").classList.remove("active");
+      document.getElementById("viewerEmpty").style.display = "grid";
+      renderReview();
+    }
+
+    function addChatMessage(text, type="bot"){
+      const chatBox = document.getElementById("chatBox");
+      const div = document.createElement("div");
+      div.className = "chat-msg" + (type === "user" ? " user" : "");
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function generateLocalCoachReply(input){
+      const text = input.trim();
+      const lower = text.toLowerCase();
+
+      if(!text) return "اكتب جملة أولًا وسأساعدك.";
+
+      if(/[اأإء-ي]/.test(text) && !/[a-z]/i.test(text)){
+        return `ترجمة تدريبية مقترحة:\n\n${simpleArabicToEnglishHint(text)}\n\nاكتبها أنت بالإنجليزية وسأصححها لك.`;
+      }
+
+      if(lower.includes("i am go")){
+        return "الصحيح: I go to school every day.\nأو: I am going to school now.\nالفرق أن go للعادة و am going لما يحدث الآن.";
+      }
+
+      if(lower.includes("my name")){
+        return "جملتك جيدة كبداية. حاول الإضافة:\nMy name is Ali. I am from Iraq. I study English every day.";
+      }
+
+      if(lower.includes("hello")){
+        return "ممتاز. يمكنك التوسيع هكذا:\nHello! How are you?\nأو:\nHello, nice to meet you.";
+      }
+
+      if(lower.includes("yesterday")){
+        return "بما أنك استخدمت yesterday، انتبه غالبًا للماضي البسيط. مثال:\nI went to the market yesterday.";
+      }
+
+      if(lower.includes("i am")) {
+        return "بداية جيدة. جرّب إكمال الجملة بمعلومة إضافية عن نفسك، مثل:\nI am a student.\nI am from Baghdad.\nI am learning English.";
+      }
+
+      return "جملتك جيدة كبداية. لتحسينها:\n1) تأكد من ترتيب الجملة.\n2) أضف فاعل + فعل + مفعول أو مكمل.\n3) جرّب كتابة جملة أطول.\n\nنسخة مقترحة أكثر طبيعية:\n" + capitalizeSentence(text);
+    }
+
+    function simpleArabicToEnglishHint(text){
+      const hints = [
+        ["اسمي", "My name is ..."],
+        ["أنا من", "I am from ..."],
+        ["أدرس", "I study ..."],
+        ["أعمل", "I work as ..."],
+        ["أحب", "I like ..."],
+        ["كل يوم", "every day"],
+        ["الإنجليزية", "English"]
+      ];
+      let output = "Try: ";
+      const matched = hints.filter(h=>text.includes(h[0])).map(h=>h[1]);
+      if(matched.length){
+        output += matched.join(" / ");
+      }else{
+        output += "Write a simple sentence like: I am learning English every day.";
+      }
+      return output;
+    }
+
+    function capitalizeSentence(text){
+      const t = text.trim();
+      if(!t) return "";
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+
+    async function sendCoachMessage(){
+      const input = document.getElementById("chatInput");
+      const text = input.value.trim();
+      if(!text) return;
+
+      addChatMessage(text, "user");
+      input.value = "";
+
+      if(OPENAI_API_KEY){
+        try{
+          const reply = await callOpenAI(text);
+          addChatMessage(reply, "bot");
+          return;
+        }catch(e){
+          addChatMessage("تعذر الاتصال بالخدمة السحابية، تم الرجوع للوضع المحلي.\n\n" + generateLocalCoachReply(text), "bot");
+          return;
+        }
+      }
+
+      addChatMessage(generateLocalCoachReply(text), "bot");
+    }
+
+    async function callOpenAI(text){
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "Authorization":"Bearer " + OPENAI_API_KEY
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          messages: [
+            {role:"system", content:"You are an English learning coach for Arabic speakers. Keep responses concise, clear, educational, and helpful."},
+            {role:"user", content:text}
+          ],
+          temperature:0.7
+        })
+      });
+      if(!response.ok) throw new Error("API error");
+      const data = await response.json();
+      return data?.choices?.[0]?.message?.content || "لا يوجد رد.";
+    }
+
+    function practicePrompt(text){
+      document.getElementById("chatInput").value = text;
+      document.getElementById("chatInput").focus();
+    }
+
+    function openAdminLogin(){
+      openModal("adminLoginModal");
+    }
+
+    function loginAdmin(){
+      const user = document.getElementById("adminUsernameInput").value.trim();
+      const pass = document.getElementById("adminPasswordInput").value.trim();
+
+      if(user === ADMIN_USERNAME && pass === ADMIN_PASSWORD){
+        closeModal("adminLoginModal");
+        openModal("adminPanelModal");
+        fillAdminSelects();
+      }else{
+        alert("بيانات الدخول غير صحيحة");
+      }
+    }
+
+    function fillAdminSelects(){
+      const levelSelect = document.getElementById("adminLevelSelect");
+      const lessonLevel = document.getElementById("adminLessonLevel");
+      const lessonSelect = document.getElementById("adminLessonSelect");
+
+      levelSelect.innerHTML = `<option value="">-- جديد / اختر مستوى --</option>` + appData.levels.map(l=>`<option value="${esc(l.id)}">${esc(l.title)}</option>`).join("");
+      lessonLevel.innerHTML = appData.levels.map(l=>`<option value="${esc(l.id)}">${esc(l.title)}</option>`).join("");
+      lessonSelect.innerHTML = `<option value="">-- جديد / اختر درس --</option>` + appData.lessons.map(l=>`<option value="${esc(l.id)}">${esc(l.title)}</option>`).join("");
+    }
+
+    function loadLevelIntoForm(){
+      const id = document.getElementById("adminLevelSelect").value;
+      if(!id){
+        clearLevelForm();
+        return;
+      }
+      const level = getLevelById(id);
+      if(!level) return;
+      editingLevelId = id;
+      document.getElementById("adminLevelTitle").value = level.title || "";
+      document.getElementById("adminLevelDescription").value = level.description || "";
+    }
+
+    function clearLevelForm(){
+      editingLevelId = null;
+      document.getElementById("adminLevelSelect").value = "";
+      document.getElementById("adminLevelTitle").value = "";
+      document.getElementById("adminLevelDescription").value = "";
+    }
+
+    function saveLevel(){
+      const title = document.getElementById("adminLevelTitle").value.trim();
+      const description = document.getElementById("adminLevelDescription").value.trim();
+
+      if(!title){
+        alert("اكتب اسم المستوى");
+        return;
+      }
+
+      if(editingLevelId){
+        const level = getLevelById(editingLevelId);
+        if(level){
+          level.title = title;
+          level.description = description;
+        }
+      }else{
+        const id = uid("level");
+        appData.levels.push({
+          id,
+          title,
+          description
+        });
+      }
+
+      saveAppData();
+      renderLevels();
+      fillAdminSelects();
+      clearLevelForm();
+      updateStats();
+      alert("تم حفظ المستوى");
+    }
+
+    function deleteLevel(){
+      if(!editingLevelId){
+        alert("اختر مستوى أولًا");
+        return;
+      }
+      if(!confirm("سيتم حذف المستوى وكل دروسه، هل أنت متأكد؟")) return;
+
+      appData.lessons = appData.lessons.filter(l=>l.levelId !== editingLevelId);
+      appData.levels = appData.levels.filter(l=>l.id !== editingLevelId);
+
+      if(selectedLevelId === editingLevelId){
+        selectedLevelId = null;
+        selectedLessonId = null;
+        document.getElementById("lessonsList").innerHTML = "";
+        document.getElementById("lessonView").innerHTML = "";
+        document.getElementById("lessonView").classList.remove("active");
+        document.getElementById("viewerEmpty").style.display = "grid";
+      }
+
+      saveAppData();
+      rebuildWordBank();
+      fillAdminSelects();
+      clearLevelForm();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      updateStats();
+      renderReview();
+      alert("تم حذف المستوى");
+    }
+
+    function loadLessonIntoForm(){
+      const id = document.getElementById("adminLessonSelect").value;
+      if(!id){
+        clearLessonForm();
+        return;
+      }
+      const lesson = getLessonById(id);
+      if(!lesson) return;
+
+      editingLessonId = id;
+      document.getElementById("adminLessonLevel").value = lesson.levelId || "";
+      document.getElementById("adminLessonType").value = lesson.type || "vocabulary";
+      document.getElementById("adminLessonTitle").value = lesson.title || "";
+      document.getElementById("adminLessonShort").value = lesson.shortDescription || "";
+      document.getElementById("adminLessonExplanation").value = lesson.explanation || "";
+      document.getElementById("adminLessonXP").value = lesson.xp || 0;
+      document.getElementById("adminLessonAudio").value = lesson.audio || "";
+      document.getElementById("adminLessonVideo").value = lesson.video || "";
+
+      document.getElementById("adminLessonVocabulary").value = (lesson.vocabulary || [])
+        .map(v=>[v.word||"", v.meaning||"", v.type||"", v.example||"", v.exampleAr||""].join(" | "))
+        .join("\n");
+
+      document.getElementById("adminLessonExamples").value = (lesson.examples || [])
+        .map(v=>`${v.en||""} | ${v.ar||""}`)
+        .join("\n");
+
+      document.getElementById("adminLessonLetters").value = (lesson.letters || [])
+        .map(v=>`${v.letter||""} | ${v.sound||""}`)
+        .join("\n");
+
+      document.getElementById("adminLessonNumbers").value = (lesson.numbers || [])
+        .map(v=>`${v.n ?? ""} | ${v.word||""} | ${v.meaning||""}`)
+        .join("\n");
+
+      document.getElementById("adminLessonQuiz").value = JSON.stringify(lesson.quiz || [], null, 2);
+    }
+
+    function clearLessonForm(){
+      editingLessonId = null;
+      document.getElementById("adminLessonSelect").value = "";
+      document.getElementById("adminLessonType").value = "vocabulary";
+      document.getElementById("adminLessonTitle").value = "";
+      document.getElementById("adminLessonShort").value = "";
+      document.getElementById("adminLessonExplanation").value = "";
+      document.getElementById("adminLessonXP").value = "25";
+      document.getElementById("adminLessonAudio").value = "";
+      document.getElementById("adminLessonVideo").value = "";
+      document.getElementById("adminLessonVocabulary").value = "";
+      document.getElementById("adminLessonExamples").value = "";
+      document.getElementById("adminLessonLetters").value = "";
+      document.getElementById("adminLessonNumbers").value = "";
+      document.getElementById("adminLessonQuiz").value = "[]";
+      if(appData.levels[0]) document.getElementById("adminLessonLevel").value = appData.levels[0].id;
+    }
+
+    function parseVocabulary(text){
+      return text.split("\n").map(line=>{
+        const parts = line.split("|").map(p=>p.trim());
+        if(!parts[0]) return null;
+        return {
+          word: parts[0] || "",
+          meaning: parts[1] || "",
+          type: parts[2] || "word",
+          example: parts[3] || "",
+          exampleAr: parts[4] || ""
+        };
+      }).filter(Boolean);
+    }
+
+    function parseExamples(text){
+      return text.split("\n").map(line=>{
+        const parts = line.split("|").map(p=>p.trim());
+        if(!parts[0]) return null;
+        return { en: parts[0] || "", ar: parts[1] || "" };
+      }).filter(Boolean);
+    }
+
+    function parseLetters(text){
+      return text.split("\n").map(line=>{
+        const parts = line.split("|").map(p=>p.trim());
+        if(!parts[0]) return null;
+        return { letter: parts[0] || "", sound: parts[1] || "" };
+      }).filter(Boolean);
+    }
+
+    function parseNumbers(text){
+      return text.split("\n").map(line=>{
+        const parts = line.split("|").map(p=>p.trim());
+        if(!parts[0]) return null;
+        return { n: Number(parts[0]) || parts[0], word: parts[1] || "", meaning: parts[2] || "" };
+      }).filter(Boolean);
+    }
+
+    function saveLesson(){
+      const levelId = document.getElementById("adminLessonLevel").value;
+      const type = document.getElementById("adminLessonType").value;
+      const title = document.getElementById("adminLessonTitle").value.trim();
+      const shortDescription = document.getElementById("adminLessonShort").value.trim();
+      const explanation = document.getElementById("adminLessonExplanation").value.trim();
+      const xp = Number(document.getElementById("adminLessonXP").value || 0);
+      const audio = document.getElementById("adminLessonAudio").value.trim();
+      const video = document.getElementById("adminLessonVideo").value.trim();
+      const vocabulary = parseVocabulary(document.getElementById("adminLessonVocabulary").value);
+      const examples = parseExamples(document.getElementById("adminLessonExamples").value);
+      const letters = parseLetters(document.getElementById("adminLessonLetters").value);
+      const numbers = parseNumbers(document.getElementById("adminLessonNumbers").value);
+      const quiz = safeJSONParse(document.getElementById("adminLessonQuiz").value.trim() || "[]", null);
+
+      if(!levelId){
+        alert("اختر المستوى");
+        return;
+      }
+      if(!title){
+        alert("اكتب عنوان الدرس");
+        return;
+      }
+      if(!Array.isArray(quiz)){
+        alert("صيغة JSON الخاصة بالاختبار غير صحيحة");
+        return;
+      }
+
+      const lessonObject = {
+        id: editingLessonId || uid("lesson"),
+        levelId,
+        type,
+        title,
+        shortDescription,
+        explanation,
+        xp,
+        audio,
+        video,
+        vocabulary,
+        examples,
+        letters,
+        numbers,
+        quiz
+      };
+
+      if(editingLessonId){
+        appData.lessons = appData.lessons.map(l=>l.id === editingLessonId ? lessonObject : l);
+      }else{
+        appData.lessons.push(lessonObject);
+      }
+
+      saveAppData();
+      rebuildWordBank();
+      fillAdminSelects();
+      clearLessonForm();
+      renderLevels();
+      renderLessonsList(selectedLevelId || levelId);
+      updateStats();
+      renderReview();
+      alert("تم حفظ الدرس");
+    }
+
+    function deleteLesson(){
+      if(!editingLessonId){
+        alert("اختر درسًا أولًا");
+        return;
+      }
+      if(!confirm("هل تريد حذف هذا الدرس؟")) return;
+
+      appData.lessons = appData.lessons.filter(l=>l.id !== editingLessonId);
+      saveAppData();
+      rebuildWordBank();
+
+      if(selectedLessonId === editingLessonId){
+        selectedLessonId = null;
+        document.getElementById("lessonView").innerHTML = "";
+        document.getElementById("lessonView").classList.remove("active");
+        document.getElementById("viewerEmpty").style.display = "grid";
+      }
+
+      fillAdminSelects();
+      clearLessonForm();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      updateStats();
+      renderReview();
+      alert("تم حذف الدرس");
+    }
+
+    function exportData(){
+      const payload = {
+        appData,
+        progressData,
+        reviewData
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:"application/json"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "elite-english-backup.json";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importData(event){
+      const file = event.target.files[0];
+      if(!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e){
+        try{
+          const data = JSON.parse(e.target.result);
+          if(data.appData && Array.isArray(data.appData.levels) && Array.isArray(data.appData.lessons)){
+            appData = data.appData;
+          }
+          if(data.progressData) progressData = data.progressData;
+          if(data.reviewData) reviewData = data.reviewData;
+
+          saveAppData();
+          saveProgressData();
+          saveReviewData();
+          rebuildWordBank();
+
+          fillAdminSelects();
+          renderLevels();
+          renderLessonsList(selectedLevelId);
+          updateStats();
+          renderReview();
+
+          alert("تم الاستيراد بنجاح");
+        }catch{
+          alert("فشل استيراد الملف");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    function seedDefaultData(confirmReset=false){
+      if(confirmReset && !confirm("سيتم استبدال بيانات الدروس الحالية بالافتراضية، هل أنت متأكد؟")) return;
+      appData = getDefaultAppData();
+      saveAppData();
+      rebuildWordBank();
+      fillAdminSelects();
+      renderLevels();
+      renderLessonsList(selectedLevelId);
+      updateStats();
+      renderReview();
+      alert("تمت إعادة البيانات الافتراضية");
+    }
+
+    document.addEventListener("keydown", function(e){
+      if(e.key === "Escape"){
+        closeModal("adminLoginModal");
+        closeModal("adminPanelModal");
+      }
+    });
+
+    window.addEventListener("click", function(e){
+      document.querySelectorAll(".modal").forEach(modal=>{
+        if(e.target === modal) modal.classList.remove("show");
+      });
+    });
+
+    function init(){
+      loadAllData();
+      updateStats();
+      renderLevels();
+      renderReview();
+      if(appData.levels[0]){
+        selectedLevelId = appData.levels[0].id;
+        renderLessonsList(selectedLevelId);
+        const lvl = getLevelById(selectedLevelId);
+        document.getElementById("selectedLevelLabel").textContent = "المستوى الحالي: " + (lvl?.title || "غير محدد");
+        document.getElementById("selectedLevelProgress").textContent = "التقدم: " + calculateLevelProgress(selectedLevelId) + "%";
+      }
+      clearLessonForm();
+    }
+
+    init();
+  </script>
+</body>
+</html>
