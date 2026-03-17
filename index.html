@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   BookOpen,
   Headphones,
@@ -11,51 +11,30 @@ import {
   CheckCircle,
   Menu,
   X,
-} from 'lucide-react';
-
-/**
- * English Academy App
- * - نفس شكل الواجهة تقريباً
- * - كود أقوى وأسهل للتعديل
- * - 3 مستويات، 10 دروس لكل مستوى
- * - شرح عربي صوتي بصوت أنثوي قدر الإمكان عبر Web Speech API
- * - قراءة الكلمات والجمل الإنجليزية
- * - بنية بيانات سهلة التوسعة
- *
- * ملاحظة مهمة:
- * هذا الإصدار يعتمد على speechSynthesis الموجودة في المتصفح.
- * اختيار الصوت الأنثوي يعتمد على الأصوات المتاحة في جهاز/متصفح المستخدم.
- */
+} from 'lucide-react'
 
 const LEVELS = [
   {
     id: 1,
     key: 'beginner',
     name: 'المبتدئ (Beginner)',
-    color: 'bg-emerald-500',
-    borderColor: 'border-emerald-200',
     description: 'أساسيات اللغة: التحية، العائلة، الوقت، الجمل البسيطة.',
   },
   {
     id: 2,
     key: 'intermediate',
     name: 'المتوسط (Intermediate)',
-    color: 'bg-blue-500',
-    borderColor: 'border-blue-200',
     description: 'توسيع المهارات: الماضي، المستقبل، المقارنة، المحادثة.',
   },
   {
     id: 3,
     key: 'advanced',
     name: 'المتقدم (Advanced)',
-    color: 'bg-purple-500',
-    borderColor: 'border-purple-200',
     description: 'لغة أكثر عمقاً: العمل، المقابلات، الكتابة المتقدمة، القواعد المركبة.',
   },
-];
+]
 
 const LESSONS = [
-  // المستوى 1
   {
     id: 1,
     level: 0,
@@ -201,7 +180,6 @@ const LESSONS = [
     examples: ['My name is Ali.', 'There is a desk in my room.', 'I study on Monday.'],
   },
 
-  // المستوى 2
   {
     id: 11,
     level: 1,
@@ -343,7 +321,6 @@ const LESSONS = [
     examples: ['I visited my uncle last week.', 'I usually study at night.', 'I will travel soon.'],
   },
 
-  // المستوى 3
   {
     id: 21,
     level: 2,
@@ -484,7 +461,7 @@ const LESSONS = [
     listeningTip: 'أعد قراءة مشروعك بصوت مرتفع مع تسجيله لملاحظة التطور.',
     examples: ['I have learned many useful skills.', 'If I had more time, I would read more.', 'Technology has changed our lives.'],
   },
-];
+]
 
 const ARABIC_FEMALE_HINTS = [
   'female',
@@ -500,12 +477,12 @@ const ARABIC_FEMALE_HINTS = [
   'amira',
   'arabic',
   'ar-',
-];
+]
 
-const ENGLISH_HINTS = ['en-', 'english', 'united states', 'united kingdom', 'google us english'];
+const ENGLISH_HINTS = ['en-', 'english', 'united states', 'united kingdom', 'google us english']
 
 function normalizeText(value) {
-  return String(value || '').trim();
+  return String(value || '').trim()
 }
 
 function buildLessonNarration(lesson) {
@@ -518,107 +495,108 @@ function buildLessonNarration(lesson) {
     `مهمة الكتابة: ${lesson.writingTask}`,
     `ملاحظة الاستماع: ${lesson.listeningTip}`,
     `والآن سنقرأ محتوى الدرس باللغة الإنجليزية: ${lesson.content}`,
-  ].join(' ');
+  ].join(' ')
 }
 
 function pickVoice(voices, langPrefix, preferFemale = false) {
-  if (!voices?.length) return null;
+  if (!voices?.length) return null
 
   const langMatches = voices.filter((voice) =>
     voice.lang?.toLowerCase().startsWith(langPrefix.toLowerCase())
-  );
+  )
 
-  if (!langMatches.length) return voices[0] || null;
+  if (!langMatches.length) return voices[0] || null
 
   if (preferFemale) {
     const female = langMatches.find((voice) => {
-      const sample = `${voice.name} ${voice.voiceURI} ${voice.lang}`.toLowerCase();
-      return ARABIC_FEMALE_HINTS.some((hint) => sample.includes(hint));
-    });
+      const sample = `${voice.name} ${voice.voiceURI} ${voice.lang}`.toLowerCase()
+      return ARABIC_FEMALE_HINTS.some((hint) => sample.includes(hint))
+    })
 
-    if (female) return female;
+    if (female) return female
   }
 
   const better = langMatches.find((voice) => {
-    const sample = `${voice.name} ${voice.voiceURI} ${voice.lang}`.toLowerCase();
-    return ENGLISH_HINTS.some((hint) => sample.includes(hint)) || sample.includes(langPrefix.toLowerCase());
-  });
+    const sample = `${voice.name} ${voice.voiceURI} ${voice.lang}`.toLowerCase()
+    return ENGLISH_HINTS.some((hint) => sample.includes(hint)) || sample.includes(langPrefix.toLowerCase())
+  })
 
-  return better || langMatches[0];
+  return better || langMatches[0]
 }
 
 function useSpeechEngine() {
-  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
-  const [voices, setVoices] = useState([]);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [speechError, setSpeechError] = useState('');
+  const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null)
+  const [voices, setVoices] = useState([])
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [speechError, setSpeechError] = useState('')
 
   useEffect(() => {
-    if (!synthRef.current) return undefined;
+    if (!synthRef.current) return undefined
 
     const loadVoices = () => {
-      const availableVoices = synthRef.current.getVoices();
+      const availableVoices = synthRef.current.getVoices()
       if (availableVoices?.length) {
-        setVoices(availableVoices);
+        setVoices(availableVoices)
       }
-    };
+    }
 
-    loadVoices();
+    loadVoices()
+
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.onvoiceschanged = loadVoices;
+      window.speechSynthesis.onvoiceschanged = loadVoices
     }
 
     return () => {
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        window.speechSynthesis.onvoiceschanged = null;
+        window.speechSynthesis.onvoiceschanged = null
       }
-      synthRef.current?.cancel();
-    };
-  }, []);
+      synthRef.current?.cancel()
+    }
+  }, [])
 
   const stop = () => {
-    synthRef.current?.cancel();
-    setIsSpeaking(false);
-  };
+    synthRef.current?.cancel()
+    setIsSpeaking(false)
+  }
 
   const speak = ({ text, lang = 'ar-SA', rate = 0.95, pitch = 1, volume = 1, preferFemale = false }) => {
-    const cleanText = normalizeText(text);
-    if (!cleanText) return;
+    const cleanText = normalizeText(text)
+    if (!cleanText) return
 
     if (!('speechSynthesis' in window)) {
-      setSpeechError('المتصفح الحالي لا يدعم ميزة القراءة الصوتية.');
-      return;
+      setSpeechError('المتصفح الحالي لا يدعم ميزة القراءة الصوتية.')
+      return
     }
 
     try {
-      setSpeechError('');
-      synthRef.current.cancel();
+      setSpeechError('')
+      synthRef.current.cancel()
 
-      const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = lang;
-      utterance.rate = rate;
-      utterance.pitch = pitch;
-      utterance.volume = volume;
+      const utterance = new SpeechSynthesisUtterance(cleanText)
+      utterance.lang = lang
+      utterance.rate = rate
+      utterance.pitch = pitch
+      utterance.volume = volume
 
-      const selectedVoice = pickVoice(voices, lang.split('-')[0], preferFemale);
-      if (selectedVoice) utterance.voice = selectedVoice;
+      const selectedVoice = pickVoice(voices, lang.split('-')[0], preferFemale)
+      if (selectedVoice) utterance.voice = selectedVoice
 
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
+      utterance.onstart = () => setIsSpeaking(true)
+      utterance.onend = () => setIsSpeaking(false)
       utterance.onerror = () => {
-        setSpeechError('تعذر تشغيل الصوت حالياً. جرّب مرة أخرى أو غيّر المتصفح.');
-        setIsSpeaking(false);
-      };
+        setSpeechError('تعذر تشغيل الصوت حالياً. جرّب مرة أخرى أو غيّر المتصفح.')
+        setIsSpeaking(false)
+      }
 
-      synthRef.current.speak(utterance);
+      synthRef.current.speak(utterance)
     } catch (error) {
-      console.error('Speech error:', error);
-      setSpeechError('حدث خطأ أثناء تشغيل الصوت.');
-      setIsSpeaking(false);
+      console.error('Speech error:', error)
+      setSpeechError('حدث خطأ أثناء تشغيل الصوت.')
+      setIsSpeaking(false)
     }
-  };
+  }
 
-  return { voices, isSpeaking, speechError, speak, stop };
+  return { isSpeaking, speechError, speak, stop }
 }
 
 function LessonSidebar({
@@ -632,227 +610,208 @@ function LessonSidebar({
   lessons,
 }) {
   return (
-    <aside
-      className={`fixed inset-y-0 right-0 z-50 w-72 bg-white border-l border-slate-200 transition-transform duration-300 transform ${
-        isSidebarOpen ? 'translate-x-0' : 'translate-x-full'
-      } lg:relative lg:translate-x-0`}
-    >
-      <div className="flex flex-col h-full">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="font-bold text-lg flex items-center gap-2">
-            <BookOpen className="text-blue-600" size={20} />
-            منهج اللغة الإنجليزية
-          </h2>
-          <button className="lg:hidden" onClick={() => setIsSidebarOpen(false)} aria-label="إغلاق القائمة">
+    <>
+      {isSidebarOpen && <div className="overlay" onClick={() => setIsSidebarOpen(false)} />}
+
+      <aside className={`sidebar ${isSidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-title">
+            <BookOpen size={20} color="#2563eb" />
+            <span>منهج اللغة الإنجليزية</span>
+          </div>
+
+          <button className="close-btn mobile-toggle" onClick={() => setIsSidebarOpen(false)} aria-label="إغلاق القائمة">
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-4 bg-slate-50 flex gap-2 overflow-x-auto no-scrollbar">
+        <div className="sidebar-levels">
           {levels.map((lvl, idx) => (
             <button
               key={lvl.id}
               onClick={() => {
-                setCurrentLevel(idx);
-                setSelectedLesson(null);
+                setCurrentLevel(idx)
+                setSelectedLesson(null)
               }}
-              className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                currentLevel === idx
-                  ? `${lvl.color} text-white shadow-sm`
-                  : 'bg-white text-slate-500 border border-slate-200'
-              }`}
+              className={`level-button ${currentLevel === idx ? `active ${lvl.key}` : ''}`}
             >
               مستوى {idx + 1}
             </button>
           ))}
         </div>
 
-        <div className="px-4 pb-2 text-[11px] text-slate-500 leading-5">
-          {levels[currentLevel]?.description}
-        </div>
+        <div className="level-description">{levels[currentLevel]?.description}</div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 custom-scrollbar">
+        <div className="lesson-list">
           {lessons.map((lesson, idx) => {
-            const active = selectedLesson?.id === lesson.id;
+            const active = selectedLesson?.id === lesson.id
             return (
               <button
                 key={lesson.id}
                 onClick={() => {
-                  setSelectedLesson(lesson);
-                  if (window.innerWidth < 1024) setIsSidebarOpen(false);
+                  setSelectedLesson(lesson)
+                  if (window.innerWidth < 1024) setIsSidebarOpen(false)
                 }}
-                className={`w-full text-right p-3 rounded-xl transition-all group border-2 ${
-                  active
-                    ? 'bg-blue-50 border-blue-200 shadow-sm'
-                    : 'bg-white border-transparent hover:border-slate-100'
-                }`}
+                className={`lesson-card ${active ? 'active' : ''}`}
               >
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                      active ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    درس {idx + 1}
-                  </span>
-                  {active && <CheckCircle size={14} className="text-blue-500" />}
+                <div className="lesson-card-top">
+                  <span className="lesson-badge">درس {idx + 1}</span>
+                  {active ? <CheckCircle size={15} color="#3b82f6" /> : null}
                 </div>
-                <h3 className={`mt-1 font-medium text-sm ${active ? 'text-blue-900' : 'text-slate-700'}`}>
-                  {lesson.title}
-                </h3>
+                <h3>{lesson.title}</h3>
               </button>
-            );
+            )
           })}
         </div>
-      </div>
-    </aside>
-  );
+      </aside>
+    </>
+  )
 }
 
 function WelcomeScreen() {
   return (
-    <div className="h-full flex flex-col items-center justify-center text-center py-20">
-      <div className="w-32 h-32 bg-blue-50 rounded-full flex items-center justify-center mb-6">
-        <Globe size={64} className="text-blue-500 animate-pulse" />
+    <div className="welcome-screen">
+      <div className="welcome-icon">
+        <Globe size={62} color="#3b82f6" />
       </div>
-      <h3 className="text-2xl font-black text-slate-800 mb-2">مرحباً بك في رحلة التعلم!</h3>
-      <p className="text-slate-500 max-w-sm">
-        اختر درساً من القائمة الجانبية لتبدأ الشرح الصوتي، قراءة الجمل، ومهام الكتابة بسهولة.
-      </p>
+      <h3>مرحباً بك في رحلة التعلم!</h3>
+      <p>اختر درساً من القائمة الجانبية لتبدأ الشرح الصوتي، قراءة الجمل، ومهام الكتابة بسهولة.</p>
     </div>
-  );
+  )
 }
 
 function LessonDetails({ lesson, onSpeakLesson, onSpeakEnglish, isSpeaking, speechError, onStop }) {
   return (
-    <div className="animate-in fade-in duration-700 slide-in-from-bottom-5">
-      <div className="flex flex-wrap gap-3 mb-6">
-        <span className="bg-white border border-slate-200 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2">
-          <Star size={14} className="text-amber-500" /> {lesson.type}
+    <div>
+      <div className="tags">
+        <span className="tag">
+          <Star size={14} color="#f59e0b" />
+          {lesson.type}
         </span>
-        <span className="bg-white border border-slate-200 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2">
-          <Award size={14} className="text-blue-500" /> {lesson.grammar}
+        <span className="tag">
+          <Award size={14} color="#3b82f6" />
+          {lesson.grammar}
         </span>
       </div>
 
-      <h2 className="text-4xl font-black text-slate-900 mb-8 leading-tight">{lesson.title}</h2>
+      <h2 className="lesson-title">{lesson.title}</h2>
 
-      {speechError ? (
-        <div className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-          {speechError}
-        </div>
-      ) : null}
+      {speechError ? <div className="error-box">{speechError}</div> : null}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-          <h4 className="flex items-center gap-2 text-slate-400 font-bold text-xs uppercase mb-4 tracking-widest">
-            <Globe size={16} /> الشرح بالعربية
-          </h4>
-          <p className="text-lg text-slate-700 leading-relaxed font-medium mb-6">{lesson.explanation}</p>
+      <div className="grid-2">
+        <div className="panel">
+          <div className="panel-label">
+            <Globe size={16} />
+            <span>الشرح بالعربية</span>
+          </div>
 
-          <div className="space-y-4">
-            <div>
-              <h5 className="text-sm font-black text-slate-800 mb-2">مهمة الكتابة</h5>
-              <p className="text-slate-600 leading-7">{lesson.writingTask}</p>
-            </div>
-            <div>
-              <h5 className="text-sm font-black text-slate-800 mb-2">تلميحة الاستماع</h5>
-              <p className="text-slate-600 leading-7">{lesson.listeningTip}</p>
-            </div>
+          <p className="panel-text">{lesson.explanation}</p>
+
+          <div className="info-section" style={{ marginBottom: '18px' }}>
+            <h5>مهمة الكتابة</h5>
+            <p>{lesson.writingTask}</p>
+          </div>
+
+          <div className="info-section">
+            <h5>تلميحة الاستماع</h5>
+            <p>{lesson.listeningTip}</p>
           </div>
         </div>
 
-        <div className="bg-slate-900 rounded-3xl p-8 shadow-xl relative group">
-          <h4 className="flex items-center gap-2 text-slate-500 font-bold text-xs uppercase mb-4 tracking-widest">
-            <Headphones size={16} /> النطق الإنجليزي
-          </h4>
-          <p className="text-2xl text-emerald-400 font-mono leading-relaxed ltr text-left mb-6 selection:bg-emerald-500/30">
-            {lesson.content}
-          </p>
-          <button
-            onClick={onSpeakEnglish}
-            className="absolute bottom-6 right-6 p-4 bg-emerald-500 text-white rounded-2xl hover:bg-emerald-400 transition-all shadow-lg hover:rotate-6 active:scale-90"
-            aria-label="تشغيل النطق الإنجليزي"
-          >
-            <Play fill="currentColor" size={24} />
+        <div className="panel-dark">
+          <div className="panel-label">
+            <Headphones size={16} />
+            <span>النطق الإنجليزي</span>
+          </div>
+
+          <p className="english-text">{lesson.content}</p>
+
+          <button onClick={onSpeakEnglish} className="play-floating-btn" aria-label="تشغيل النطق الإنجليزي">
+            <Play size={24} fill="currentColor" />
           </button>
         </div>
 
-        <div className="md:col-span-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl p-8 text-white">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-white/20 rounded-lg">
-              <PenTool size={24} />
+        <div className="full-panel gradient-panel">
+          <div className="gradient-header">
+            <div className="gradient-icon-box">
+              <PenTool size={22} />
             </div>
-            <h4 className="text-xl font-bold">تلميحة القواعد (Grammar Tip)</h4>
+            <h4 style={{ margin: 0, fontSize: '22px', fontWeight: 900 }}>تلميحة القواعد (Grammar Tip)</h4>
           </div>
-          <p className="text-blue-50 text-lg opacity-90 leading-relaxed">
-            يركز هذا الدرس على قاعدة{' '}
-            <span className="font-black underline decoration-blue-300 underline-offset-4">{lesson.grammar}</span>.
-            حاول استخدامها داخل جملك الخاصة، ثم اقرأ الأمثلة بصوت مرتفع لتثبيت القاعدة في ذهنك.
+
+          <p>
+            يركز هذا الدرس على قاعدة <strong>{lesson.grammar}</strong>. حاول استخدامها داخل جملك الخاصة، ثم اقرأ
+            الأمثلة بصوت مرتفع لتثبيت القاعدة في ذهنك.
           </p>
         </div>
 
-        <div className="md:col-span-2 bg-white rounded-3xl p-8 border border-slate-200 shadow-sm">
-          <h4 className="text-slate-800 font-black text-lg mb-4">أمثلة إضافية</h4>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="full-panel panel">
+          <h4 className="examples-title">أمثلة إضافية</h4>
+
+          <div className="examples-grid">
             {lesson.examples.map((example, index) => (
-              <div key={`${lesson.id}-example-${index}`} className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="font-mono text-slate-800 text-left ltr">{example}</p>
+              <div key={`${lesson.id}-example-${index}`} className="example-box">
+                <p>{example}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="mt-8 flex flex-wrap gap-3">
-        <button
-          onClick={onSpeakLesson}
-          disabled={isSpeaking}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all text-sm ${
-            isSpeaking
-              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-              : 'bg-slate-900 text-white hover:bg-slate-800 active:scale-95 shadow-lg shadow-slate-200'
-          }`}
-        >
+      <div className="actions-row">
+        <button onClick={onSpeakLesson} disabled={isSpeaking} className="btn btn-primary">
           {isSpeaking ? (
-            <div className="flex gap-1 items-center">
-              <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
+            <span className="speaking-dots">
+              <span></span>
+              <span></span>
+              <span></span>
               جاري الشرح...
-            </div>
+            </span>
           ) : (
             <>
-              <Volume2 size={18} /> شرح الدرس صوتياً
+              <Volume2 size={18} style={{ marginLeft: 8, verticalAlign: 'middle' }} />
+              شرح الدرس صوتياً
             </>
           )}
         </button>
 
-        <button
-          onClick={onStop}
-          className="px-5 py-2.5 rounded-full font-bold text-sm bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
-        >
+        <button onClick={onStop} className="btn btn-secondary">
           إيقاف الصوت
         </button>
       </div>
     </div>
-  );
+  )
 }
 
 export default function App() {
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [selectedLesson, setSelectedLesson] = useState(null);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const { isSpeaking, speechError, speak, stop } = useSpeechEngine();
+  const [currentLevel, setCurrentLevel] = useState(0)
+  const [selectedLesson, setSelectedLesson] = useState(null)
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 1024)
+  const { isSpeaking, speechError, speak, stop } = useSpeechEngine()
 
   const filteredLessons = useMemo(
     () => LESSONS.filter((lesson) => lesson.level === currentLevel),
     [currentLevel]
-  );
+  )
 
   useEffect(() => {
-    if (!selectedLesson) {
-      setSelectedLesson(filteredLessons[0] || null);
+    if (!selectedLesson || selectedLesson.level !== currentLevel) {
+      setSelectedLesson(filteredLessons[0] || null)
     }
-  }, [filteredLessons, selectedLesson]);
+  }, [filteredLessons, selectedLesson, currentLevel])
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsSidebarOpen(true)
+      } else {
+        setIsSidebarOpen(false)
+      }
+    }
+
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
   const handleSpeakLesson = (lesson) => {
     speak({
@@ -861,8 +820,8 @@ export default function App() {
       rate: 0.95,
       pitch: 1.05,
       preferFemale: true,
-    });
-  };
+    })
+  }
 
   const handleSpeakEnglish = (lesson) => {
     speak({
@@ -871,11 +830,11 @@ export default function App() {
       rate: 0.9,
       pitch: 1,
       preferFemale: false,
-    });
-  };
+    })
+  }
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans text-slate-900 overflow-hidden" dir="rtl">
+    <div className="app-shell">
       <LessonSidebar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -887,21 +846,20 @@ export default function App() {
         lessons={filteredLessons}
       />
 
-      <main className="flex-1 flex flex-col h-full relative overflow-y-auto">
-        <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-slate-200 z-10 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <main className="main-content">
+        <header className="topbar">
+          <div className="topbar-left">
             <button
-              className="lg:hidden p-2 hover:bg-slate-100 rounded-lg"
+              className="mobile-toggle"
               onClick={() => setIsSidebarOpen(true)}
               aria-label="فتح القائمة"
             >
               <Menu size={24} />
             </button>
-            <div className="flex flex-col">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                {LEVELS[currentLevel].name}
-              </span>
-              <h1 className="text-xl font-black text-slate-800">أكاديمية اللغة الإنجليزية</h1>
+
+            <div>
+              <div className="topbar-label">{LEVELS[currentLevel].name}</div>
+              <h1 className="topbar-title">أكاديمية اللغة الإنجليزية</h1>
             </div>
           </div>
 
@@ -909,27 +867,26 @@ export default function App() {
             <button
               onClick={() => handleSpeakLesson(selectedLesson)}
               disabled={isSpeaking}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all text-sm ${
-                isSpeaking
-                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                  : 'bg-slate-900 text-white hover:bg-slate-800 active:scale-95 shadow-lg shadow-slate-200'
-              }`}
+              className="btn btn-primary"
             >
               {isSpeaking ? (
-                <div className="flex gap-1 items-center">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></span>
+                <span className="speaking-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
                   جاري الشرح...
-                </div>
+                </span>
               ) : (
                 <>
-                  <Volume2 size={18} /> شرح الدرس صوتياً
+                  <Volume2 size={18} style={{ marginLeft: 8, verticalAlign: 'middle' }} />
+                  شرح الدرس صوتياً
                 </>
               )}
             </button>
           ) : null}
         </header>
 
-        <div className="p-6 md:p-10 max-w-4xl mx-auto w-full flex-1">
+        <div className="page-body">
           {selectedLesson ? (
             <LessonDetails
               lesson={selectedLesson}
@@ -944,15 +901,6 @@ export default function App() {
           )}
         </div>
       </main>
-
-      <style>{`
-        .ltr { direction: ltr; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-      `}</style>
     </div>
-  );
+  )
 }
